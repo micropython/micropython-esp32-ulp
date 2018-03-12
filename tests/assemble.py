@@ -3,7 +3,7 @@ from esp32_ulp.assemble import parse_line, parse, assemble
 src = """\
 # line 1
 
-start:  delay 42    # line 3
+start:  wait 42    # line 3
 
         # line 5
         ld r0, r1, 0
@@ -18,7 +18,7 @@ def test_parse_line():
     # note: line number = index + 1
     assert parse_line(lines[0]) == None
     assert parse_line(lines[1]) == None
-    assert parse_line(lines[2]) == ('start', 'delay', ('42', ))
+    assert parse_line(lines[2]) == ('start', 'wait', ('42', ))
     assert parse_line(lines[3]) == None
     assert parse_line(lines[4]) == None
     assert parse_line(lines[5]) == (None, 'ld', ('r0', 'r1', '0', ))

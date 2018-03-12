@@ -227,7 +227,7 @@ def rd_reg(reg, low_bit, high_bit):
     return _rd_reg.all
 
 
-def delay(cycles):
+def wait(cycles):
     _delay.cycles = cycles
     _delay.unused = 0
     _delay.opcode = OPCODE_DELAY
@@ -313,7 +313,7 @@ def wake():
     return _end.all
 
 
-def sleep_cycle_sel(timer_idx):
+def sleep(timer_idx):
     _sleep.cycle_sel = timer_idx
     _sleep.unused = 0
     _sleep.sub_opcode = SUB_OPCODE_SLEEP

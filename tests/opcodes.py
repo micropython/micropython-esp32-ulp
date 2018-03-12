@@ -1,5 +1,5 @@
 from uctypes import UINT32, BFUINT32, BF_POS, BF_LEN
-from esp32_ulp.opcodes import make_ins, make_ins_struct_def, delay
+from esp32_ulp.opcodes import make_ins, make_ins_struct_def
 
 OPCODE_DELAY = 4
 LAYOUT_DELAY = """

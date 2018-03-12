@@ -13,9 +13,9 @@ start:      ld r0, r0, 0    # a comment!
             rd_reg 0x3ff48000, 1, 2
             wr_reg 0x3ff48000, 1, 2, 3
 
-            delay 1000
+            wait 1000
             wake
-            sleep_cycle_sel 1
+            sleep 1
             halt
 end:
 
