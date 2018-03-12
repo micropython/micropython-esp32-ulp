@@ -53,7 +53,7 @@ def assemble(lines):
                 raise Exception('label %s is already defined.' % label)
             symbols[label] = addr
         if opcode is not None:
-            func = getattr(opcodes, opcode, None)
+            func = getattr(opcodes, 'i_' + opcode, None)
             if func is None:
                 raise Exception('Unknown opcode: %s' % opcode)
             instruction = func(*args)

@@ -279,7 +279,7 @@ def _soc_reg_to_ulp_periph_sel(reg):
     return ret
 
 
-def reg_wr(reg, high_bit, low_bit, val):
+def i_reg_wr(reg, high_bit, low_bit, val):
     reg = get_imm(reg)
     _wr_reg.addr = (reg & 0xff) >> 2
     _wr_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
@@ -290,7 +290,7 @@ def reg_wr(reg, high_bit, low_bit, val):
     return _wr_reg.all
 
 
-def reg_rd(reg, high_bit, low_bit):
+def i_reg_rd(reg, high_bit, low_bit):
     reg = get_imm(reg)
     _rd_reg.addr = (reg & 0xff) >> 2
     _rd_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
@@ -301,7 +301,7 @@ def reg_rd(reg, high_bit, low_bit):
     return _rd_reg.all
 
 
-def i2c_rd(sub_addr, high_bit, low_bit, slave_sel):
+def i_i2c_rd(sub_addr, high_bit, low_bit, slave_sel):
     _i2c.sub_addr = get_imm(sub_addr)
     _i2c.data = 0
     _i2c.low = get_imm(low_bit)
@@ -313,7 +313,7 @@ def i2c_rd(sub_addr, high_bit, low_bit, slave_sel):
     return _i2c.all
 
 
-def i2c_wr(sub_addr, value, high_bit, low_bit, slave_sel):
+def i_i2c_wr(sub_addr, value, high_bit, low_bit, slave_sel):
     _i2c.sub_addr = get_imm(sub_addr)
     _i2c.data = get_imm(value)
     _i2c.low = get_imm(low_bit)
@@ -325,21 +325,21 @@ def i2c_wr(sub_addr, value, high_bit, low_bit, slave_sel):
     return _i2c.all
 
 
-def nop():
+def i_nop():
     _delay.cycles = 0
     _delay.unused = 0
     _delay.opcode = OPCODE_DELAY
     return _delay.all
 
 
-def wait(cycles):
+def i_wait(cycles):
     _delay.cycles = get_imm(cycles)
     _delay.unused = 0
     _delay.opcode = OPCODE_DELAY
     return _delay.all
 
 
-def adc(reg_dest, adc_idx, pad_idx):
+def i_adc(reg_dest, adc_idx, pad_idx):
     _adc.dreg = get_reg(reg_dest)
     _adc.mux = get_imm(pad_idx) + 1
     _adc.sar_sel = get_imm(adc_idx)
@@ -350,7 +350,7 @@ def adc(reg_dest, adc_idx, pad_idx):
     return _adc.all
 
 
-def st(reg_val, reg_addr, offset):
+def i_st(reg_val, reg_addr, offset):
     _st.dreg = get_reg(reg_val)
     _st.sreg = get_reg(reg_addr)
     _st.unused1 = 0
@@ -361,13 +361,13 @@ def st(reg_val, reg_addr, offset):
     return _st.all
 
 
-def halt():
+def i_halt():
     _halt.unused = 0
     _halt.opcode = OPCODE_HALT
     return _halt.all
 
 
-def ld(reg_dest, reg_addr, offset):
+def i_ld(reg_dest, reg_addr, offset):
     _ld.dreg = get_reg(reg_dest)
     _ld.sreg = get_reg(reg_addr)
     _ld.unused1 = 0
@@ -377,7 +377,7 @@ def ld(reg_dest, reg_addr, offset):
     return _ld.all
 
 
-def move(reg_dest, reg_imm_src):
+def i_move(reg_dest, reg_imm_src):
     # this is the only ALU instruction with 2 args: move r0, r1
     dest = get_reg(reg_dest)
     src = arg_qualify(reg_imm_src)
@@ -430,31 +430,31 @@ def _alu3(reg_dest, reg_src1, reg_imm_src2, alu_sel):
     raise TypeError('unsupported operand: %s' % src2.raw)
 
 
-def add(reg_dest, reg_src1, reg_imm_src2):
+def i_add(reg_dest, reg_src1, reg_imm_src2):
     return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_ADD)
 
 
-def sub(reg_dest, reg_src1, reg_imm_src2):
+def i_sub(reg_dest, reg_src1, reg_imm_src2):
     return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_SUB)
 
 
-#def and(reg_dest, reg_src1, reg_imm_src2):
-#    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_AND)
+def i_and(reg_dest, reg_src1, reg_imm_src2):
+    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_AND)
 
 
-#def or(reg_dest, reg_src1, reg_imm_src2):
-#    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_OR)
+def i_or(reg_dest, reg_src1, reg_imm_src2):
+    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_OR)
 
 
-def lsh(reg_dest, reg_src1, reg_imm_src2):
+def i_lsh(reg_dest, reg_src1, reg_imm_src2):
     return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_LSH)
 
 
-def rsh(reg_dest, reg_src1, reg_imm_src2):
+def i_rsh(reg_dest, reg_src1, reg_imm_src2):
     return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_RSH)
 
 
-def wake():
+def i_wake():
     _end.wakeup = 1
     _end.unused = 0
     _end.sub_opcode = SUB_OPCODE_END
@@ -462,7 +462,7 @@ def wake():
     return _end.all
 
 
-def sleep(timer_idx):
+def i_sleep(timer_idx):
     _sleep.cycle_sel = get_imm(timer_idx)
     _sleep.unused = 0
     _sleep.sub_opcode = SUB_OPCODE_SLEEP
@@ -470,7 +470,7 @@ def sleep(timer_idx):
     return _sleep.all
 
 
-def bge(pc_offset, imm_value):
+def i_bge(pc_offset, imm_value):
     _b.imm = get_imm(imm_value)
     _b.cmp = B_CMP_GE
     offs = get_imm(pc_offset)
@@ -481,7 +481,7 @@ def bge(pc_offset, imm_value):
     return _b.all
 
 
-def bl(pc_offset, imm_value):
+def i_bl(pc_offset, imm_value):
     _b.imm = get_imm(imm_value)
     _b.cmp = B_CMP_L
     offs = get_imm(pc_offset)
@@ -492,7 +492,7 @@ def bl(pc_offset, imm_value):
     return _b.all
 
 
-def bxr(reg_pc):
+def i_bxr(reg_pc):
     _bx.dreg = get_reg(reg_pc)
     _bx.addr = 0
     _bx.unused = 0
@@ -503,7 +503,7 @@ def bxr(reg_pc):
     return _bx.all
 
 
-def bxi(imm_pc):
+def i_bxi(imm_pc):
     _bx.dreg = 0
     _bx.addr = get_imm(imm_pc)
     _bx.unused = 0
