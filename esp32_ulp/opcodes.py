@@ -374,6 +374,31 @@ def ld(reg_dest, reg_addr, offset):
     return _ld.all
 
 
+def move(reg_dest, reg_imm_src):
+    # this is the only ALU instruction with 2 args: move r0, r1
+    dest = get_reg(reg_dest)
+    src = arg_qualify(reg_imm_src)
+    if src.type == REG:
+        _alu_reg.dreg = dest
+        _alu_reg.sreg = src.value
+        _alu_reg.treg = 0
+        _alu_reg.unused = 0
+        _alu_reg.sel = ALU_SEL_MOV
+        _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
+        _alu_reg.opcode = OPCODE_ALU
+        return _alu_reg.all
+    if src.type == IMM:
+        _alu_imm.dreg = dest
+        _alu_imm.sreg = 0
+        _alu_imm.imm = src.value
+        _alu_imm.unused = 0
+        _alu_imm.sel = ALU_SEL_MOV
+        _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
+        _alu_imm.opcode = OPCODE_ALU
+        return _alu_imm.all
+    raise TypeError('unsupported operand: %s' % src.raw)
+
+
 def _alu3(reg_dest, reg_src1, reg_imm_src2, alu_sel):
     """
     ALU instructions with 3 args, like e.g. add r1, r2, r3
@@ -404,31 +429,6 @@ def _alu3(reg_dest, reg_src1, reg_imm_src2, alu_sel):
 
 def add(reg_dest, reg_src1, reg_imm_src2):
     return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_ADD)
-
-
-def move(reg_dest, reg_imm_src):
-    # this is the only ALU instruction with 2 args: move r0, r1
-    dest = get_reg(reg_dest)
-    src = arg_qualify(reg_imm_src)
-    if src.type == REG:
-        _alu_reg.dreg = dest
-        _alu_reg.sreg = src.value
-        _alu_reg.treg = 0
-        _alu_reg.unused = 0
-        _alu_reg.sel = ALU_SEL_MOV
-        _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
-        _alu_reg.opcode = OPCODE_ALU
-        return _alu_reg.all
-    if src.type == IMM:
-        _alu_imm.dreg = dest
-        _alu_imm.sreg = 0
-        _alu_imm.imm = src.value
-        _alu_imm.unused = 0
-        _alu_imm.sel = ALU_SEL_MOV
-        _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
-        _alu_imm.opcode = OPCODE_ALU
-        return _alu_imm.all
-    raise TypeError('unsupported operand: %s' % src.raw)
 
 
 def wake():
