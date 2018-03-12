@@ -2,7 +2,7 @@
 ESP32 ULP Co-Processor Instructions
 """
 
-from uctypes import struct, addressof, NATIVE, UINT32, BFUINT32, BF_POS, BF_LEN
+from uctypes import struct, addressof, LITTLE_ENDIAN, UINT32, BFUINT32, BF_POS, BF_LEN
 
 from .soc import *
 
@@ -68,7 +68,7 @@ def make_ins(layout):
     """
     struct_def = make_ins_struct_def(layout)
     instruction = bytearray(4)
-    return struct(addressof(instruction), struct_def, NATIVE)
+    return struct(addressof(instruction), struct_def, LITTLE_ENDIAN)
 
 
 # instruction structure definitions
