@@ -47,7 +47,7 @@ OPCODE_LD = 13
 
 def make_ins_struct_def(layout):
     lines = layout.strip().splitlines()
-    pos = 0
+    pos = 0  # bitfield definitions start from lsb
     struct_def = {}
     for line in lines:
         bitfield = line.split('#', 1)[0]  # get rid of comment
