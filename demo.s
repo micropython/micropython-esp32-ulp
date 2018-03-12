@@ -18,6 +18,7 @@ start:      ld r0, r0, 0    # a comment!
 
             adc r0, 0, 1
 
+            nop
             wait 1000
             wake
             sleep 1

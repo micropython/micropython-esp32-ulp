@@ -278,6 +278,13 @@ def i2c_wr(sub_addr, value, high_bit, low_bit, slave_sel):
     return _i2c.all
 
 
+def nop():
+    _delay.cycles = 0
+    _delay.unused = 0
+    _delay.opcode = OPCODE_DELAY
+    return _delay.all
+
+
 def wait(cycles):
     _delay.cycles = cycles
     _delay.unused = 0
