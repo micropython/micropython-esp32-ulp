@@ -1,14 +1,16 @@
 # comment-only line
 
-start:      ld r0, r0, 0    # a comment!
-            st r0, r0, 0
+start:      ld r0, r1, 0    # a comment!
+            st r0, r1, 0
             addr r0, r1, r2
             addi r0, r1, 42
             movr r0, r1
             movi r0, 42
+
+            # jumping to labels not supported yet
             bl -1, 0
             bge 1, 0
-            bxi start
+            bxi 0
 
             reg_rd 0x3ff48000, 7, 0
             reg_wr 0x3ff48000, 7, 0, 42

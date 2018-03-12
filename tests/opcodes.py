@@ -1,5 +1,6 @@
 from uctypes import UINT32, BFUINT32, BF_POS, BF_LEN
 from esp32_ulp.opcodes import make_ins, make_ins_struct_def
+from esp32_ulp.opcodes import get_reg, get_imm, arg_qualify, ARG, REG, IMM
 
 OPCODE_DELAY = 4
 LAYOUT_DELAY = """
@@ -29,6 +30,28 @@ def test_make_ins():
     assert _delay.all == 0x40000023
 
 
+def test_arg_qualify():
+    assert arg_qualify('r0') == ARG(REG, 0, 'r0')
+    assert arg_qualify('R3') == ARG(REG, 3, 'R3')
+    assert arg_qualify('0') == ARG(IMM, 0, '0')
+    assert arg_qualify('-1') == ARG(IMM, -1, '-1')
+    assert arg_qualify('1') == ARG(IMM, 1, '1')
+    assert arg_qualify('0x20') == ARG(IMM, 32, '0x20')
+    assert arg_qualify('0o100') == ARG(IMM, 64, '0o100')
+    assert arg_qualify('0b1000') == ARG(IMM, 8, '0b1000')
+
+
+def test_get_reg():
+    assert get_reg('r0') == 0
+    assert get_reg('R3') == 3
+
+
+def test_get_imm():
+    assert get_imm('42') == 42
+
+
 test_make_ins_struct_def()
 test_make_ins()
-
+test_arg_qualify()
+test_get_reg()
+test_get_imm()

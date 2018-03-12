@@ -43,16 +43,6 @@ def parse(lines):
     return [p for p in parsed if p is not None]
 
 
-def translate_args(args, symbols):
-    result = []
-    for arg in args:
-        value = symbols.get(arg)
-        if value is None:
-            value = int(arg)
-        result.append(value)
-    return tuple(result)
-
-
 def assemble(lines):
     symbols = dict(r0=0, R0=0, r1=1, R1=1, r2=2, R2=2, r3=3, R3=3)
     code = []
@@ -66,7 +56,6 @@ def assemble(lines):
             func = getattr(opcodes, opcode, None)
             if func is None:
                 raise Exception('Unknown opcode: %s' % opcode)
-            args = translate_args(args or (), symbols)
             instruction = func(*args)
             code.append(instruction)
             addr += 1
