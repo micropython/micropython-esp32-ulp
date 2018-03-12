@@ -13,6 +13,8 @@ start:      ld r0, r0, 0    # a comment!
             reg_rd 0x3ff48000, 7, 0
             reg_wr 0x3ff48000, 7, 0, 42
 
+            adc r0, 0, 1
+
             wait 1000
             wake
             sleep 1

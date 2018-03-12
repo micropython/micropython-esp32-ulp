@@ -18,6 +18,8 @@ RD_REG_PERIPH_RTC_I2C = 3
 
 OPCODE_DELAY = 4
 
+OPCODE_ADC = 5
+
 OPCODE_ST = 6
 SUB_OPCODE_ST = 4
 
@@ -97,6 +99,17 @@ _delay = make_ins("""
     cycles : 16     # Number of cycles to sleep
     unused : 12     # Unused
     opcode : 4      # Opcode (OPCODE_DELAY)
+""")
+
+
+_adc = make_ins("""
+    dreg : 2        # Register where to store ADC result
+    mux : 4         # Select SARADC pad (mux + 1)
+    sar_sel : 1     # Select SARADC0 (0) or SARADC1 (1)
+    unused1 : 1     # Unused
+    cycles : 16     # TBD, cycles used for measurement
+    unused2 : 4     # Unused
+    opcode: 4       # Opcode (OPCODE_ADC)
 """)
 
 
@@ -232,6 +245,17 @@ def wait(cycles):
     _delay.unused = 0
     _delay.opcode = OPCODE_DELAY
     return _delay.all
+
+
+def adc(reg_dest, adc_idx, pad_idx):
+    _adc.dreg = reg_dest
+    _adc.mux = pad_idx + 1
+    _adc.sar_sel = adc_idx
+    _adc.unused1 = 0
+    _adc.cycles = 0
+    _adc.unused2 = 0
+    _adc.opcode = OPCODE_ADC
+    return _adc.all
 
 
 def st(reg_val, reg_addr, offset):
