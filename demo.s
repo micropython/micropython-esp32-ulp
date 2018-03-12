@@ -16,6 +16,9 @@ start:      ld r0, r1, 0    # a comment!
             rsh r0, r1, 42
             move r0, r1
             move r0, 42
+            stage_rst
+            stage_inc 42
+            stage_dec 23
 
             # jumping to labels not supported yet
             bl -1, 0

@@ -29,14 +29,17 @@ SUB_OPCODE_ST = 4
 OPCODE_ALU = 7
 SUB_OPCODE_ALU_REG = 0
 SUB_OPCODE_ALU_IMM = 1
-SUB_OPCODE_ALU_CNT = 2  # stage counter, tech ref 29.4.1.3
-ALU_SEL_ADD = 0  # also: STAGE_INC
-ALU_SEL_SUB = 1  # also: STAGE_DEC
-ALU_SEL_AND = 2  # also: STAGE_RST
+ALU_SEL_ADD = 0
+ALU_SEL_SUB = 1
+ALU_SEL_AND = 2
 ALU_SEL_OR = 3
 ALU_SEL_MOV = 4
 ALU_SEL_LSH = 5
 ALU_SEL_RSH = 6
+SUB_OPCODE_ALU_CNT = 2
+ALU_SEL_INC = 0
+ALU_SEL_DEC = 1
+ALU_SEL_RST = 2
 
 OPCODE_BRANCH = 8
 SUB_OPCODE_BX = 0
@@ -163,6 +166,16 @@ _alu_imm = make_ins("""
     unused : 1      # Unused
     sel : 4         # Operation to perform, one of ALU_SEL_xxx
     sub_opcode : 3  # Sub opcode (SUB_OPCODE_ALU_IMM)
+    opcode : 4      # Opcode (OPCODE_ALU)
+""")
+
+
+_alu_cnt = make_ins("""
+    unused1 : 4     # Unused
+    imm : 8         # Immediate value (to inc / dec stage counter)
+    unused2 : 9     # Unused
+    sel : 4         # Operation to perform, one of ALU_SEL_xxx
+    sub_opcode : 3  # Sub opcode (SUB_OPCODE_ALU_CNT)
     opcode : 4      # Opcode (OPCODE_ALU)
 """)
 
@@ -452,6 +465,32 @@ def i_lsh(reg_dest, reg_src1, reg_imm_src2):
 
 def i_rsh(reg_dest, reg_src1, reg_imm_src2):
     return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_RSH)
+
+
+def _alu_stage(imm, alu_sel):
+    """
+    Stage counter instructions with 1 arg: stage_inc / stage_dec
+    """
+    imm = get_imm(imm)
+    _alu_cnt.unused1 = 0
+    _alu_cnt.imm = imm
+    _alu_cnt.unused2 = 0
+    _alu_cnt.sel = alu_sel
+    _alu_cnt.sub_opcode = SUB_OPCODE_ALU_CNT
+    _alu_cnt.opcode = OPCODE_ALU
+    return _alu_cnt.all
+
+
+def i_stage_inc(imm):
+    return _alu_stage(imm, ALU_SEL_INC)
+
+
+def i_stage_dec(imm):
+    return _alu_stage(imm, ALU_SEL_DEC)
+
+
+def i_stage_rst():
+    return _alu_stage('0', ALU_SEL_RST)
 
 
 def i_wake():
