@@ -10,8 +10,8 @@ start:      ld r0, r0, 0    # a comment!
             bge 1, 0
             bxi start
 
-            rd_reg 0x3ff48000, 1, 2
-            wr_reg 0x3ff48000, 1, 2, 3
+            reg_rd 0x3ff48000, 7, 0
+            reg_wr 0x3ff48000, 7, 0, 42
 
             wait 1000
             wake
