@@ -16,6 +16,8 @@ RD_REG_PERIPH_RTC_IO = 1
 RD_REG_PERIPH_SENS = 2
 RD_REG_PERIPH_RTC_I2C = 3
 
+OPCODE_I2C = 3
+
 OPCODE_DELAY = 4
 
 OPCODE_ADC = 5
@@ -92,6 +94,18 @@ _rd_reg = make_ins("""
     low : 5         # Low bit
     high : 5        # High bit
     opcode : 4      # Opcode (OPCODE_WR_REG)
+""")
+
+
+_i2c = make_ins("""
+    sub_addr : 8    # address within I2C slave
+    data : 8        # Data to read or write
+    low : 3         # low bit
+    high : 3        # high bit
+    i2c_sel : 4     # select i2c slave via SENS_I2C_SLAVE_ADDRx
+    unused : 1      # Unused
+    rw : 1          # Write (1) or read (0)
+    opcode : 4      # Opcode (OPCODE_I2C)
 """)
 
 
@@ -238,6 +252,30 @@ def reg_rd(reg, high_bit, low_bit):
     _rd_reg.high = high_bit
     _rd_reg.opcode = OPCODE_RD_REG
     return _rd_reg.all
+
+
+def i2c_rd(sub_addr, high_bit, low_bit, slave_sel):
+    _i2c.sub_addr = sub_addr
+    _i2c.data = 0
+    _i2c.low = low_bit
+    _i2c.high = high_bit
+    _i2c.i2c_sel = slave_sel
+    _i2c.unused = 0
+    _i2c.rw = 0
+    _i2c.opcode = OPCODE_I2C
+    return _i2c.all
+
+
+def i2c_wr(sub_addr, value, high_bit, low_bit, slave_sel):
+    _i2c.sub_addr = sub_addr
+    _i2c.data = value
+    _i2c.low = low_bit
+    _i2c.high = high_bit
+    _i2c.i2c_sel = slave_sel
+    _i2c.unused = 0
+    _i2c.rw = 1
+    _i2c.opcode = OPCODE_I2C
+    return _i2c.all
 
 
 def wait(cycles):
