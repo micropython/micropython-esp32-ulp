@@ -2,10 +2,10 @@
 
 start:      ld r0, r1, 0    # a comment!
             st r0, r1, 0
-            addr r0, r1, r2
-            addi r0, r1, 42
-            movr r0, r1
-            movi r0, 42
+            add r0, r1, r2
+            add r0, r1, 42
+            move r0, r1
+            move r0, 42
 
             # jumping to labels not supported yet
             bl -1, 0

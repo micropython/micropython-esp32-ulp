@@ -374,48 +374,53 @@ def ld(reg_dest, reg_addr, offset):
     return _ld.all
 
 
-def addr(reg_dest, reg_src1, reg_src2):
-    _alu_reg.dreg = get_reg(reg_dest)
-    _alu_reg.sreg = get_reg(reg_src1)
-    _alu_reg.treg = get_reg(reg_src2)
-    _alu_reg.unused = 0
-    _alu_reg.sel = ALU_SEL_ADD
-    _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
-    _alu_reg.opcode = OPCODE_ALU
-    return _alu_reg.all
+def add(reg_dest, reg_src1, reg_imm_src2):
+    dest = get_reg(reg_dest)
+    src1 = get_reg(reg_src1)
+    src2 = arg_qualify(reg_imm_src2)
+    if src2.type == REG:
+        _alu_reg.dreg = dest
+        _alu_reg.sreg = src1
+        _alu_reg.treg = src2.value
+        _alu_reg.unused = 0
+        _alu_reg.sel = ALU_SEL_ADD
+        _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
+        _alu_reg.opcode = OPCODE_ALU
+        return _alu_reg.all
+    if src2.type == IMM:
+        _alu_imm.dreg = dest
+        _alu_imm.sreg = src1
+        _alu_imm.imm = src2.value
+        _alu_imm.unused = 0
+        _alu_imm.sel = ALU_SEL_ADD
+        _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
+        _alu_imm.opcode = OPCODE_ALU
+        return _alu_imm.all
+    raise TypeError('unsupported operand: %s' % src2.raw)
 
 
-def movr(reg_dest, reg_src):
-    _alu_reg.dreg = get_reg(reg_dest)
-    _alu_reg.sreg = get_reg(reg_src)
-    _alu_reg.treg = 0
-    _alu_reg.unused = 0
-    _alu_reg.sel = ALU_SEL_MOV
-    _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
-    _alu_reg.opcode = OPCODE_ALU
-    return _alu_reg.all
-
-
-def addi(reg_dest, reg_src, imm):
-    _alu_imm.dreg = get_reg(reg_dest)
-    _alu_imm.sreg = get_reg(reg_src)
-    _alu_imm.imm = get_imm(imm)
-    _alu_imm.unused = 0
-    _alu_imm.sel = ALU_SEL_ADD
-    _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
-    _alu_imm.opcode = OPCODE_ALU
-    return _alu_imm.all
-
-
-def movi(reg_dest, imm):
-    _alu_imm.dreg = get_reg(reg_dest)
-    _alu_imm.sreg = 0
-    _alu_imm.imm = get_imm(imm)
-    _alu_imm.unused = 0
-    _alu_imm.sel = ALU_SEL_MOV
-    _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
-    _alu_imm.opcode = OPCODE_ALU
-    return _alu_imm.all
+def move(reg_dest, reg_imm_src):
+    dest = get_reg(reg_dest)
+    src = arg_qualify(reg_imm_src)
+    if src.type == REG:
+        _alu_reg.dreg = dest
+        _alu_reg.sreg = src.value
+        _alu_reg.treg = 0
+        _alu_reg.unused = 0
+        _alu_reg.sel = ALU_SEL_MOV
+        _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
+        _alu_reg.opcode = OPCODE_ALU
+        return _alu_reg.all
+    if src.type == IMM:
+        _alu_imm.dreg = dest
+        _alu_imm.sreg = 0
+        _alu_imm.imm = src.value
+        _alu_imm.unused = 0
+        _alu_imm.sel = ALU_SEL_MOV
+        _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
+        _alu_imm.opcode = OPCODE_ALU
+        return _alu_imm.all
+    raise TypeError('unsupported operand: %s' % src.raw)
 
 
 def wake():
