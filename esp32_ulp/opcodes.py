@@ -28,7 +28,10 @@ SUB_OPCODE_ST = 4
 OPCODE_ALU = 7
 SUB_OPCODE_ALU_REG = 0
 SUB_OPCODE_ALU_IMM = 1
-ALU_SEL_ADD = 0
+SUB_OPCODE_ALU_CNT = 2  # stage counter, tech ref 29.4.1.3
+ALU_SEL_ADD = 0  # also: STAGE_INC
+ALU_SEL_SUB = 1  # also: STAGE_DEC
+ALU_SEL_AND = 2  # also: STAGE_RST
 ALU_SEL_MOV = 4
 
 OPCODE_BRANCH = 8
@@ -99,7 +102,7 @@ _rd_reg = make_ins("""
 
 _i2c = make_ins("""
     sub_addr : 8    # address within I2C slave
-    data : 8        # Data to read or write
+    data : 8        # Data to write (not used for read)
     low : 3         # low bit
     high : 3        # high bit
     i2c_sel : 4     # select i2c slave via SENS_I2C_SLAVE_ADDRx
