@@ -33,7 +33,10 @@ SUB_OPCODE_ALU_CNT = 2  # stage counter, tech ref 29.4.1.3
 ALU_SEL_ADD = 0  # also: STAGE_INC
 ALU_SEL_SUB = 1  # also: STAGE_DEC
 ALU_SEL_AND = 2  # also: STAGE_RST
+ALU_SEL_OR = 3
 ALU_SEL_MOV = 4
+ALU_SEL_LSH = 5
+ALU_SEL_RSH = 6
 
 OPCODE_BRANCH = 8
 SUB_OPCODE_BX = 0
@@ -429,6 +432,26 @@ def _alu3(reg_dest, reg_src1, reg_imm_src2, alu_sel):
 
 def add(reg_dest, reg_src1, reg_imm_src2):
     return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_ADD)
+
+
+def sub(reg_dest, reg_src1, reg_imm_src2):
+    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_SUB)
+
+
+#def and(reg_dest, reg_src1, reg_imm_src2):
+#    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_AND)
+
+
+#def or(reg_dest, reg_src1, reg_imm_src2):
+#    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_OR)
+
+
+def lsh(reg_dest, reg_src1, reg_imm_src2):
+    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_LSH)
+
+
+def rsh(reg_dest, reg_src1, reg_imm_src2):
+    return _alu3(reg_dest, reg_src1, reg_imm_src2, ALU_SEL_RSH)
 
 
 def wake():
