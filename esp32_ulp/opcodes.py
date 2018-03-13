@@ -263,13 +263,15 @@ def arg_qualify(arg):
 
     return result as ARG namedtuple
     """
-    if len(arg) == 2 and arg[0] in 'rR' and arg[1] in '0123456789':
-        reg = int(arg[1])
-        if 0 <= reg <= 3:
-            return ARG(REG, reg, arg)
-        raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
-    if len(arg) == 2 and arg.lower() in ['--', 'eq', 'ov', 'lt', 'gt', 'ge']:
-        return ARG(COND, arg.lower(), arg)
+    arg_lower = arg.lower()
+    if len(arg) == 2:
+        if arg_lower[0] == 'r' and arg[1] in '0123456789':
+            reg = int(arg[1])
+            if 0 <= reg <= 3:
+                return ARG(REG, reg, arg)
+            raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
+        if arg_lower in ['--', 'eq', 'ov', 'lt', 'gt', 'ge']:
+            return ARG(COND, arg_lower, arg)
     try:
         return ARG(IMM, int(arg), arg)
     except ValueError:
