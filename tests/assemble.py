@@ -44,7 +44,7 @@ def test_assemble():
     assert a.symbols['end'] == (TEXT, 4)
     assert len(a.sections[TEXT]) == 4
     assert len(a.sections[DATA]) == 0
-    assert a.sections[BSS] == 0
+    assert a.offsets[BSS] == 0
 
 
 test_parse_line()

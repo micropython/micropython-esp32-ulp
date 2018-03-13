@@ -10,7 +10,7 @@ class Assembler:
 
     def __init__(self):
         self.symbols = {}
-        self.sections = dict(text=[], data=[], bss=0)
+        self.sections = dict(text=[], data=[])
         self.offsets = dict(text=0, data=0, bss=0)
         self.section = TEXT
 
@@ -56,11 +56,12 @@ class Assembler:
         s = self.section
         if expected_section is not None and s is not expected_section:
             raise TypeError('only allowed in %s section' % expected_section)
-        if s is TEXT or s is DATA:
+        if s is BSS:
+            # just increase BSS size by value
+            self.offsets[s] += value
+        else:
             self.sections[s].append(value)
             self.offsets[s] += 1
-        elif s is BSS:
-            self.sections[s] += value  # just increase BSS size by value
 
     def dump(self):
         print("Symbols:")
@@ -68,12 +69,14 @@ class Assembler:
             print(label, section_offset)
         print("%s section:" % TEXT)
         for t in self.sections[TEXT]:
-            print(hex(t))
+            print("%08x" % t)
+        print("size: %d" % self.offsets[TEXT])
         print("%s section:" % DATA)
         for d in self.sections[DATA]:
-            print(d)
+            print("%08x" % d)
+        print("size: %d" % self.offsets[DATA])
         print("%s section:" % BSS)
-        print("size: %d" % self.sections[BSS])
+        print("size: %d" % self.offsets[BSS])
 
     def d_text(self):
         self.section = TEXT
@@ -83,6 +86,24 @@ class Assembler:
 
     def d_bss(self):
         self.section = BSS
+
+    def d_skip(self, amount, fill=None):
+        # TODO fill should be 8bit, but we are currently filling with 32bit
+        s = self.section
+        amount = int(amount)
+        if fill is not None and s is BSS:
+            raise ValueError('fill not allowed in section %s' % s)
+        fill = int(fill or 0)
+        if amount % 4:
+            amount += 4 - amount % 4
+        amount = amount // 4
+        if s is BSS:
+            self.append_section(amount)
+        else:
+            for i in range(amount):
+                self.append_section(fill)
+
+    d_space = d_skip
 
     def assemble(self, lines):
         for label, opcode, args in self.parse(lines):

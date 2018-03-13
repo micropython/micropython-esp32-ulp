@@ -2,7 +2,7 @@
 
             .text
 
-start:      ld r0, r1, 0    # a comment!
+textstart:  ld r0, r1, 0    # a comment!
             st r0, r1, 0
             add r0, r1, r2
             add r0, r1, 42
@@ -48,9 +48,15 @@ start:      ld r0, r1, 0    # a comment!
             wake
             sleep 1
             halt
-end:
+textend:
 
             .data
+data0:      .skip 4, 0x23
+data1:      .space 4, 0x42
+data2:      .skip 4
+dataend:
 
             .bss
-
+bss0:       .skip 4
+bss1:       .skip 4
+bssend:
