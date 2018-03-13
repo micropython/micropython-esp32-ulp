@@ -1,1 +1,1 @@
-micropython -m esp32_ulp demo.s
+micropython -m esp32_ulp demo.S
