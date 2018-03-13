@@ -36,7 +36,7 @@ def test_parse():
 def test_assemble():
     lines = src.splitlines()
     symbols, code = assemble(lines)
-    assert {'start', 'end'} < set(symbols)
+    assert {'start', 'end'} <= set(symbols)
     assert symbols['start'] == 0
     assert symbols['end'] == 4
     assert len(code) == 4

@@ -44,7 +44,7 @@ def parse(lines):
 
 
 def assemble(lines):
-    symbols = dict(r0=0, R0=0, r1=1, R1=1, r2=2, R2=2, r3=3, R3=3)
+    symbols = {}
     code = []
     addr = 0
     for label, opcode, args in parse(lines):
