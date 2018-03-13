@@ -8,10 +8,10 @@ textstart:  ld r0, r1, 0    # a comment!
             add r0, r1, 42
             sub r0, r1, r2
             sub r0, r1, 42
-            #and r0, r1, r2
-            #and r0, r1, 42
-            #or r0, r1, r2
-            #or r0, r1, 42
+            and r0, r1, r2
+            and r0, r1, 42
+            or r0, r1, r2
+            or r0, r1, 42
             lsh r0, r1, r2
             lsh r0, r1, 42
             rsh r0, r1, r2
