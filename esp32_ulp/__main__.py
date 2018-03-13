@@ -1,13 +1,14 @@
 import sys
 
-from .assemble import assemble
+from .assemble import Assembler
 
 
 def main(fn):
     with open(fn) as f:
         lines = f.readlines()
 
-    symbols, code = assemble(lines)
+    assembler = Assembler()
+    symbols, code = assembler.assemble(lines)
 
     print('Symbols:')
     for name, value in sorted(symbols.items()):

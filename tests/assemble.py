@@ -1,4 +1,4 @@
-from esp32_ulp.assemble import parse_line, parse, assemble
+from esp32_ulp.assemble import Assembler
 
 src = """\
 # line 1
@@ -14,28 +14,31 @@ end:
 
 
 def test_parse_line():
+    a = Assembler()
     lines = src.splitlines()
     # note: line number = index + 1
-    assert parse_line(lines[0]) == None
-    assert parse_line(lines[1]) == None
-    assert parse_line(lines[2]) == ('start', 'wait', ('42', ))
-    assert parse_line(lines[3]) == None
-    assert parse_line(lines[4]) == None
-    assert parse_line(lines[5]) == (None, 'ld', ('r0', 'r1', '0', ))
-    assert parse_line(lines[6]) == (None, 'st', ('r0', 'r1', '0', ))
-    assert parse_line(lines[7]) == (None, 'halt', ())
-    assert parse_line(lines[8]) == ('end', None, ())
+    assert a.parse_line(lines[0]) == None
+    assert a.parse_line(lines[1]) == None
+    assert a.parse_line(lines[2]) == ('start', 'wait', ('42', ))
+    assert a.parse_line(lines[3]) == None
+    assert a.parse_line(lines[4]) == None
+    assert a.parse_line(lines[5]) == (None, 'ld', ('r0', 'r1', '0', ))
+    assert a.parse_line(lines[6]) == (None, 'st', ('r0', 'r1', '0', ))
+    assert a.parse_line(lines[7]) == (None, 'halt', ())
+    assert a.parse_line(lines[8]) == ('end', None, ())
 
 
 def test_parse():
+    a = Assembler()
     lines = src.splitlines()
-    result = parse(lines)
+    result = a.parse(lines)
     assert None not in result
 
 
 def test_assemble():
+    a = Assembler()
     lines = src.splitlines()
-    symbols, code = assemble(lines)
+    symbols, code = a.assemble(lines)
     assert {'start', 'end'} <= set(symbols)
     assert symbols['start'] == 0
     assert symbols['end'] == 4
