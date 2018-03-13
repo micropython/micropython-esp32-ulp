@@ -235,7 +235,7 @@ _ld = make_ins("""
 
 # assembler opcode definitions
 
-REG, IMM = 0, 1
+REG, IMM, COND = 0, 1, 2
 ARG = namedtuple('ARG', ('type', 'value', 'raw'))
 
 
@@ -253,6 +253,8 @@ def arg_qualify(arg):
         if 0 <= reg <= 3:
             return ARG(REG, reg, arg)
         raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
+    if len(arg) == 2 and arg in ['--', 'eq', 'EQ', 'ov', 'OV']:
+        return ARG(COND, arg.lower(), arg)
     try:
         return ARG(IMM, int(arg), arg)
     except ValueError:
@@ -272,6 +274,13 @@ def get_imm(arg):
     if arg.type == IMM:
         return arg.value
     raise TypeError('wanted: immediate, got: %s' % arg.raw)
+
+
+def get_cond(arg):
+    arg = arg_qualify(arg)
+    if arg.type == COND:
+        return arg.value
+    raise TypeError('wanted: condition, got: %s' % arg.raw)
 
 
 def _soc_reg_to_ulp_periph_sel(reg):
@@ -509,6 +518,36 @@ def i_sleep(timer_idx):
     return _sleep.all
 
 
+def i_jump(target, condition='--'):
+    target = arg_qualify(target)
+    condition = get_cond(condition)
+    if condition == 'eq':
+        jump_type = BX_JUMP_TYPE_ZERO
+    elif condition == 'ov':
+        jump_type = BX_JUMP_TYPE_OVF
+    else:  # '--' means unconditional
+        jump_type = BX_JUMP_TYPE_DIRECT
+    if target.type == IMM:
+        _bx.dreg = 0
+        _bx.addr = target.value
+        _bx.unused = 0
+        _bx.reg = 0
+        _bx.type = jump_type
+        _bx.sub_opcode = SUB_OPCODE_BX
+        _bx.opcode = OPCODE_BRANCH
+        return _bx.all
+    if target.type == REG:
+        _bx.dreg = target.value
+        _bx.addr = 0
+        _bx.unused = 0
+        _bx.reg = 1
+        _bx.type = jump_type
+        _bx.sub_opcode = SUB_OPCODE_BX
+        _bx.opcode = OPCODE_BRANCH
+        return _bx.all
+    raise TypeError('unsupported operand: %s' % target.raw)
+
+
 def i_bge(pc_offset, imm_value):
     _b.imm = get_imm(imm_value)
     _b.cmp = B_CMP_GE
@@ -529,25 +568,3 @@ def i_bl(pc_offset, imm_value):
     _b.sub_opcode = SUB_OPCODE_B
     _b.opcode = OPCODE_BRANCH
     return _b.all
-
-
-def i_bxr(reg_pc):
-    _bx.dreg = get_reg(reg_pc)
-    _bx.addr = 0
-    _bx.unused = 0
-    _bx.reg = 1
-    _bx.type = BX_JUMP_TYPE_DIRECT
-    _bx.sub_opcode = SUB_OPCODE_BX
-    _bx.opcode = OPCODE_BRANCH
-    return _bx.all
-
-
-def i_bxi(imm_pc):
-    _bx.dreg = 0
-    _bx.addr = get_imm(imm_pc)
-    _bx.unused = 0
-    _bx.reg = 0
-    _bx.type = BX_JUMP_TYPE_DIRECT
-    _bx.sub_opcode = SUB_OPCODE_BX
-    _bx.opcode = OPCODE_BRANCH
-    return _bx.all

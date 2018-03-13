@@ -23,7 +23,12 @@ start:      ld r0, r1, 0    # a comment!
             # jumping to labels not supported yet
             bl -1, 0
             bge 1, 0
-            bxi 0
+            jump 0
+            jump 0, eq
+            jump 0, ov
+            jump r0
+            jump r0, eq
+            jump r0, ov
 
             reg_rd 0x3ff48000, 7, 0
             reg_wr 0x3ff48000, 7, 0, 42
