@@ -78,6 +78,12 @@ class Assembler:
         print("%s section:" % BSS)
         print("size: %d" % self.offsets[BSS])
 
+    def fetch(self):
+        def get_bytes(section):
+            return b''.join(self.sections[section])
+
+        return get_bytes(TEXT), get_bytes(DATA), self.offsets[BSS]
+
     def d_text(self):
         self.section = TEXT
 
