@@ -235,7 +235,7 @@ _ld = make_ins("""
 
 # assembler opcode definitions
 
-REG, IMM, COND = 0, 1, 2
+REG, IMM, COND_FLAGS, COND_COMP = 0, 1, 2, 4
 ARG = namedtuple('ARG', ('type', 'value', 'raw'))
 
 
@@ -254,7 +254,9 @@ def arg_qualify(arg):
             return ARG(REG, reg, arg)
         raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
     if len(arg) == 2 and arg in ['--', 'eq', 'EQ', 'ov', 'OV']:
-        return ARG(COND, arg.lower(), arg)
+        return ARG(COND_FLAGS, arg.lower(), arg)
+    if len(arg) == 2 and arg in ['lt', 'LT', 'ge', 'GE']:
+        return ARG(COND_COMP, arg.lower(), arg)
     try:
         return ARG(IMM, int(arg), arg)
     except ValueError:
@@ -276,11 +278,18 @@ def get_imm(arg):
     raise TypeError('wanted: immediate, got: %s' % arg.raw)
 
 
-def get_cond(arg):
+def get_cond_flags(arg):
     arg = arg_qualify(arg)
-    if arg.type == COND:
+    if arg.type == COND_FLAGS:
         return arg.value
-    raise TypeError('wanted: condition, got: %s' % arg.raw)
+    raise TypeError('wanted: flags condition, got: %s' % arg.raw)
+
+
+def get_cond_comp(arg):
+    arg = arg_qualify(arg)
+    if arg.type == COND_COMP:
+        return arg.value
+    raise TypeError('wanted: comparison condition, got: %s' % arg.raw)
 
 
 def _soc_reg_to_ulp_periph_sel(reg):
@@ -520,7 +529,7 @@ def i_sleep(timer_idx):
 
 def i_jump(target, condition='--'):
     target = arg_qualify(target)
-    condition = get_cond(condition)
+    condition = get_cond_flags(condition)
     if condition == 'eq':
         jump_type = BX_JUMP_TYPE_ZERO
     elif condition == 'ov':
@@ -548,23 +557,18 @@ def i_jump(target, condition='--'):
     raise TypeError('unsupported operand: %s' % target.raw)
 
 
-def i_bge(pc_offset, imm_value):
-    _b.imm = get_imm(imm_value)
-    _b.cmp = B_CMP_GE
-    offs = get_imm(pc_offset)
-    _b.offset = abs(offs)
-    _b.sign = 0 if offs >= 0 else 1
-    _b.sub_opcode = SUB_OPCODE_B
-    _b.opcode = OPCODE_BRANCH
-    return _b.all
-
-
-def i_bl(pc_offset, imm_value):
-    _b.imm = get_imm(imm_value)
-    _b.cmp = B_CMP_L
-    offs = get_imm(pc_offset)
-    _b.offset = abs(offs)
-    _b.sign = 0 if offs >= 0 else 1
+def i_jumpr(offset, threshold, condition):
+    offset = get_imm(offset)
+    threshold = get_imm(threshold)
+    condition = get_cond_comp(condition)
+    if condition == 'lt':
+        cmp_op = B_CMP_L
+    elif condition == 'ge':
+        cmp_op = B_CMP_GE
+    _b.imm = threshold
+    _b.cmp = cmp_op
+    _b.offset = abs(offset)
+    _b.sign = 0 if offset >= 0 else 1
     _b.sub_opcode = SUB_OPCODE_B
     _b.opcode = OPCODE_BRANCH
     return _b.all

@@ -21,8 +21,8 @@ start:      ld r0, r1, 0    # a comment!
             stage_dec 23
 
             # jumping to labels not supported yet
-            bl -1, 0
-            bge 1, 0
+            jumpr -1, 42, lt
+            jumpr +1, 23, GE
             jump 0
             jump 0, eq
             jump 0, ov
