@@ -18,4 +18,16 @@
             sub r3, r0, -1
             sub r2, r1, 1
 
+            lsh r0, r1, r2
+            lsh r2, r3, 1
+
+            rsh r3, r2, r1
+            rsh r3, r2, 31
+
+            move r0, r1
+            move r0, 42
+
+            stage_rst
+            stage_inc 42
+            stage_dec 23
 
