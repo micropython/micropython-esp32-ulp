@@ -58,5 +58,5 @@ dataend:
 
             .bss
 bss0:       .skip 4
-bss1:       .skip 4
+bss1:       .skip 2
 bssend:

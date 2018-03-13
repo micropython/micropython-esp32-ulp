@@ -61,7 +61,7 @@ class Assembler:
             self.offsets[s] += value
         else:
             self.sections[s].append(value)
-            self.offsets[s] += 1
+            self.offsets[s] += len(value)
 
     def dump(self):
         print("Symbols:")
@@ -69,11 +69,11 @@ class Assembler:
             print(label, section_offset)
         print("%s section:" % TEXT)
         for t in self.sections[TEXT]:
-            print("%08x" % t)
+            print("%08x" % int.from_bytes(t, 'little'))
         print("size: %d" % self.offsets[TEXT])
         print("%s section:" % DATA)
         for d in self.sections[DATA]:
-            print("%08x" % d)
+            print("%08x" % int.from_bytes(d, 'little'))
         print("size: %d" % self.offsets[DATA])
         print("%s section:" % BSS)
         print("size: %d" % self.offsets[BSS])
@@ -88,20 +88,15 @@ class Assembler:
         self.section = BSS
 
     def d_skip(self, amount, fill=None):
-        # TODO fill should be 8bit, but we are currently filling with 32bit
         s = self.section
         amount = int(amount)
         if fill is not None and s is BSS:
             raise ValueError('fill not allowed in section %s' % s)
-        fill = int(fill or 0)
-        if amount % 4:
-            amount += 4 - amount % 4
-        amount = amount // 4
         if s is BSS:
             self.append_section(amount)
         else:
-            for i in range(amount):
-                self.append_section(fill)
+            fill = int(fill or 0).to_bytes(1, 'little') * amount
+            self.append_section(fill)
 
     d_space = d_skip
 
@@ -110,7 +105,7 @@ class Assembler:
             if label is not None:
                 if label in self.symbols:
                     raise Exception('label %s is already defined.' % label)
-                self.symbols[label] = (self.section, self.offsets[self.section])
+                self.symbols[label] = (self.section, self.offsets[self.section] // 4)
             if opcode is not None:
                 if opcode[0] == '.':
                     # assembler directive
@@ -125,7 +120,7 @@ class Assembler:
                     func = getattr(opcodes, 'i_' + opcode, None)
                     if func is not None:
                         instruction = func(*args)
-                        self.append_section(instruction, TEXT)
+                        self.append_section(instruction.to_bytes(4, 'little'), TEXT)
                         continue
                 raise Exception('Unknown opcode or directive: %s' % opcode)
 

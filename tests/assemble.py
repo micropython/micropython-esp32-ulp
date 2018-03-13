@@ -42,7 +42,7 @@ def test_assemble():
     assert {'start', 'end'} <= set(a.symbols)
     assert a.symbols['start'] == (TEXT, 0)
     assert a.symbols['end'] == (TEXT, 4)
-    assert len(a.sections[TEXT]) == 4
+    assert len(b''.join(a.sections[TEXT])) == 16  # 4 instructions * 4B
     assert len(a.sections[DATA]) == 0
     assert a.offsets[BSS] == 0
 
