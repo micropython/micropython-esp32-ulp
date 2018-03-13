@@ -250,7 +250,7 @@ _ld = make_ins("""
 
 # assembler opcode definitions
 
-REG, IMM, COND_FLAGS, COND_COMP = 0, 1, 2, 3
+REG, IMM, COND = 0, 1, 2
 ARG = namedtuple('ARG', ('type', 'value', 'raw'))
 
 
@@ -268,10 +268,8 @@ def arg_qualify(arg):
         if 0 <= reg <= 3:
             return ARG(REG, reg, arg)
         raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
-    if len(arg) == 2 and arg in ['--', 'eq', 'ov']:
-        return ARG(COND_FLAGS, arg.lower(), arg)
-    if len(arg) == 2 and arg in ['EQ', 'LT', 'GT', 'GE']:
-        return ARG(COND_COMP, arg.lower(), arg)
+    if len(arg) == 2 and arg.lower() in ['--', 'eq', 'ov', 'lt', 'gt', 'ge']:
+        return ARG(COND, arg.lower(), arg)
     try:
         return ARG(IMM, int(arg), arg)
     except ValueError:
@@ -293,18 +291,11 @@ def get_imm(arg):
     raise TypeError('wanted: immediate, got: %s' % arg.raw)
 
 
-def get_cond_flags(arg):
+def get_cond(arg):
     arg = arg_qualify(arg)
-    if arg.type == COND_FLAGS:
+    if arg.type == COND:
         return arg.value
-    raise TypeError('wanted: flags condition, got: %s' % arg.raw)
-
-
-def get_cond_comp(arg):
-    arg = arg_qualify(arg)
-    if arg.type == COND_COMP:
-        return arg.value
-    raise TypeError('wanted: comparison condition, got: %s' % arg.raw)
+    raise TypeError('wanted: condition, got: %s' % arg.raw)
 
 
 def _soc_reg_to_ulp_periph_sel(reg):
@@ -544,13 +535,15 @@ def i_sleep(timer_idx):
 
 def i_jump(target, condition='--'):
     target = arg_qualify(target)
-    condition = get_cond_flags(condition)
+    condition = get_cond(condition)
     if condition == 'eq':
         jump_type = BX_JUMP_TYPE_ZERO
     elif condition == 'ov':
         jump_type = BX_JUMP_TYPE_OVF
-    else:  # '--' means unconditional
+    elif condition == '--':  # means unconditional
         jump_type = BX_JUMP_TYPE_DIRECT
+    else:
+        raise ValueError("invalid flags condition")
     if target.type == IMM:
         _bx.dreg = 0
         _bx.addr = target.value
@@ -575,7 +568,7 @@ def i_jump(target, condition='--'):
 def i_jumpr(offset, threshold, condition):
     offset = get_imm(offset)
     threshold = get_imm(threshold)
-    condition = get_cond_comp(condition)
+    condition = get_cond(condition)
     if condition == 'lt':
         cmp_op = B_CMP_L
     elif condition == 'ge':
@@ -594,7 +587,7 @@ def i_jumpr(offset, threshold, condition):
 def i_jumps(offset, threshold, condition):
     offset = get_imm(offset)
     threshold = get_imm(threshold)
-    condition = get_cond_comp(condition)
+    condition = get_cond(condition)
     if condition == 'lt':
         cmp_op = BC_CMP_LT
     elif condition == 'gt':
