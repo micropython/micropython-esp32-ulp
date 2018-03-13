@@ -108,6 +108,19 @@ class Assembler:
 
     d_space = d_skip
 
+    def append_data(self, wordlen, args):
+        data = [int(arg).to_bytes(wordlen, 'little') for arg in args]
+        self.append_section(b''.join(data))
+
+    def d_byte(self, *args):
+        self.append_data(1, args)
+
+    def d_word(self, *args):
+        self.append_data(2, args)
+
+    def d_long(self, *args):
+        self.append_data(4, args)
+
     def assemble(self, lines):
         for label, opcode, args in self.parse(lines):
             if label is not None:
