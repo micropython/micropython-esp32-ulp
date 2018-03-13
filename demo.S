@@ -3,7 +3,7 @@
             .text
 
 textstart:  ld r0, r1, 0    # a comment!
-            st r0, r1, 0
+            st r0, r1, 0    // another comment!
             add r0, r1, r2
             add r0, r1, 42
             sub r0, r1, r2

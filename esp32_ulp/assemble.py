@@ -22,7 +22,9 @@ class Assembler:
 
         label:    opcode arg1, arg2, ...    # rest-of-line comment
         """
-        line = line.split('#', 1)[0].rstrip()
+        line = line.split('#', 1)[0]
+        line = line.split('//', 1)[0]
+        line = line.rstrip()
         if not line:
             return
         has_label = line[0] not in '\t '

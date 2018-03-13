@@ -9,7 +9,7 @@ start:  wait 42    # line 3
         ld r0, r1, 0
         st  r0,  r1,0    # line 7
         halt
-end:
+end:    // C style comment
 """
 
 
