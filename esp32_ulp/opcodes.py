@@ -423,7 +423,7 @@ def i_move(reg_dest, reg_imm_src):
     if src.type == REG:
         _alu_reg.dreg = dest
         _alu_reg.sreg = src.value
-        _alu_reg.treg = 0
+        _alu_reg.treg = 1  # XXX undocumented, this is the value binutils-esp32 uses
         _alu_reg.unused = 0
         _alu_reg.sel = ALU_SEL_MOV
         _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
