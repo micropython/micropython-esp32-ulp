@@ -1,0 +1,5 @@
+tests/compat/*.bin
+tests/compat/*.elf
+tests/compat/*.o
+tests/compat/*.ulp
+.DS_Store
