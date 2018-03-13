@@ -378,9 +378,9 @@ def i_wait(cycles):
     return _delay.all
 
 
-def i_adc(reg_dest, adc_idx, pad_idx):
+def i_adc(reg_dest, adc_idx, mux):
     _adc.dreg = get_reg(reg_dest)
-    _adc.mux = get_imm(pad_idx) + 1
+    _adc.mux = get_imm(mux)
     _adc.sar_sel = get_imm(adc_idx)
     _adc.unused1 = 0
     _adc.cycles = 0
