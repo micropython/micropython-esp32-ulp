@@ -49,6 +49,10 @@ BX_JUMP_TYPE_OVF = 2
 SUB_OPCODE_B = 1
 B_CMP_L = 0
 B_CMP_GE = 1
+SUB_OPCODE_BC = 2
+BC_CMP_LT = 0
+BC_CMP_GT = 1
+BC_CMP_EQ = 2
 
 OPCODE_END = 9
 SUB_OPCODE_END = 0
@@ -201,6 +205,17 @@ _b = make_ins("""
 """)
 
 
+_bc = make_ins("""
+    imm : 8         # Immediate value to compare against
+    unused : 7      # Unused
+    cmp : 2         # Comparison to perform: BC_CMP_LT, GT or EQ
+    offset : 7      # Absolute value of target PC offset w.r.t. current PC, expressed in words
+    sign : 1        # Sign of target PC offset: 0: positive, 1: negative
+    sub_opcode : 3  # Sub opcode (SUB_OPCODE_BC)
+    opcode : 4      # Opcode (OPCODE_BRANCH)
+""")
+
+
 _end = make_ins("""
     wakeup : 1      # Set to 1 to wake up chip
     unused : 24     # Unused
@@ -235,7 +250,7 @@ _ld = make_ins("""
 
 # assembler opcode definitions
 
-REG, IMM, COND_FLAGS, COND_COMP = 0, 1, 2, 4
+REG, IMM, COND_FLAGS, COND_COMP = 0, 1, 2, 3
 ARG = namedtuple('ARG', ('type', 'value', 'raw'))
 
 
@@ -253,9 +268,9 @@ def arg_qualify(arg):
         if 0 <= reg <= 3:
             return ARG(REG, reg, arg)
         raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
-    if len(arg) == 2 and arg in ['--', 'eq', 'EQ', 'ov', 'OV']:
+    if len(arg) == 2 and arg in ['--', 'eq', 'ov']:
         return ARG(COND_FLAGS, arg.lower(), arg)
-    if len(arg) == 2 and arg in ['lt', 'LT', 'ge', 'GE']:
+    if len(arg) == 2 and arg in ['EQ', 'LT', 'GT', 'GE']:
         return ARG(COND_COMP, arg.lower(), arg)
     try:
         return ARG(IMM, int(arg), arg)
@@ -565,6 +580,8 @@ def i_jumpr(offset, threshold, condition):
         cmp_op = B_CMP_L
     elif condition == 'ge':
         cmp_op = B_CMP_GE
+    else:
+        raise ValueError("invalid comparison condition")
     _b.imm = threshold
     _b.cmp = cmp_op
     _b.offset = abs(offset)
@@ -572,3 +589,24 @@ def i_jumpr(offset, threshold, condition):
     _b.sub_opcode = SUB_OPCODE_B
     _b.opcode = OPCODE_BRANCH
     return _b.all
+
+
+def i_jumps(offset, threshold, condition):
+    offset = get_imm(offset)
+    threshold = get_imm(threshold)
+    condition = get_cond_comp(condition)
+    if condition == 'lt':
+        cmp_op = BC_CMP_LT
+    elif condition == 'gt':
+        cmp_op = BC_CMP_GT
+    elif condition == 'eq':
+        cmp_op = BC_CMP_EQ
+    else:
+        raise ValueError("invalid comparison condition")
+    _bc.imm = threshold
+    _bc.cmp = cmp_op
+    _bc.offset = abs(offset)
+    _bc.sign = 0 if offset >= 0 else 1
+    _bc.sub_opcode = SUB_OPCODE_BC
+    _bc.opcode = OPCODE_BRANCH
+    return _bc.all
