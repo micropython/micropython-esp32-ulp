@@ -8,15 +8,8 @@ def main(fn):
         lines = f.readlines()
 
     assembler = Assembler()
-    symbols, code = assembler.assemble(lines)
-
-    print('Symbols:')
-    for name, value in sorted(symbols.items()):
-        print(name, ':', value)
-
-    print('Code:')
-    for ins in code:
-        print(hex(ins))
+    assembler.assemble(lines)
+    assembler.dump()
 
 
 main(sys.argv[1])

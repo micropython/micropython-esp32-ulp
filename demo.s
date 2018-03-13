@@ -1,5 +1,7 @@
 # comment-only line
 
+            .text
+
 start:      ld r0, r1, 0    # a comment!
             st r0, r1, 0
             add r0, r1, r2
@@ -47,4 +49,8 @@ start:      ld r0, r1, 0    # a comment!
             sleep 1
             halt
 end:
+
+            .data
+
+            .bss
 
