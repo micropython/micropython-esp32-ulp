@@ -3,8 +3,10 @@ ESP32 ULP Co-Processor Assembler
 """
 
 from . import opcodes
+from .nocomment import remove_comments
 
 TEXT, DATA, BSS = 'text', 'data', 'bss'
+
 
 class Assembler:
 
@@ -16,15 +18,13 @@ class Assembler:
 
     def parse_line(self, line):
         """
-        parse one line of assembler into label, opcode, args
+        parse one line of assembler into label, opcode, args.
+        comments already have been removed by pre-processing.
 
         a line looks like (label, opcode, args, comment are all optional):
 
-        label:    opcode arg1, arg2, ...    # rest-of-line comment
+        label:    opcode arg1, arg2, ...
         """
-        line = line.split('#', 1)[0]
-        line = line.split('//', 1)[0]
-        line = line.rstrip()
         if not line:
             return
         has_label = line[0] not in '\t '
@@ -49,7 +49,8 @@ class Assembler:
         return label, opcode, args
 
 
-    def parse(self, lines):
+    def parse(self, text):
+        lines = remove_comments(text)
         parsed = [self.parse_line(line) for line in lines]
         return [p for p in parsed if p is not None]
 
