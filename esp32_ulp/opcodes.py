@@ -142,8 +142,8 @@ _adc = make_ins("""
 
 
 _st = make_ins("""
-    dreg : 2        # Register which contains address in RTC memory (expressed in words)
     sreg : 2        # Register which contains data to store
+    dreg : 2        # Register which contains address in RTC memory (expressed in words)
     unused1 : 6     # Unused
     offset : 11     # Offset to add to dreg
     unused2 : 4     # Unused
