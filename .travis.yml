@@ -14,6 +14,7 @@ script:
 
   ###### Install tools ######
 
+  - echo -e "travis_fold:start:build_micropython"
   - echo "Building micropython"
   - git clone --recursive https://github.com/micropython/micropython.git
   - pushd micropython/ports/unix
@@ -23,7 +24,9 @@ script:
   - export PATH=$PATH:$PWD
   - test $(micropython -c 'print("test")') = "test"
   - popd
+  - echo -e "travis_fold:end:build_micropython"
 
+  - echo -e "travis_fold:start:build_binutils"
   - echo "Building binutils-esp32ulp"
   - git clone https://github.com/espressif/binutils-esp32ulp.git
   - pushd binutils-esp32ulp
@@ -35,9 +38,17 @@ script:
   - export PATH=$PATH:$PWD/dist/bin
   - esp32ulp-elf-as --version | grep 'esp32ulp-elf' > /dev/null
   - popd
+  - echo -e "travis_fold:end:build_binutils"
 
   ###### Run tests ######
 
   - pushd tests
-  - ./00_run_tests.sh
+  
+  - echo -e "travis_fold:start:unit_tests"
+  - ./00_unit_tests.sh
+  - echo -e "travis_fold:end:unit_tests"
+
+  - echo -e "travis_fold:start:compat_tests"
+  - ./01_compat_tests.sh
+  - echo -e "travis_fold:end:compat_tests"
 
