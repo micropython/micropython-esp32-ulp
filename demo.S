@@ -54,12 +54,12 @@ textend:
 data0:      .skip 4, 0x23
 data1:      .space 4, 0x42
 data2:      .skip 4
-datab:      .byte 1, 2, 3, 4
 dataw:      .word 1, 2, 3, 4
 datal:      .long 1, 2, 3, 4
+datab:      .byte 1, 2, 3  # test alignment / fill up of section
 dataend:
 
             .bss
 bss0:       .skip 4
-bss1:       .skip 2
+bss1:       .skip 2  # test alignment / fill up of section
 bssend:

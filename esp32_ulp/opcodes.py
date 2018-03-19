@@ -142,10 +142,10 @@ _adc = make_ins("""
 
 
 _st = make_ins("""
-    dreg : 2        # Register which contains data to store
-    sreg : 2        # Register which contains address in RTC memory (expressed in words)
+    sreg : 2        # Register which contains data to store
+    dreg : 2        # Register which contains address in RTC memory (expressed in words)
     unused1 : 6     # Unused
-    offset : 11     # Offset to add to sreg
+    offset : 11     # Offset to add to dreg
     unused2 : 4     # Unused
     sub_opcode : 3  # Sub opcode (SUB_OPCODE_ST)
     opcode : 4      # Opcode (OPCODE_ST)
@@ -378,9 +378,9 @@ def i_wait(cycles):
     return _delay.all
 
 
-def i_adc(reg_dest, adc_idx, pad_idx):
+def i_adc(reg_dest, adc_idx, mux):
     _adc.dreg = get_reg(reg_dest)
-    _adc.mux = get_imm(pad_idx) + 1
+    _adc.mux = get_imm(mux)
     _adc.sar_sel = get_imm(adc_idx)
     _adc.unused1 = 0
     _adc.cycles = 0
@@ -390,10 +390,10 @@ def i_adc(reg_dest, adc_idx, pad_idx):
 
 
 def i_st(reg_val, reg_addr, offset):
-    _st.dreg = get_reg(reg_val)
-    _st.sreg = get_reg(reg_addr)
+    _st.dreg = get_reg(reg_addr)
+    _st.sreg = get_reg(reg_val)
     _st.unused1 = 0
-    _st.offset = get_imm(offset)
+    _st.offset = get_imm(offset) // 4
     _st.unused2 = 0
     _st.sub_opcode = SUB_OPCODE_ST
     _st.opcode = OPCODE_ST
@@ -410,7 +410,7 @@ def i_ld(reg_dest, reg_addr, offset):
     _ld.dreg = get_reg(reg_dest)
     _ld.sreg = get_reg(reg_addr)
     _ld.unused1 = 0
-    _ld.offset = get_imm(offset)
+    _ld.offset = get_imm(offset) // 4
     _ld.unused2 = 0
     _ld.opcode = OPCODE_LD
     return _ld.all
@@ -423,7 +423,7 @@ def i_move(reg_dest, reg_imm_src):
     if src.type == REG:
         _alu_reg.dreg = dest
         _alu_reg.sreg = src.value
-        _alu_reg.treg = 0
+        _alu_reg.treg = 1  # XXX undocumented, this is the value binutils-esp32 uses
         _alu_reg.unused = 0
         _alu_reg.sel = ALU_SEL_MOV
         _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG

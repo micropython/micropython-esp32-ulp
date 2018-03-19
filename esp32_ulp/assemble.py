@@ -65,6 +65,18 @@ class Assembler:
             self.sections[s].append(value)
             self.offsets[s] += len(value)
 
+    def finalize_sections(self):
+        # make sure all sections have a bytelength dividable by 4,
+        # thus having all sections aligned at 32bit-word boundaries.
+        for s in list(self.sections.keys()) + [BSS, ]:
+            offs = self.offsets[s]
+            mod = offs % 4
+            if mod:
+                fill = int(0).to_bytes(4 - mod, 'little')
+                self.offsets[s] += len(fill)
+                if s is not BSS:
+                    self.sections[s].append(fill)
+
     def dump(self):
         print("Symbols:")
         for label, section_offset in sorted(self.symbols.items()):
@@ -144,4 +156,5 @@ class Assembler:
                         self.append_section(instruction.to_bytes(4, 'little'), TEXT)
                         continue
                 raise Exception('Unknown opcode or directive: %s' % opcode)
+        self.finalize_sections()
 
