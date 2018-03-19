@@ -27,3 +27,18 @@ Please be patient or contribute missing parts or fixes.
 
 See the issue tracker for known bugs and todo items.
 
+
+Links
+-----
+
+We are NOT (fully) compatible with "as", but we try to be close for the stuff
+that is actually implemented:
+
+https://sourceware.org/binutils/docs/as/index.html
+
+Espressif docs:
+
+https://esp-idf.readthedocs.io/en/latest/api-guides/ulp_instruction_set.html
+
+https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf
+
