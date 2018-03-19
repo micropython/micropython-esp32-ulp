@@ -7,7 +7,10 @@ from .link import make_binary
 def src_to_binary(src):
     assembler = Assembler()
     assembler.assemble(src)
-    assembler.dump()
+    addrs_syms = assembler.symbols.export()
+    for addr, sym in addrs_syms:
+        print('%04d %s' % (addr, sym))
+
     text, data, bss_len = assembler.fetch()
     return make_binary(text, data, bss_len)
 

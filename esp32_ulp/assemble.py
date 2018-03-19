@@ -50,7 +50,11 @@ class SymbolTable:
     def dump(self):
         for symbol, entry in self._symbols.items():
             print(symbol, entry)
-        
+
+    def export(self):
+        addrs_syms = [(self.resolve_absolute(entry), symbol) for symbol, entry in self._symbols.items()]
+        return sorted(addrs_syms)
+
     def to_abs_addr(self, section, offset):
         try:
             base = self._bases[section]
