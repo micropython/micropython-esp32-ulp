@@ -2,6 +2,8 @@
 
             .text
 
+            .set constant42, 42
+
 textstart:  ld r0, r1, 0    # a comment!
             st r0, r1, 0    // another comment!
             add r0, r1, r2
@@ -19,6 +21,7 @@ textstart:  ld r0, r1, 0    # a comment!
             move r0, r1
             move r0, 42
             move r0, textstart  # moves abs addr of textstart to r0
+            move r0, constant42
             stage_rst
             stage_inc 42
             stage_dec 23

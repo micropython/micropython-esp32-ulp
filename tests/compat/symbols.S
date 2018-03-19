@@ -1,7 +1,10 @@
             .text
 
+            .set constant42, 42
+
 start:      move r0, data0
             move r1, data1
+            move r2, constant42
 
             # count from 0 .. 42 in stage register
             stage_rst

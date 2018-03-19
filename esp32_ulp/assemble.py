@@ -215,6 +215,10 @@ class Assembler:
 
     d_space = d_skip
 
+    def d_set(self, symbol, expr):
+        value = int(expr)  # TODO: support more than just integers
+        self.symbols.set_sym(symbol, ABS, None, value)
+
     def append_data(self, wordlen, args):
         data = [int(arg).to_bytes(wordlen, 'little') for arg in args]
         self.append_section(b''.join(data))
