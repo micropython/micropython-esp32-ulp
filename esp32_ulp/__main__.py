@@ -4,9 +4,9 @@ from .assemble import Assembler
 from .link import make_binary
 
 
-def src_to_binary(lines):
+def src_to_binary(src):
     assembler = Assembler()
-    assembler.assemble(lines)
+    assembler.assemble(src)
     assembler.dump()
     text, data, bss_len = assembler.fetch()
     return make_binary(text, data, bss_len)
@@ -14,9 +14,9 @@ def src_to_binary(lines):
 
 def main(fn):
     with open(fn) as f:
-        lines = f.readlines()
+        src = f.read()
 
-    binary = src_to_binary(lines)
+    binary = src_to_binary(src)
 
     if fn.endswith('.s') or fn.endswith('.S'):
         fn = fn[:-2]
