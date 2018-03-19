@@ -1,4 +1,5 @@
 from esp32_ulp.assemble import Assembler, TEXT, DATA, BSS, REL, ABS
+from esp32_ulp.assemble import SymbolTable
 
 src = """\
 
@@ -40,7 +41,55 @@ def test_assemble():
     assert a.offsets[BSS] == 0
 
 
+def test_symbols():
+    st = SymbolTable({}, {})
+    for entry in [
+        ('rel_t4', REL, TEXT, 4),
+        ('abs_t4', ABS, TEXT, 4),
+        ('rel_d4', REL, DATA, 4),
+        ('abs_d4', ABS, DATA, 4),
+    ]:
+        st.set_sym(*entry)
+    # PASS 1 ========================================================
+    st.set_pass(1)
+    assert st.has_sym('abs_t4')
+    assert st.get_sym('abs_t4') == (ABS, TEXT, 4)
+    assert not st.has_sym('notexist')
+    assert st.get_sym('notexist') == (REL, TEXT, 0)  # pass1 -> dummy
+    assert st.resolve_absolute('abs_t4') == 4
+    assert st.resolve_absolute('abs_d4') == 4
+    assert st.resolve_absolute('rel_t4') == 4
+    assert st.resolve_absolute('rel_d4') == 4
+    st.set_from(TEXT, 8)
+    assert st.resolve_relative('abs_t4') == -4
+    assert st.resolve_relative('abs_d4') == -4
+    assert st.resolve_relative('rel_t4') == -4
+    assert st.resolve_relative('rel_d4') == -4
+    # PASS 2 ========================================================
+    st.set_bases({TEXT: 100, DATA: 200})
+    st.set_pass(2)
+    assert st.has_sym('abs_t4')
+    assert st.get_sym('abs_t4') == (ABS, TEXT, 4)
+    assert not st.has_sym('notexist')
+    try:
+        st.get_sym('notexist')  # pass2 -> raises
+    except KeyError:
+        raised = True
+    else:
+        raised = False
+    assert raised
+    assert st.resolve_absolute('abs_t4') == 4
+    assert st.resolve_absolute('abs_d4') == 4
+    assert st.resolve_absolute('rel_t4') == 100 + 4
+    assert st.resolve_absolute('rel_d4') == 200 + 4
+    st.set_from(TEXT, 8)
+    assert st.resolve_relative('abs_t4') == 4 - 108
+    assert st.resolve_relative('abs_d4') == 4 - 108
+    assert st.resolve_relative('rel_t4') == 104 - 108
+    assert st.resolve_relative('rel_d4') == 204 - 108
+
+
 test_parse_line()
 test_parse()
 test_assemble()
-
+test_symbols()
