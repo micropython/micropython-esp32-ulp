@@ -29,9 +29,9 @@ for src_file in $(ls -1 compat/*.S); do
         echo "py-esp32-ulp log:"
         cat $log_file
         echo "py-esp32-ulp output:"
-        xxd -e $ulp_file
+        xxd $ulp_file
         echo "binutils output:"
-        xxd -e $bin_file
+        xxd $bin_file
         exit 1
     else
         echo -e "\tBuild outputs match"

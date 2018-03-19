@@ -2,6 +2,8 @@
 
             .text
 
+            .set constant42, 42
+
 textstart:  ld r0, r1, 0    # a comment!
             st r0, r1, 0    // another comment!
             add r0, r1, r2
@@ -18,14 +20,17 @@ textstart:  ld r0, r1, 0    # a comment!
             rsh r0, r1, 42
             move r0, r1
             move r0, 42
+            move r0, textstart  # moves abs addr of textstart to r0
+            move r0, constant42
             stage_rst
             stage_inc 42
             stage_dec 23
 
-            # jumping to labels not supported yet
-            jumpr -1, 42, lt
-            jumpr +1, 23, GE
-            jump 0
+rel_b:      jumpr -1, 42, lt
+            jumpr rel_b, 42, LT
+            jumpr rel_f, 23, ge
+rel_f:      jumpr +1, 23, GE
+            jump textstart
             jump 0, eq
             jump 0, OV
             jump r0
