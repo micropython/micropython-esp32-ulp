@@ -202,18 +202,29 @@ class Assembler:
     def d_bss(self):
         self.section = BSS
 
+    def fill(self, section, amount, fill_byte):
+        if fill_byte is not None and section is BSS:
+            raise ValueError('fill in bss section not allowed')
+        if section is TEXT:  # TODO: text section should be filled with NOPs
+            raise ValueError('fill/skip/align in text section not supported')
+        fill = int(fill_byte or 0).to_bytes(1, 'little') * amount
+        self.offsets[section] += len(fill)
+        if section is not BSS:
+            self.sections[section].append(fill)
+
     def d_skip(self, amount, fill=None):
-        s = self.section
         amount = int(amount)
-        if fill is not None and s is BSS:
-            raise ValueError('fill not allowed in section %s' % s)
-        if s is BSS:
-            self.append_section(amount)
-        else:
-            fill = int(fill or 0).to_bytes(1, 'little') * amount
-            self.append_section(fill)
+        self.fill(self.section, amount, fill)
 
     d_space = d_skip
+
+    def d_align(self, align=4, fill=None):
+        align = int(align)
+        offs = self.offsets[self.section]
+        mod = offs % align
+        if mod:
+            amount = align - mod
+            self.fill(self.section, amount, fill)
 
     def d_set(self, symbol, expr):
         value = int(expr)  # TODO: support more than just integers
