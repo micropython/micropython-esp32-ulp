@@ -1,4 +1,4 @@
-from esp32_ulp.assemble import Assembler, TEXT, DATA, BSS
+from esp32_ulp.assemble import Assembler, TEXT, DATA, BSS, REL, ABS
 
 src = """\
 
@@ -31,9 +31,10 @@ def test_parse():
 def test_assemble():
     a = Assembler()
     a.assemble(src)
-    assert {'start', 'end'} <= set(a.symbols)
-    assert a.symbols['start'] == (TEXT, 0)
-    assert a.symbols['end'] == (TEXT, 4)
+    assert a.symbols.has_sym('start')
+    assert a.symbols.has_sym('end')
+    assert a.symbols.get_sym('start') == (REL, TEXT, 0)
+    assert a.symbols.get_sym('end') == (REL, TEXT, 4)
     assert len(b''.join(a.sections[TEXT])) == 16  # 4 instructions * 4B
     assert len(a.sections[DATA]) == 0
     assert a.offsets[BSS] == 0

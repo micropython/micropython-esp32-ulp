@@ -7,6 +7,9 @@ from uctypes import struct, addressof, LITTLE_ENDIAN, UINT32, BFUINT32, BF_POS, 
 
 from .soc import *
 
+# XXX dirty hack: use a global for the symbol table
+symbols = None
+
 # Opcodes, Sub-Opcodes, Modes, ...
 
 OPCODE_WR_REG = 1
@@ -250,7 +253,7 @@ _ld = make_ins("""
 
 # assembler opcode definitions
 
-REG, IMM, COND = 0, 1, 2
+REG, IMM, COND, SYM = 0, 1, 2, 3
 ARG = namedtuple('ARG', ('type', 'value', 'raw'))
 
 
@@ -276,25 +279,44 @@ def arg_qualify(arg):
         return ARG(IMM, int(arg), arg)
     except ValueError:
         pass
-    raise TypeError('arg_qualify: unsupported arg type: %s' % arg)
+    entry = symbols.get_sym(arg)
+    return ARG(SYM, entry, arg)
 
 
 def get_reg(arg):
-    arg = arg_qualify(arg)
+    if isinstance(arg, str):
+        arg = arg_qualify(arg)
     if arg.type == REG:
         return arg.value
     raise TypeError('wanted: register, got: %s' % arg.raw)
 
 
 def get_imm(arg):
-    arg = arg_qualify(arg)
+    if isinstance(arg, str):
+        arg = arg_qualify(arg)
     if arg.type == IMM:
         return arg.value
+    if arg.type == SYM:
+        return symbols.resolve_absolute(arg.value)
+    raise TypeError('wanted: immediate, got: %s' % arg.raw)
+
+
+get_abs = get_imm
+
+
+def get_rel(arg):
+    if isinstance(arg, str):
+        arg = arg_qualify(arg)
+    if arg.type == IMM:
+        return arg.value
+    if arg.type == SYM:
+        return symbols.resolve_relative(arg.value)
     raise TypeError('wanted: immediate, got: %s' % arg.raw)
 
 
 def get_cond(arg):
-    arg = arg_qualify(arg)
+    if isinstance(arg, str):
+        arg = arg_qualify(arg)
     if arg.type == COND:
         return arg.value
     raise TypeError('wanted: condition, got: %s' % arg.raw)
@@ -429,10 +451,10 @@ def i_move(reg_dest, reg_imm_src):
         _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
         _alu_reg.opcode = OPCODE_ALU
         return _alu_reg.all
-    if src.type == IMM:
+    if src.type == IMM or src.type == SYM:
         _alu_imm.dreg = dest
         _alu_imm.sreg = 0
-        _alu_imm.imm = src.value
+        _alu_imm.imm = get_abs(src)
         _alu_imm.unused = 0
         _alu_imm.sel = ALU_SEL_MOV
         _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
@@ -457,10 +479,10 @@ def _alu3(reg_dest, reg_src1, reg_imm_src2, alu_sel):
         _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG
         _alu_reg.opcode = OPCODE_ALU
         return _alu_reg.all
-    if src2.type == IMM:
+    if src2.type == IMM or src2.type == SYM:
         _alu_imm.dreg = dest
         _alu_imm.sreg = src1
-        _alu_imm.imm = src2.value
+        _alu_imm.imm = get_abs(src2)
         _alu_imm.unused = 0
         _alu_imm.sel = alu_sel
         _alu_imm.sub_opcode = SUB_OPCODE_ALU_IMM
@@ -546,9 +568,9 @@ def i_jump(target, condition='--'):
         jump_type = BX_JUMP_TYPE_DIRECT
     else:
         raise ValueError("invalid flags condition")
-    if target.type == IMM:
+    if target.type == IMM or target.type == SYM:
         _bx.dreg = 0
-        _bx.addr = target.value
+        _bx.addr = get_abs(target)
         _bx.unused = 0
         _bx.reg = 0
         _bx.type = jump_type
@@ -568,7 +590,7 @@ def i_jump(target, condition='--'):
 
 
 def i_jumpr(offset, threshold, condition):
-    offset = get_imm(offset)
+    offset = get_rel(offset)
     threshold = get_imm(threshold)
     condition = get_cond(condition)
     if condition == 'lt':
@@ -587,7 +609,7 @@ def i_jumpr(offset, threshold, condition):
 
 
 def i_jumps(offset, threshold, condition):
-    offset = get_imm(offset)
+    offset = get_rel(offset)
     threshold = get_imm(threshold)
     condition = get_cond(condition)
     if condition == 'lt':
