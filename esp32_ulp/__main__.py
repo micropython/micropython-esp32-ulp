@@ -1,12 +1,16 @@
 import sys
 
+from .util import garbage_collect
+
 from .assemble import Assembler
 from .link import make_binary
+garbage_collect('after import')
 
 
 def src_to_binary(src):
     assembler = Assembler()
     assembler.assemble(src)
+    garbage_collect('before symbols export')
     addrs_syms = assembler.symbols.export()
     for addr, sym in addrs_syms:
         print('%04d %s' % (addr, sym))

@@ -1,5 +1,6 @@
 from esp32_ulp.assemble import Assembler, TEXT, DATA, BSS, REL, ABS
 from esp32_ulp.assemble import SymbolTable
+from esp32_ulp.nocomment import remove_comments
 
 src = """\
 
@@ -25,7 +26,8 @@ def test_parse_line():
 
 def test_parse():
     a = Assembler()
-    result = a.parse(src)
+    lines = remove_comments(src)
+    result = a.parse(lines)
     assert None not in result
 
 
