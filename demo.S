@@ -48,6 +48,8 @@ rel_f:      jumpr +1, 23, GE
 
             adc r0, 0, 1
 
+            tsens r0, 42
+
             nop
             wait 1000
             wake

@@ -61,6 +61,8 @@ OPCODE_END = 9
 SUB_OPCODE_END = 0
 SUB_OPCODE_SLEEP = 1
 
+OPCODE_TSENS = 10
+
 OPCODE_HALT = 11
 
 OPCODE_LD = 13
@@ -130,6 +132,14 @@ _delay = make_ins("""
     cycles : 16     # Number of cycles to sleep
     unused : 12     # Unused
     opcode : 4      # Opcode (OPCODE_DELAY)
+""")
+
+
+_tsens = make_ins("""
+    dreg : 2        # Register where to store TSENS result
+    delay : 14      # Number of cycles needed to obtain a measurement
+    unused : 12     # Unused
+    opcode : 4      # Opcode (OPCODE_TSENS)
 """)
 
 
@@ -398,6 +408,14 @@ def i_wait(cycles):
     _delay.unused = 0
     _delay.opcode = OPCODE_DELAY
     return _delay.all
+
+
+def i_tsens(reg_dest, delay):
+    _tsens.dreg = get_reg(reg_dest)
+    _tsens.delay = get_imm(delay)
+    _tsens.unused = 0
+    _tsens.opcode = OPCODE_TSENS
+    return _tsens.all
 
 
 def i_adc(reg_dest, adc_idx, mux):
