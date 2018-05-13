@@ -4,6 +4,7 @@ ESP32 ULP Co-Processor Assembler
 
 from . import opcodes
 from .nocomment import remove_comments
+from .util import garbage_collect
 
 TEXT, DATA, BSS = 'text', 'data', 'bss'
 
@@ -139,8 +140,7 @@ class Assembler:
         return label, opcode, args
 
 
-    def parse(self, text):
-        lines = remove_comments(text)
+    def parse(self, lines):
         parsed = [self.parse_line(line) for line in lines]
         return [p for p in parsed if p is not None]
 
@@ -271,10 +271,13 @@ class Assembler:
                 raise Exception('Unknown opcode or directive: %s' % opcode)
         self.finalize_sections()
 
-    def assemble(self, lines):
+    def assemble(self, text):
+        lines = remove_comments(text)
         self.init(1)  # pass 1 is only to get the symbol table right
         self.assembler_pass(lines)
         self.symbols.set_bases(self.compute_bases())
+        garbage_collect('before pass2')
         self.init(2)  # now we know all symbols and bases, do the real assembler pass, pass 2
         self.assembler_pass(lines)
+        garbage_collect('after pass2')
 
