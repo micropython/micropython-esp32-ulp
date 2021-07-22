@@ -3,6 +3,7 @@ from esp32_ulp.assemble import SymbolTable
 from esp32_ulp.nocomment import remove_comments
 
 src = """\
+        .set const, 123
 
 start:  wait 42
         ld r0, r1, 0
@@ -14,14 +15,14 @@ end:
 
 def test_parse_line():
     a = Assembler()
-    lines = src.splitlines()
-    # note: line number = index + 1
-    assert a.parse_line(lines[0]) == None
-    assert a.parse_line(lines[1]) == ('start', 'wait', ('42', ))
-    assert a.parse_line(lines[2]) == (None, 'ld', ('r0', 'r1', '0', ))
-    assert a.parse_line(lines[3]) == (None, 'st', ('r0', 'r1', '0', ))
-    assert a.parse_line(lines[4]) == (None, 'halt', ())
-    assert a.parse_line(lines[5]) == ('end', None, ())
+    lines = iter(src.splitlines())
+    assert a.parse_line(next(lines)) == (None, '.set', ('const', '123', ))
+    assert a.parse_line(next(lines)) == None
+    assert a.parse_line(next(lines)) == ('start', 'wait', ('42', ))
+    assert a.parse_line(next(lines)) == (None, 'ld', ('r0', 'r1', '0', ))
+    assert a.parse_line(next(lines)) == (None, 'st', ('r0', 'r1', '0', ))
+    assert a.parse_line(next(lines)) == (None, 'halt', ())
+    assert a.parse_line(next(lines)) == ('end', None, ())
 
 
 def test_parse():
@@ -34,8 +35,10 @@ def test_parse():
 def test_assemble():
     a = Assembler()
     a.assemble(src)
+    assert a.symbols.has_sym('const')
     assert a.symbols.has_sym('start')
     assert a.symbols.has_sym('end')
+    assert a.symbols.get_sym('const') == (ABS, None, 123)
     assert a.symbols.get_sym('start') == (REL, TEXT, 0)
     assert a.symbols.get_sym('end') == (REL, TEXT, 4)
     assert len(b''.join(a.sections[TEXT])) == 16  # 4 instructions * 4B
@@ -50,6 +53,7 @@ def test_symbols():
         ('abs_t4', ABS, TEXT, 4),
         ('rel_d4', REL, DATA, 4),
         ('abs_d4', ABS, DATA, 4),
+        ('const', ABS, None, 123),
     ]:
         st.set_sym(*entry)
     # PASS 1 ========================================================
@@ -62,11 +66,13 @@ def test_symbols():
     assert st.resolve_absolute('abs_d4') == 4
     assert st.resolve_absolute('rel_t4') == 4
     assert st.resolve_absolute('rel_d4') == 4
+    assert st.resolve_absolute('const') == 123
     st.set_from(TEXT, 8)
     assert st.resolve_relative('abs_t4') == -4
     assert st.resolve_relative('abs_d4') == -4
     assert st.resolve_relative('rel_t4') == -4
     assert st.resolve_relative('rel_d4') == -4
+    assert st.resolve_absolute('const') == 123
     # PASS 2 ========================================================
     st.set_bases({TEXT: 100, DATA: 200})
     st.set_pass(2)
@@ -84,11 +90,13 @@ def test_symbols():
     assert st.resolve_absolute('abs_d4') == 4
     assert st.resolve_absolute('rel_t4') == 100 + 4
     assert st.resolve_absolute('rel_d4') == 200 + 4
+    assert st.resolve_absolute('const') == 123
     st.set_from(TEXT, 8)
     assert st.resolve_relative('abs_t4') == 4 - 108
     assert st.resolve_relative('abs_d4') == 4 - 108
     assert st.resolve_relative('rel_t4') == 104 - 108
     assert st.resolve_relative('rel_d4') == 204 - 108
+    assert st.resolve_absolute('const') == 123
 
 
 test_parse_line()
