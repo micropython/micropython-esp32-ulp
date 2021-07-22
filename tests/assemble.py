@@ -121,6 +121,20 @@ def test_assemble_global():
     assert exported_symbols == [(0, 'counter'), (1, 'internal'), (2, 'entry')]
 
 
+def test_assemble_uppercase_opcode():
+    a = Assembler()
+    try:
+        a.assemble("  WAIT 42")
+    except ValueError as e:
+        if str(e) != "Unknown opcode or directive: WAIT":
+            # re-raise failures we didn't expect
+            raise
+        raised = True
+    else:
+        raised = False
+    assert not raised
+
+
 def test_symbols():
     st = SymbolTable({}, {}, {})
     for entry in [
@@ -180,4 +194,5 @@ test_assemble()
 test_assemble_bss()
 test_assemble_bss_with_value()
 test_assemble_global()
+test_assemble_uppercase_opcode()
 test_symbols()

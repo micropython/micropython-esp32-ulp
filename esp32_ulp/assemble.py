@@ -275,12 +275,12 @@ class Assembler:
                         continue
                 else:
                     # machine instruction
-                    func = getattr(opcodes, 'i_' + opcode, None)
+                    func = getattr(opcodes, 'i_' + opcode.lower(), None)
                     if func is not None:
                         instruction = func(*args)
                         self.append_section(instruction.to_bytes(4, 'little'), TEXT)
                         continue
-                raise Exception('Unknown opcode or directive: %s' % opcode)
+                raise ValueError('Unknown opcode or directive: %s' % opcode)
         self.finalize_sections()
 
     def assemble(self, text):
