@@ -12,9 +12,10 @@ REL, ABS = 0, 1
 
 
 class SymbolTable:
-    def __init__(self, symbols, bases):
+    def __init__(self, symbols, bases, globals):
         self._symbols = symbols
         self._bases = bases
+        self._globals = globals
         self._pass = None
 
     def set_pass(self, _pass):
@@ -53,7 +54,9 @@ class SymbolTable:
             print(symbol, entry)
 
     def export(self):
-        addrs_syms = [(self.resolve_absolute(entry), symbol) for symbol, entry in self._symbols.items()]
+        addrs_syms = [(self.resolve_absolute(entry), symbol)
+                      for symbol, entry in self._symbols.items()
+                      if symbol in self._globals]
         return sorted(addrs_syms)
 
     def to_abs_addr(self, section, offset):
@@ -93,11 +96,15 @@ class SymbolTable:
         from_addr = self.to_abs_addr(self._from_section, self._from_offset)
         return sym_addr - from_addr
 
+    def set_global(self, symbol):
+        self._globals[symbol] = True
+        pass
+
 
 class Assembler:
 
-    def __init__(self, symbols=None, bases=None):
-        self.symbols = SymbolTable(symbols or {}, bases or {})
+    def __init__(self, symbols=None, bases=None, globls=None):
+        self.symbols = SymbolTable(symbols or {}, bases or {}, globls or {})
         opcodes.symbols = self.symbols  # XXX dirty hack
 
     def init(self, a_pass):
@@ -235,6 +242,9 @@ class Assembler:
     def d_set(self, symbol, expr):
         value = int(expr)  # TODO: support more than just integers
         self.symbols.set_sym(symbol, ABS, None, value)
+
+    def d_global(self, symbol):
+        self.symbols.set_global(symbol)
 
     def append_data(self, wordlen, args):
         data = [int(arg).to_bytes(wordlen, 'little') for arg in args]

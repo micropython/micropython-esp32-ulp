@@ -22,6 +22,23 @@ label:
 """
 
 
+src_global = """\
+
+  .global counter
+counter:
+  .long 0
+
+internal:
+  .long 0
+
+  .text
+  .global entry
+entry:
+  wait 42
+  halt
+"""
+
+
 def test_parse_line():
     a = Assembler()
     lines = iter(src.splitlines())
@@ -90,8 +107,19 @@ def test_assemble_bss_with_value():
     assert raised
 
 
+def test_assemble_global():
+    a = Assembler()
+    a.assemble(src_global)
+    assert a.symbols.has_sym('counter')
+    assert a.symbols.has_sym('internal')
+    assert a.symbols.has_sym('entry')
+
+    exported_symbols = a.symbols.export()
+    assert exported_symbols == [(0, 'counter'), (2, 'entry')]  # internal not exported
+
+
 def test_symbols():
-    st = SymbolTable({}, {})
+    st = SymbolTable({}, {}, {})
     for entry in [
         ('rel_t4', REL, TEXT, 4),
         ('abs_t4', ABS, TEXT, 4),
@@ -148,4 +176,5 @@ test_parse()
 test_assemble()
 test_assemble_bss()
 test_assemble_bss_with_value()
+test_assemble_global()
 test_symbols()
