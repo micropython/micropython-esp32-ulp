@@ -53,10 +53,10 @@ class SymbolTable:
         for symbol, entry in self._symbols.items():
             print(symbol, entry)
 
-    def export(self):
+    def export(self, incl_non_globals=False):
         addrs_syms = [(self.resolve_absolute(entry), symbol)
                       for symbol, entry in self._symbols.items()
-                      if symbol in self._globals]
+                      if incl_non_globals or symbol in self._globals]
         return sorted(addrs_syms)
 
     def to_abs_addr(self, section, offset):

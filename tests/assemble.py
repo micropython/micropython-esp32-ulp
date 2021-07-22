@@ -117,6 +117,9 @@ def test_assemble_global():
     exported_symbols = a.symbols.export()
     assert exported_symbols == [(0, 'counter'), (2, 'entry')]  # internal not exported
 
+    exported_symbols = a.symbols.export(True)  # include non-global symbols
+    assert exported_symbols == [(0, 'counter'), (1, 'internal'), (2, 'entry')]
+
 
 def test_symbols():
     st = SymbolTable({}, {}, {})
