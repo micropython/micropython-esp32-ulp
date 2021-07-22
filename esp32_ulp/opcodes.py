@@ -112,7 +112,7 @@ _rd_reg = make_ins("""
     unused : 8      # Unused
     low : 5         # Low bit
     high : 5        # High bit
-    opcode : 4      # Opcode (OPCODE_WR_REG)
+    opcode : 4      # Opcode (OPCODE_RD_REG)
 """)
 
 
