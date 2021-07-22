@@ -150,8 +150,8 @@ class Assembler:
         if expected_section is not None and s is not expected_section:
             raise TypeError('only allowed in %s section' % expected_section)
         if s is BSS:
-            # just increase BSS size by value
-            self.offsets[s] += value
+            # just increase BSS size by length of value
+            self.offsets[s] += len(value)
         else:
             self.sections[s].append(value)
             self.offsets[s] += len(value)

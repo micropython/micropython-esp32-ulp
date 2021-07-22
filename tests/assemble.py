@@ -14,6 +14,13 @@ end:
 .data
 """
 
+src_bss = """\
+  .bss
+
+label:
+  .long 0
+"""
+
 
 def test_parse_line():
     a = Assembler()
@@ -50,6 +57,18 @@ def test_assemble():
     assert len(b''.join(a.sections[TEXT])) == 16  # 4 instructions * 4B
     assert len(a.sections[DATA]) == 0
     assert a.offsets[BSS] == 0
+
+
+def test_assemble_bss():
+    a = Assembler()
+    try:
+        a.assemble(src_bss)
+    except TypeError:
+        raised = True
+    else:
+        raised = False
+    assert not raised
+    assert a.offsets[BSS] == 4  # 1 word * 4B
 
 
 def test_symbols():
@@ -108,4 +127,5 @@ def test_symbols():
 test_parse_line()
 test_parse()
 test_assemble()
+test_assemble_bss()
 test_symbols()
