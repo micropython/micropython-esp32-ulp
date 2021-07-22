@@ -32,7 +32,7 @@ class SymbolTable:
     def set_sym(self, symbol, stype, section, value):
         entry = (stype, section, value)
         if symbol in self._symbols and entry != self._symbols[symbol]:
-            raise Exception('redefining symbol %s with different value %r -> %r.' % (label, self._symbols[symbol], entry))
+            raise Exception('redefining symbol %s with different value %r -> %r.' % (symbol, self._symbols[symbol], entry))
         self._symbols[symbol] = entry
 
     def has_sym(self, symbol):
