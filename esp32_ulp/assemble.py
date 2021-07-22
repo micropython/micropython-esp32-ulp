@@ -118,7 +118,7 @@ class Assembler:
         """
         if not line:
             return
-        has_label = line[0] not in '\t '
+        has_label = line[0] not in '\t .'
         if has_label:
             label_line = line.split(None, 1)
             if len(label_line) == 2:

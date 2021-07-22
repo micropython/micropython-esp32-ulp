@@ -4,12 +4,14 @@ from esp32_ulp.nocomment import remove_comments
 
 src = """\
         .set const, 123
+.set const_left, 976
 
 start:  wait 42
         ld r0, r1, 0
         st  r0,  r1,0
         halt
 end:
+.data
 """
 
 
@@ -17,12 +19,14 @@ def test_parse_line():
     a = Assembler()
     lines = iter(src.splitlines())
     assert a.parse_line(next(lines)) == (None, '.set', ('const', '123', ))
+    assert a.parse_line(next(lines)) == (None, '.set', ('const_left', '976', ))
     assert a.parse_line(next(lines)) == None
     assert a.parse_line(next(lines)) == ('start', 'wait', ('42', ))
     assert a.parse_line(next(lines)) == (None, 'ld', ('r0', 'r1', '0', ))
     assert a.parse_line(next(lines)) == (None, 'st', ('r0', 'r1', '0', ))
     assert a.parse_line(next(lines)) == (None, 'halt', ())
     assert a.parse_line(next(lines)) == ('end', None, ())
+    assert a.parse_line(next(lines)) == (None, '.data', ())  # test left-aligned directive is not treated as label
 
 
 def test_parse():
@@ -36,9 +40,11 @@ def test_assemble():
     a = Assembler()
     a.assemble(src)
     assert a.symbols.has_sym('const')
+    assert a.symbols.has_sym('const_left')
     assert a.symbols.has_sym('start')
     assert a.symbols.has_sym('end')
     assert a.symbols.get_sym('const') == (ABS, None, 123)
+    assert a.symbols.get_sym('const_left') == (ABS, None, 976)
     assert a.symbols.get_sym('start') == (REL, TEXT, 0)
     assert a.symbols.get_sym('end') == (REL, TEXT, 4)
     assert len(b''.join(a.sections[TEXT])) == 16  # 4 instructions * 4B
