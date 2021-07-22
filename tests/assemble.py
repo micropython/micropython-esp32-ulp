@@ -135,6 +135,28 @@ def test_assemble_uppercase_opcode():
     assert not raised
 
 
+def test_assemble_evalulate_expressions():
+    src_w_expr = """\
+    .set shft, 2
+    .set loops, (1 << shft)
+
+entry:
+    move r0, 1+1
+    move r1, loops
+    move r2, (shft + 10) * 2
+    move r3, entry << 2
+"""
+    a = Assembler()
+    a.assemble(src_w_expr)
+
+    assert a.symbols.has_sym('shft')
+    assert a.symbols.has_sym('loops')
+    assert a.symbols.has_sym('entry')
+    assert a.symbols.get_sym('shft') == (ABS, None, 2)
+    assert a.symbols.get_sym('loops') == (ABS, None, 4)
+    assert a.symbols.get_sym('entry') == (REL, TEXT, 0)
+
+
 def test_symbols():
     st = SymbolTable({}, {}, {})
     for entry in [
@@ -195,4 +217,5 @@ test_assemble_bss()
 test_assemble_bss_with_value()
 test_assemble_global()
 test_assemble_uppercase_opcode()
+test_assemble_evalulate_expressions()
 test_symbols()

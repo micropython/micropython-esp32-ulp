@@ -240,7 +240,7 @@ class Assembler:
             self.fill(self.section, amount, fill)
 
     def d_set(self, symbol, expr):
-        value = int(expr)  # TODO: support more than just integers
+        value = int(opcodes.eval_arg(expr))  # TODO: support more than just integers
         self.symbols.set_sym(symbol, ABS, None, value)
 
     def d_global(self, symbol):

@@ -6,6 +6,7 @@ from ucollections import namedtuple
 from uctypes import struct, addressof, LITTLE_ENDIAN, UINT32, BFUINT32, BF_POS, BF_LEN
 
 from .soc import *
+from .util import split_tokens, validate_expression
 
 # XXX dirty hack: use a global for the symbol table
 symbols = None
@@ -267,6 +268,20 @@ REG, IMM, COND, SYM = 0, 1, 2, 3
 ARG = namedtuple('ARG', ('type', 'value', 'raw'))
 
 
+def eval_arg(arg):
+    parts = []
+    for token in split_tokens(arg):
+        if symbols.has_sym(token):
+            _, _, sym_value = symbols.get_sym(token)
+            parts.append(str(sym_value))
+        else:
+            parts.append(token)
+    parts = "".join(parts)
+    if not validate_expression(parts):
+        raise ValueError('Unsupported expression: %s' % parts)
+    return eval(parts)
+
+
 def arg_qualify(arg):
     """
     look at arg and qualify its type:
@@ -289,8 +304,12 @@ def arg_qualify(arg):
         return ARG(IMM, int(arg), arg)
     except ValueError:
         pass
-    entry = symbols.get_sym(arg)
-    return ARG(SYM, entry, arg)
+    try:
+        entry = symbols.get_sym(arg)
+        return ARG(SYM, entry, arg)
+    except KeyError:
+        pass
+    return ARG(IMM, int(eval_arg(arg)), arg)
 
 
 def get_reg(arg):
