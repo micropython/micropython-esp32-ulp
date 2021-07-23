@@ -2,6 +2,7 @@ import sys
 
 from .util import garbage_collect
 
+from .preprocess import preprocess
 from .assemble import Assembler
 from .link import make_binary
 garbage_collect('after import')
@@ -23,6 +24,7 @@ def main(fn):
     with open(fn) as f:
         src = f.read()
 
+    src = preprocess(src)
     binary = src_to_binary(src)
 
     if fn.endswith('.s') or fn.endswith('.S'):
