@@ -277,7 +277,7 @@ class Assembler:
                     # machine instruction
                     func = getattr(opcodes, 'i_' + opcode.lower(), None)
                     if func is not None:
-                        instruction = func(*args)
+                        instruction = 0 if self.a_pass == 1 else func(*args)
                         self.append_section(instruction.to_bytes(4, 'little'), TEXT)
                         continue
                 raise ValueError('Unknown opcode or directive: %s' % opcode)

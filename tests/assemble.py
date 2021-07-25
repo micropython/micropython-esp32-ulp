@@ -175,6 +175,19 @@ def test_assemble_optional_comment_removal():
     assert raised
 
 
+def test_assemble_test_regressions_from_evaluation():
+    line = " reg_wr (0x3ff48400 + 0x10), 1, 1, 1"
+
+    a = Assembler()
+    raised = False
+    try:
+        a.assemble(line)
+    except ValueError as e:
+        if str(e) == 'invalid register base':  # ensure we trapped the expected Exception
+            raised = True
+    assert not raised
+
+
 def test_symbols():
     st = SymbolTable({}, {}, {})
     for entry in [
@@ -237,4 +250,5 @@ test_assemble_global()
 test_assemble_uppercase_opcode()
 test_assemble_evalulate_expressions()
 test_assemble_optional_comment_removal()
+test_assemble_test_regressions_from_evaluation()
 test_symbols()
