@@ -2,6 +2,34 @@ from . import nocomment
 from .util import split_tokens
 
 
+class RTC_Macros:
+    @staticmethod
+    def READ_RTC_REG(rtc_reg, low_bit, bit_width):
+        return '\treg_rd ' + ', '.join((
+            rtc_reg,
+            '%s + %s - 1' % (low_bit, bit_width),
+            low_bit
+        ))
+
+    @staticmethod
+    def WRITE_RTC_REG(rtc_reg, low_bit, bit_width, value):
+        args = (
+            rtc_reg,
+            '%s + %s - 1' % (low_bit, bit_width),
+            low_bit,
+            value
+        )
+        return '\treg_wr ' + ', '.join(args)
+
+    @staticmethod
+    def READ_RTC_FIELD(rtc_reg, low_bit):
+        return RTC_Macros.READ_RTC_REG(rtc_reg, low_bit, 1)
+
+    @staticmethod
+    def WRITE_RTC_FIELD(rtc_reg, low_bit, value):
+        return RTC_Macros.WRITE_RTC_REG(rtc_reg, low_bit, 1, value + ' & 1')
+
+
 class Preprocessor:
     def __init__(self):
         self._defines = {}
@@ -42,12 +70,34 @@ class Preprocessor:
 
         return line
 
+    def expand_rtc_macros(self, line):
+        clean_line = line.strip()
+        if not clean_line:
+            return line
+
+        macro = clean_line.split('(', 1)
+        if len(macro) != 2:
+            return line
+
+        macro_name, macro_args = macro
+
+        macro_fn = getattr(RTC_Macros, macro_name, None)
+        if macro_fn is None:
+            return line
+
+        macro_args, _ = macro_args.rsplit(')', 1)  # trim away right bracket. safe as comments already stripped
+        macro_args = macro_args.split(',')  # not safe when args contain ',' but we should not have those
+        macro_args = [x.strip() for x in macro_args]
+
+        return macro_fn(*macro_args)
+
     def preprocess(self, content):
         self.parse_defines(content)
         lines = nocomment.remove_comments(content)
         result = []
         for line in lines:
             line = self.expand_defines(line)
+            line = self.expand_rtc_macros(line)
             result.append(line)
         result = "\n".join(result)
         return result

@@ -169,6 +169,18 @@ def preprocess_should_replace_defines_used_in_defines():
     assert "move r1, (0x1234 << 4)" in p.preprocess(lines)
 
 
+@test
+def test_expand_rtc_macros():
+    p = Preprocessor()
+
+    assert p.expand_rtc_macros("") == ""
+    assert p.expand_rtc_macros("abc") == "abc"
+    assert p.expand_rtc_macros("WRITE_RTC_REG(1, 2, 3, 4)") == "\treg_wr 1, 2 + 3 - 1, 2, 4"
+    assert p.expand_rtc_macros("READ_RTC_REG(1, 2, 3)") == "\treg_rd 1, 2 + 3 - 1, 2"
+    assert p.expand_rtc_macros("WRITE_RTC_FIELD(1, 2, 3)") == "\treg_wr 1, 2 + 1 - 1, 2, 3 & 1"
+    assert p.expand_rtc_macros("READ_RTC_FIELD(1, 2)") == "\treg_rd 1, 2 + 1 - 1, 2"
+
+
 if __name__ == '__main__':
     # run all methods marked with @test
     for t in tests:
