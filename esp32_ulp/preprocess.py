@@ -32,29 +32,31 @@ class RTC_Macros:
 
 class Preprocessor:
     def __init__(self):
+        self._defines_db = None
         self._defines = {}
 
+    def parse_define_line(self, line):
+        line = line.strip()
+        if not line.startswith("#define"):
+            # skip lines not containing #define
+            return {}
+        line = line[8:].strip()  # remove #define
+        parts = line.split(None, 1)
+        if len(parts) != 2:
+            # skip defines without value
+            return {}
+        identifier, value = parts
+        tmp = identifier.split('(', 1)
+        if len(tmp) == 2:
+            # skip parameterised defines (macros)
+            return {}
+        value = "".join(nocomment.remove_comments(value)).strip()
+        return {identifier: value}
+
     def parse_defines(self, content):
-        result = {}
         for line in content.splitlines():
-            line = line.strip()
-            if not line.startswith("#define"):
-                # skip lines not containing #define
-                continue
-            line = line[8:].strip()  # remove #define
-            parts = line.split(None, 1)
-            if len(parts) != 2:
-                # skip defines without value
-                continue
-            identifier, value = parts
-            tmp = identifier.split('(', 1)
-            if len(tmp) == 2:
-                # skip parameterised defines (macros)
-                continue
-            value = "".join(nocomment.remove_comments(value)).strip()
-            result[identifier] = value
-        self._defines = result
-        return result
+            self._defines.update(self.parse_define_line(line))
+        return self._defines
 
     def expand_defines(self, line):
         found = True
@@ -69,6 +71,16 @@ class Preprocessor:
                 line += lu
 
         return line
+
+    def process_include_file(self, filename):
+        defines = self._defines
+
+        with open(filename, 'r') as f:
+            for line in f:
+                result = self.parse_defines(line)
+                defines.update(result)
+
+        return defines
 
     def expand_rtc_macros(self, line):
         clean_line = line.strip()

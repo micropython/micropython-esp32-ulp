@@ -27,19 +27,19 @@ def replace_defines_should_return_remove_comments():
 def test_parse_defines():
     p = Preprocessor()
 
-    assert p.parse_defines("") == {}
-    assert p.parse_defines("// comment") == {}
-    assert p.parse_defines("  // comment") == {}
-    assert p.parse_defines("  /* comment */") == {}
-    assert p.parse_defines("  /* comment */ #define A 42") == {}  # #define must be the first thing on a line
-    assert p.parse_defines("#define a 1") == {"a": "1"}
-    assert p.parse_defines(" #define a 1") == {"a": "1"}
-    assert p.parse_defines("#define a 1 2") == {"a": "1 2"}
-    assert p.parse_defines("#define f(a,b) 1") == {}  # macros not supported
-    assert p.parse_defines("#define f(a, b) 1") == {}  # macros not supported
-    assert p.parse_defines("#define f (a,b) 1") == {"f": "(a,b) 1"}  # f is not a macro
-    assert p.parse_defines("#define f (a, b) 1") == {"f": "(a, b) 1"}  # f is not a macro
-    assert p.parse_defines("#define RTC_ADDR       0x12345    // start of range") == {"RTC_ADDR": "0x12345"}
+    assert p.parse_define_line("") == {}
+    assert p.parse_define_line("// comment") == {}
+    assert p.parse_define_line("  // comment") == {}
+    assert p.parse_define_line("  /* comment */") == {}
+    assert p.parse_define_line("  /* comment */ #define A 42") == {}  # #define must be the first thing on a line
+    assert p.parse_define_line("#define a 1") == {"a": "1"}
+    assert p.parse_define_line(" #define a 1") == {"a": "1"}
+    assert p.parse_define_line("#define a 1 2") == {"a": "1 2"}
+    assert p.parse_define_line("#define f(a,b) 1") == {}  # macros not supported
+    assert p.parse_define_line("#define f(a, b) 1") == {}  # macros not supported
+    assert p.parse_define_line("#define f (a,b) 1") == {"f": "(a,b) 1"}  # f is not a macro
+    assert p.parse_define_line("#define f (a, b) 1") == {"f": "(a, b) 1"}  # f is not a macro
+    assert p.parse_define_line("#define RTC_ADDR       0x12345    // start of range") == {"RTC_ADDR": "0x12345"}
 
 
 @test
@@ -179,6 +179,29 @@ def test_expand_rtc_macros():
     assert p.expand_rtc_macros("READ_RTC_REG(1, 2, 3)") == "\treg_rd 1, 2 + 3 - 1, 2"
     assert p.expand_rtc_macros("WRITE_RTC_FIELD(1, 2, 3)") == "\treg_wr 1, 2 + 1 - 1, 2, 3 & 1"
     assert p.expand_rtc_macros("READ_RTC_FIELD(1, 2)") == "\treg_rd 1, 2 + 1 - 1, 2"
+
+
+@test
+def test_process_include_file():
+    p = Preprocessor()
+
+    defines = p.process_include_file('fixtures/incl.h')
+    assert defines['CONST1'] == '42'
+    assert defines['CONST2'] == '99'
+    assert defines.get('MULTI_LINE', None) == 'abc \\'  # correct. line continuations not supported
+    assert 'MACRO' not in defines
+
+
+@test
+def test_process_include_file_with_multiple_files():
+    p = Preprocessor()
+
+    defines = p.process_include_file('fixtures/incl.h')
+    defines = p.process_include_file('fixtures/incl2.h')
+
+    assert defines['CONST1'] == '42', "constant from incl.h"
+    assert defines['CONST2'] == '123', "constant overridden by incl2.h"
+    assert defines['CONST3'] == '777', "constant from incl2.h"
 
 
 if __name__ == '__main__':
