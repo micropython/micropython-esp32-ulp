@@ -16,10 +16,6 @@ class SymbolTable:
         self._symbols = symbols
         self._bases = bases
         self._globals = globals
-        self._pass = None
-
-    def set_pass(self, _pass):
-        self._pass = _pass
 
     def set_bases(self, bases):
         self._bases = bases
@@ -40,13 +36,7 @@ class SymbolTable:
         return symbol in self._symbols
         
     def get_sym(self, symbol):
-        try:
-            entry = self._symbols[symbol]
-        except KeyError:
-            if self._pass == 1:
-                entry = (REL, TEXT, 0)  # for a dummy, this is good enough
-            else:
-                raise
+        entry = self._symbols[symbol]
         return entry
 
     def dump(self):
@@ -60,13 +50,7 @@ class SymbolTable:
         return sorted(addrs_syms)
 
     def to_abs_addr(self, section, offset):
-        try:
-            base = self._bases[section]
-        except KeyError:
-            if self._pass == 1:
-                base = 0  # for a dummy this is good enough
-            else:
-                raise
+        base = self._bases[section]
         return base + offset
 
     def resolve_absolute(self, symbol):
@@ -109,7 +93,6 @@ class Assembler:
 
     def init(self, a_pass):
         self.a_pass = a_pass
-        self.symbols.set_pass(a_pass)
         self.sections = dict(text=[], data=[])
         self.offsets = dict(text=0, data=0, bss=0)
         self.section = TEXT
