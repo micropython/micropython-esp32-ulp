@@ -186,6 +186,21 @@ def test_expand_rtc_macros():
 
 
 @test
+def preprocess_should_replace_BIT_with_empty_string_unless_defined():
+    # by default replace BIT with empty string (see description for why in the code)
+    src = " move r1, 0x123 << BIT(24)"
+    assert "move r1, 0x123 << (24)" in Preprocessor().preprocess(src)
+
+    # but if BIT is defined, use that
+    src = """\
+    #define BIT 12
+
+    move r1, BIT"""
+
+    assert "move r1, 12" in Preprocessor().preprocess(src)
+
+
+@test
 def test_process_include_file():
     p = Preprocessor()
 

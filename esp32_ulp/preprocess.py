@@ -70,6 +70,15 @@ class Preprocessor:
                 lu = self._defines.get(t, t)
                 if lu == t and self._defines_db:
                     lu = self._defines_db.get(t, t)
+                if lu == t and t == 'BIT':
+                    # Special hack: BIT(..) translates to a 32-bit mask where only the specified bit is set.
+                    # But the reg_wr and reg_rd opcodes expect actual bit numbers for argument 2 and 3.
+                    # While the real READ_RTC_*/WRITE_RTC_* macros take in the output of BIT(x), they
+                    # ultimately convert these back (via helper macros) to the bit number (x). And since this
+                    # preprocessor does not (aim to) implement "proper" macro-processing, we can simply
+                    # short-circuit this round-trip via macros and replace "BIT" with nothing so that
+                    # "BIT(x)" gets mapped to "(x)".
+                    continue
                 if lu != t:
                     found = True
                 line += lu
