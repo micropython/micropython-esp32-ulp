@@ -1,5 +1,6 @@
 from . import nocomment
 from .util import split_tokens
+from .definesdb import DefinesDB
 
 
 class RTC_Macros:
@@ -56,6 +57,7 @@ class Preprocessor:
     def parse_defines(self, content):
         for line in content.splitlines():
             self._defines.update(self.parse_define_line(line))
+
         return self._defines
 
     def expand_defines(self, line):
@@ -66,6 +68,8 @@ class Preprocessor:
             line = ""
             for t in tokens:
                 lu = self._defines.get(t, t)
+                if lu == t and self._defines_db:
+                    lu = self._defines_db.get(t, t)
                 if lu != t:
                     found = True
                 line += lu
@@ -73,14 +77,13 @@ class Preprocessor:
         return line
 
     def process_include_file(self, filename):
-        defines = self._defines
+        with self.open_db() as db:
+            with open(filename, 'r') as f:
+                for line in f:
+                    result = self.parse_define_line(line)
+                    db.update(result)
 
-        with open(filename, 'r') as f:
-            for line in f:
-                result = self.parse_defines(line)
-                defines.update(result)
-
-        return defines
+        return db
 
     def expand_rtc_macros(self, line):
         clean_line = line.strip()
@@ -103,17 +106,43 @@ class Preprocessor:
 
         return macro_fn(*macro_args)
 
+    def use_db(self, defines_db):
+        self._defines_db = defines_db
+
+    def open_db(self):
+        class ctx:
+            def __init__(self, db):
+                self._db = db
+
+            def __enter__(self):
+                # not opening DefinesDB - it opens itself when needed
+                return self._db
+
+            def __exit__(self, type, value, traceback):
+                if isinstance(self._db, DefinesDB):
+                    self._db.close()
+
+        if self._defines_db:
+            return ctx(self._defines_db)
+
+        return ctx(self._defines)
+
     def preprocess(self, content):
         self.parse_defines(content)
-        lines = nocomment.remove_comments(content)
-        result = []
-        for line in lines:
-            line = self.expand_defines(line)
-            line = self.expand_rtc_macros(line)
-            result.append(line)
-        result = "\n".join(result)
+
+        with self.open_db():
+            lines = nocomment.remove_comments(content)
+            result = []
+            for line in lines:
+                line = self.expand_defines(line)
+                line = self.expand_rtc_macros(line)
+                result.append(line)
+            result = "\n".join(result)
+
         return result
 
 
-def preprocess(content):
-    return Preprocessor().preprocess(content)
+def preprocess(content, use_defines_db=True):
+    preprocessor = Preprocessor()
+    preprocessor.use_db(DefinesDB())
+    return preprocessor.preprocess(content)

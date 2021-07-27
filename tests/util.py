@@ -1,4 +1,5 @@
-from esp32_ulp.util import split_tokens, validate_expression
+import os
+from esp32_ulp.util import split_tokens, validate_expression, file_exists
 
 tests = []
 
@@ -54,6 +55,19 @@ def test_validate_expression():
     assert validate_expression('123 ^ 4') is False  # operator not supported for now
     assert validate_expression('evil()') is False
     assert validate_expression('def cafe()') is False  # valid hex digits, but potentially dangerous code
+
+
+@test
+def test_file_exists():
+    testfile = '.testfile'
+    with open(testfile, 'w') as f:
+        f.write('contents')
+
+    assert file_exists(testfile)
+
+    os.remove(testfile)
+
+    assert not file_exists(testfile)
 
 
 if __name__ == '__main__':

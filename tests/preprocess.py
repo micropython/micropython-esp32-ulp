@@ -1,4 +1,8 @@
+import os
+
 from esp32_ulp.preprocess import Preprocessor
+from esp32_ulp.definesdb import DefinesDB, DBNAME
+from esp32_ulp.util import file_exists
 
 tests = []
 
@@ -186,6 +190,7 @@ def test_process_include_file():
     p = Preprocessor()
 
     defines = p.process_include_file('fixtures/incl.h')
+
     assert defines['CONST1'] == '42'
     assert defines['CONST2'] == '99'
     assert defines.get('MULTI_LINE', None) == 'abc \\'  # correct. line continuations not supported
@@ -202,6 +207,94 @@ def test_process_include_file_with_multiple_files():
     assert defines['CONST1'] == '42', "constant from incl.h"
     assert defines['CONST2'] == '123', "constant overridden by incl2.h"
     assert defines['CONST3'] == '777', "constant from incl2.h"
+
+
+@test
+def test_process_include_file_using_database():
+    db = DefinesDB()
+    db.clear()
+
+    p = Preprocessor()
+    p.use_db(db)
+
+    p.process_include_file('fixtures/incl.h')
+    p.process_include_file('fixtures/incl2.h')
+
+    assert db['CONST1'] == '42', "constant from incl.h"
+    assert db['CONST2'] == '123', "constant overridden by incl2.h"
+    assert db['CONST3'] == '777', "constant from incl2.h"
+
+    db.close()
+
+
+@test
+def test_process_include_file_should_not_load_database_keys_into_instance_defines_dictionary():
+    db = DefinesDB()
+    db.clear()
+
+    p = Preprocessor()
+    p.use_db(db)
+
+    p.process_include_file('fixtures/incl.h')
+
+    # a bit hackish to reference instance-internal state
+    # but it's important to verify this, as we otherwise run out of memory on device
+    assert 'CONST2' not in p._defines
+
+
+
+@test
+def test_preprocess_should_use_definesdb_when_provided():
+    p = Preprocessor()
+
+    content = """\
+#define LOCALCONST 42
+
+entry:
+    move r1, LOCALCONST
+    move r2, DBKEY
+"""
+
+    # first try without db
+    result = p.preprocess(content)
+
+    assert "move r1, 42" in result
+    assert "move r2, DBKEY" in result
+    assert "move r2, 99" not in result
+
+    # now try with db
+    db = DefinesDB()
+    db.clear()
+    db.update({'DBKEY': '99'})
+    p.use_db(db)
+
+    result = p.preprocess(content)
+
+    assert "move r1, 42" in result
+    assert "move r2, 99" in result
+    assert "move r2, DBKEY" not in result
+
+
+@test
+def test_preprocess_should_ensure_no_definesdb_is_created_when_only_reading_from_it():
+    content = """\
+    #define CONST 42
+    move r1, CONST"""
+
+    # remove any existing db
+    db = DefinesDB()
+    db.clear()
+    assert not file_exists(DBNAME)
+
+    # now preprocess using db
+    p = Preprocessor()
+    p.use_db(db)
+
+    result = p.preprocess(content)
+
+    assert "move r1, 42" in result
+
+    assert not file_exists(DBNAME)
 
 
 if __name__ == '__main__':

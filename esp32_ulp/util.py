@@ -1,6 +1,7 @@
 DEBUG = False
 
 import gc
+import os
 
 NORMAL, WHITESPACE = 0, 1
 
@@ -67,3 +68,12 @@ def validate_expression(param):
                 if c not in '0123456789abcdef':
                     state = 0
     return True
+
+
+def file_exists(filename):
+    try:
+        os.stat(filename)
+        return True
+    except OSError:
+        pass
+    return False
