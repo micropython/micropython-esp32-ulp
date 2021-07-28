@@ -17,4 +17,9 @@ counter:
 entry:
   MOVE R1, gpio
   WAIT 42
+
+  # reg_rd/reg_wr with "short" and "long" address notation
+  reg_rd 12, 7, 0
+  reg_rd 0x3ff48000, 7, 0
+
   halt

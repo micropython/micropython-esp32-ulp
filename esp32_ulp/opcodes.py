@@ -16,6 +16,7 @@ symbols = None
 OPCODE_WR_REG = 1
 OPCODE_RD_REG = 2
 
+DR_REG_MAX_DIRECT = 0x3ff
 RD_REG_PERIPH_RTC_CNTL = 0
 RD_REG_PERIPH_RTC_IO = 1
 RD_REG_PERIPH_SENS = 2
@@ -353,8 +354,9 @@ def get_cond(arg):
 
 def _soc_reg_to_ulp_periph_sel(reg):
     # Map SoC peripheral register to periph_sel field of RD_REG and WR_REG instructions.
-    ret = 3
-    if reg < DR_REG_RTCCNTL_BASE:
+    if reg < DR_REG_MAX_DIRECT:
+        ret = RD_REG_PERIPH_RTC_CNTL
+    elif reg < DR_REG_RTCCNTL_BASE:
         raise ValueError("invalid register base")
     elif reg < DR_REG_RTCIO_BASE:
         ret = RD_REG_PERIPH_RTC_CNTL
@@ -371,7 +373,10 @@ def _soc_reg_to_ulp_periph_sel(reg):
 
 def i_reg_wr(reg, high_bit, low_bit, val):
     reg = get_imm(reg)
-    _wr_reg.addr = (reg & 0xff) >> 2
+    if reg < DR_REG_MAX_DIRECT:  # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
+        _wr_reg.addr = reg
+    else:
+        _wr_reg.addr = (reg & 0xff) >> 2
     _wr_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _wr_reg.data = get_imm(val)
     _wr_reg.low = get_imm(low_bit)
@@ -382,7 +387,10 @@ def i_reg_wr(reg, high_bit, low_bit, val):
 
 def i_reg_rd(reg, high_bit, low_bit):
     reg = get_imm(reg)
-    _rd_reg.addr = (reg & 0xff) >> 2
+    if reg < DR_REG_MAX_DIRECT: # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
+        _rd_reg.addr = reg
+    else:
+        _rd_reg.addr = (reg & 0xff) >> 2
     _rd_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _rd_reg.unused = 0
     _rd_reg.low = get_imm(low_bit)
