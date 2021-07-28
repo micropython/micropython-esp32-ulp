@@ -70,5 +70,13 @@ jobs:
         export PATH=$PATH:${{ steps.build_micropython.outputs.bin_dir }}
         export PATH=$PATH:${{ steps.build_binutils.outputs.bin_dir }}
         cd tests
-        ln -s ../binutils-esp32ulp  # already cloned earlier. reuse.
         ./01_compat_tests.sh
+
+    - name: Run compat tests with RTC macros
+      id: compat_rtc_tests
+      run: |
+        export PATH=$PATH:${{ steps.build_micropython.outputs.bin_dir }}
+        export PATH=$PATH:${{ steps.build_binutils.outputs.bin_dir }}
+        cd tests
+        ln -s ../binutils-esp32ulp  # already cloned earlier. reuse.
+        ./02_compat_rtc_tests.sh
