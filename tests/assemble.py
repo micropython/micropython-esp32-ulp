@@ -71,6 +71,25 @@ def test_assemble_bss():
     assert a.offsets[BSS] == 4  # 1 word * 4B
 
 
+def test_assemble_bss_with_value():
+    lines = """\
+.bss
+    .long 3  #non-zero value not allowed in bss section
+"""
+
+    a = Assembler()
+    try:
+        a.assemble(lines)
+    except ValueError as e:
+        if str(e) != "attempt to store non-zero value in section .bss":
+            raise  # re-raise failures we didn't expect
+        raised = True
+    else:
+        raised = False
+
+    assert raised
+
+
 def test_symbols():
     st = SymbolTable({}, {})
     for entry in [
@@ -128,4 +147,5 @@ test_parse_line()
 test_parse()
 test_assemble()
 test_assemble_bss()
+test_assemble_bss_with_value()
 test_symbols()

@@ -150,6 +150,8 @@ class Assembler:
         if expected_section is not None and s is not expected_section:
             raise TypeError('only allowed in %s section' % expected_section)
         if s is BSS:
+            if int.from_bytes(value, 'little') != 0:
+                raise ValueError('attempt to store non-zero value in section .bss')
             # just increase BSS size by length of value
             self.offsets[s] += len(value)
         else:
