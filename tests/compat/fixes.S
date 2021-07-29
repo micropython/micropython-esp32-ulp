@@ -12,6 +12,9 @@
 counter:
 .long 0
 
+.data
+var2: .int 1111
+
   .text
   .global entry
 entry:

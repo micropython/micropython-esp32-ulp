@@ -240,6 +240,11 @@ class Assembler:
         self.append_data(2, args)
 
     def d_long(self, *args):
+        self.d_int(*args)
+
+    def d_int(self, *args):
+        # .long and .int are identical as per GNU assembler documentation
+        # https://sourceware.org/binutils/docs/as/Long.html
         self.append_data(4, args)
 
     def assembler_pass(self, lines):
