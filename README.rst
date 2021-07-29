@@ -17,6 +17,10 @@ Status
 
 The most commonly used simple stuff should work.
 
+Expressions in assembly source code are supported and get evaluated during
+assembling. Only expressions evaluating to a single integer are supported.
+Constants defined with ``.set`` are supported in expressions.
+
 We have some unit tests and also compatibility tests that compare the output
 whether it is identical with binutils-esp32ulp output.
 
