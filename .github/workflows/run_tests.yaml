@@ -1,0 +1,74 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libffi-dev pkg-config bison flex
+
+    - name: Record version
+      run: |
+        export VER=$(git describe --always --tags)
+        echo ${VER}
+
+    ###### Install tools ######
+
+    - name: Build MicroPython
+      id: build_micropython
+      run: |
+        echo "Building micropython"
+        git clone --depth 1 https://github.com/micropython/micropython.git
+        pushd micropython/mpy-cross
+        make
+        popd
+        pushd micropython/ports/unix
+        git describe --always --tags
+        make submodules
+        make
+        export PATH=$PATH:$PWD
+        echo "::set-output name=bin_dir::$PWD"
+        test $(micropython -c 'print("test")') = "test"
+        popd
+
+    - name: Build binutils-esp32ulp
+      id: build_binutils
+      run: |
+        echo "Building binutils-esp32ulp"
+        git clone --depth 1 https://github.com/espressif/binutils-esp32ulp.git
+        pushd binutils-esp32ulp
+        git describe --always --tags
+        ./configure --target=esp32ulp-elf --prefix=$PWD/dist --disable-doc --disable-gdb --disable-libdecnumber --disable-readline --disable-sim
+        echo "MAKEINFO = :" >> Makefile
+        make
+        make install-strip
+        export PATH=$PATH:$PWD/dist/bin
+        echo "::set-output name=bin_dir::$PWD/dist/bin"
+        esp32ulp-elf-as --version | grep 'esp32ulp-elf' > /dev/null
+        popd
+
+    ###### Run tests ######
+
+    - name: Run unit tests
+      id: unit_tests
+      run: |
+        export PATH=$PATH:${{ steps.build_micropython.outputs.bin_dir }}
+        cd tests
+        ./00_unit_tests.sh
+
+    - name: Run compat tests
+      id: compat_tests
+      run: |
+        export PATH=$PATH:${{ steps.build_micropython.outputs.bin_dir }}
+        export PATH=$PATH:${{ steps.build_binutils.outputs.bin_dir }}
+        cd tests
+        ln -s ../binutils-esp32ulp  # already cloned earlier. reuse.
+        ./01_compat_tests.sh
