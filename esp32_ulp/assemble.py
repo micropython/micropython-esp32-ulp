@@ -3,7 +3,7 @@ ESP32 ULP Co-Processor Assembler
 """
 
 from . import opcodes
-from .nocomment import remove_comments
+from .nocomment import remove_comments as do_remove_comments
 from .util import garbage_collect
 
 TEXT, DATA, BSS = 'text', 'data', 'bss'
@@ -283,8 +283,8 @@ class Assembler:
                 raise ValueError('Unknown opcode or directive: %s' % opcode)
         self.finalize_sections()
 
-    def assemble(self, text):
-        lines = remove_comments(text)
+    def assemble(self, text, remove_comments=True):
+        lines = do_remove_comments(text) if remove_comments else text.splitlines()
         self.init(1)  # pass 1 is only to get the symbol table right
         self.assembler_pass(lines)
         self.symbols.set_bases(self.compute_bases())

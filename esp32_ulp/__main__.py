@@ -10,7 +10,7 @@ garbage_collect('after import')
 
 def src_to_binary(src):
     assembler = Assembler()
-    assembler.assemble(src)
+    assembler.assemble(src, remove_comments=False)  # comments already removed by preprocessor
     garbage_collect('before symbols export')
     addrs_syms = assembler.symbols.export()
     for addr, sym in addrs_syms:

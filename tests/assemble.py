@@ -157,6 +157,24 @@ entry:
     assert a.symbols.get_sym('entry') == (REL, TEXT, 0)
 
 
+def test_assemble_optional_comment_removal():
+    line = " move r1, 123  # comment"
+
+    a = Assembler()
+
+    # first assemble as normal (comments will be removed by default)
+    a.assemble(line)
+
+    # now assemble with comment removal disabled
+    try:
+        a.assemble(line, remove_comments=False)
+    except ValueError as e:
+        raised = True
+    else:
+        raised = False
+    assert raised
+
+
 def test_symbols():
     st = SymbolTable({}, {}, {})
     for entry in [
@@ -218,4 +236,5 @@ test_assemble_bss_with_value()
 test_assemble_global()
 test_assemble_uppercase_opcode()
 test_assemble_evalulate_expressions()
+test_assemble_optional_comment_removal()
 test_symbols()
