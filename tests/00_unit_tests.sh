@@ -4,7 +4,7 @@
 
 set -e
 
-for file in opcodes assemble link ; do
+for file in opcodes assemble link util preprocess definesdb; do
     echo testing $file...
     micropython $file.py
 done

@@ -6,6 +6,7 @@ from ucollections import namedtuple
 from uctypes import struct, addressof, LITTLE_ENDIAN, UINT32, BFUINT32, BF_POS, BF_LEN
 
 from .soc import *
+from .util import split_tokens, validate_expression
 
 # XXX dirty hack: use a global for the symbol table
 symbols = None
@@ -15,6 +16,7 @@ symbols = None
 OPCODE_WR_REG = 1
 OPCODE_RD_REG = 2
 
+DR_REG_MAX_DIRECT = 0x3ff
 RD_REG_PERIPH_RTC_CNTL = 0
 RD_REG_PERIPH_RTC_IO = 1
 RD_REG_PERIPH_SENS = 2
@@ -112,7 +114,7 @@ _rd_reg = make_ins("""
     unused : 8      # Unused
     low : 5         # Low bit
     high : 5        # High bit
-    opcode : 4      # Opcode (OPCODE_WR_REG)
+    opcode : 4      # Opcode (OPCODE_RD_REG)
 """)
 
 
@@ -267,6 +269,20 @@ REG, IMM, COND, SYM = 0, 1, 2, 3
 ARG = namedtuple('ARG', ('type', 'value', 'raw'))
 
 
+def eval_arg(arg):
+    parts = []
+    for token in split_tokens(arg):
+        if symbols.has_sym(token):
+            _, _, sym_value = symbols.get_sym(token)
+            parts.append(str(sym_value))
+        else:
+            parts.append(token)
+    parts = "".join(parts)
+    if not validate_expression(parts):
+        raise ValueError('Unsupported expression: %s' % parts)
+    return eval(parts)
+
+
 def arg_qualify(arg):
     """
     look at arg and qualify its type:
@@ -289,8 +305,12 @@ def arg_qualify(arg):
         return ARG(IMM, int(arg), arg)
     except ValueError:
         pass
-    entry = symbols.get_sym(arg)
-    return ARG(SYM, entry, arg)
+    try:
+        entry = symbols.get_sym(arg)
+    except KeyError:
+        return ARG(IMM, int(eval_arg(arg)), arg)
+    else:
+        return ARG(SYM, entry, arg)
 
 
 def get_reg(arg):
@@ -334,8 +354,9 @@ def get_cond(arg):
 
 def _soc_reg_to_ulp_periph_sel(reg):
     # Map SoC peripheral register to periph_sel field of RD_REG and WR_REG instructions.
-    ret = 3
-    if reg < DR_REG_RTCCNTL_BASE:
+    if reg < DR_REG_MAX_DIRECT:
+        ret = RD_REG_PERIPH_RTC_CNTL
+    elif reg < DR_REG_RTCCNTL_BASE:
         raise ValueError("invalid register base")
     elif reg < DR_REG_RTCIO_BASE:
         ret = RD_REG_PERIPH_RTC_CNTL
@@ -352,7 +373,10 @@ def _soc_reg_to_ulp_periph_sel(reg):
 
 def i_reg_wr(reg, high_bit, low_bit, val):
     reg = get_imm(reg)
-    _wr_reg.addr = (reg & 0xff) >> 2
+    if reg < DR_REG_MAX_DIRECT:  # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
+        _wr_reg.addr = reg
+    else:
+        _wr_reg.addr = (reg & 0xff) >> 2
     _wr_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _wr_reg.data = get_imm(val)
     _wr_reg.low = get_imm(low_bit)
@@ -363,7 +387,10 @@ def i_reg_wr(reg, high_bit, low_bit, val):
 
 def i_reg_rd(reg, high_bit, low_bit):
     reg = get_imm(reg)
-    _rd_reg.addr = (reg & 0xff) >> 2
+    if reg < DR_REG_MAX_DIRECT: # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
+        _rd_reg.addr = reg
+    else:
+        _rd_reg.addr = (reg & 0xff) >> 2
     _rd_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _rd_reg.unused = 0
     _rd_reg.low = get_imm(low_bit)
@@ -463,7 +490,7 @@ def i_move(reg_dest, reg_imm_src):
     if src.type == REG:
         _alu_reg.dreg = dest
         _alu_reg.sreg = src.value
-        _alu_reg.treg = 1  # XXX undocumented, this is the value binutils-esp32 uses
+        _alu_reg.treg = src.value  # XXX undocumented, this is the value binutils-esp32 uses
         _alu_reg.unused = 0
         _alu_reg.sel = ALU_SEL_MOV
         _alu_reg.sub_opcode = SUB_OPCODE_ALU_REG

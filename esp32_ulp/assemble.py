@@ -3,7 +3,7 @@ ESP32 ULP Co-Processor Assembler
 """
 
 from . import opcodes
-from .nocomment import remove_comments
+from .nocomment import remove_comments as do_remove_comments
 from .util import garbage_collect
 
 TEXT, DATA, BSS = 'text', 'data', 'bss'
@@ -12,13 +12,10 @@ REL, ABS = 0, 1
 
 
 class SymbolTable:
-    def __init__(self, symbols, bases):
+    def __init__(self, symbols, bases, globals):
         self._symbols = symbols
         self._bases = bases
-        self._pass = None
-
-    def set_pass(self, _pass):
-        self._pass = _pass
+        self._globals = globals
 
     def set_bases(self, bases):
         self._bases = bases
@@ -32,38 +29,28 @@ class SymbolTable:
     def set_sym(self, symbol, stype, section, value):
         entry = (stype, section, value)
         if symbol in self._symbols and entry != self._symbols[symbol]:
-            raise Exception('redefining symbol %s with different value %r -> %r.' % (label, self._symbols[symbol], entry))
+            raise Exception('redefining symbol %s with different value %r -> %r.' % (symbol, self._symbols[symbol], entry))
         self._symbols[symbol] = entry
 
     def has_sym(self, symbol):
         return symbol in self._symbols
         
     def get_sym(self, symbol):
-        try:
-            entry = self._symbols[symbol]
-        except KeyError:
-            if self._pass == 1:
-                entry = (REL, TEXT, 0)  # for a dummy, this is good enough
-            else:
-                raise
+        entry = self._symbols[symbol]
         return entry
 
     def dump(self):
         for symbol, entry in self._symbols.items():
             print(symbol, entry)
 
-    def export(self):
-        addrs_syms = [(self.resolve_absolute(entry), symbol) for symbol, entry in self._symbols.items()]
+    def export(self, incl_non_globals=False):
+        addrs_syms = [(self.resolve_absolute(entry), symbol)
+                      for symbol, entry in self._symbols.items()
+                      if incl_non_globals or symbol in self._globals]
         return sorted(addrs_syms)
 
     def to_abs_addr(self, section, offset):
-        try:
-            base = self._bases[section]
-        except KeyError:
-            if self._pass == 1:
-                base = 0  # for a dummy this is good enough
-            else:
-                raise
+        base = self._bases[section]
         return base + offset
 
     def resolve_absolute(self, symbol):
@@ -93,16 +80,19 @@ class SymbolTable:
         from_addr = self.to_abs_addr(self._from_section, self._from_offset)
         return sym_addr - from_addr
 
+    def set_global(self, symbol):
+        self._globals[symbol] = True
+        pass
+
 
 class Assembler:
 
-    def __init__(self, symbols=None, bases=None):
-        self.symbols = SymbolTable(symbols or {}, bases or {})
+    def __init__(self, symbols=None, bases=None, globals=None):
+        self.symbols = SymbolTable(symbols or {}, bases or {}, globals or {})
         opcodes.symbols = self.symbols  # XXX dirty hack
 
     def init(self, a_pass):
         self.a_pass = a_pass
-        self.symbols.set_pass(a_pass)
         self.sections = dict(text=[], data=[])
         self.offsets = dict(text=0, data=0, bss=0)
         self.section = TEXT
@@ -118,7 +108,7 @@ class Assembler:
         """
         if not line:
             return
-        has_label = line[0] not in '\t '
+        has_label = line[0] not in '\t .'
         if has_label:
             label_line = line.split(None, 1)
             if len(label_line) == 2:
@@ -150,8 +140,10 @@ class Assembler:
         if expected_section is not None and s is not expected_section:
             raise TypeError('only allowed in %s section' % expected_section)
         if s is BSS:
-            # just increase BSS size by value
-            self.offsets[s] += value
+            if int.from_bytes(value, 'little') != 0:
+                raise ValueError('attempt to store non-zero value in section .bss')
+            # just increase BSS size by length of value
+            self.offsets[s] += len(value)
         else:
             self.sections[s].append(value)
             self.offsets[s] += len(value)
@@ -231,8 +223,11 @@ class Assembler:
             self.fill(self.section, amount, fill)
 
     def d_set(self, symbol, expr):
-        value = int(expr)  # TODO: support more than just integers
+        value = int(opcodes.eval_arg(expr))
         self.symbols.set_sym(symbol, ABS, None, value)
+
+    def d_global(self, symbol):
+        self.symbols.set_global(symbol)
 
     def append_data(self, wordlen, args):
         data = [int(arg).to_bytes(wordlen, 'little') for arg in args]
@@ -245,6 +240,11 @@ class Assembler:
         self.append_data(2, args)
 
     def d_long(self, *args):
+        self.d_int(*args)
+
+    def d_int(self, *args):
+        # .long and .int are identical as per GNU assembler documentation
+        # https://sourceware.org/binutils/docs/as/Long.html
         self.append_data(4, args)
 
     def assembler_pass(self, lines):
@@ -263,16 +263,22 @@ class Assembler:
                         continue
                 else:
                     # machine instruction
-                    func = getattr(opcodes, 'i_' + opcode, None)
+                    func = getattr(opcodes, 'i_' + opcode.lower(), None)
                     if func is not None:
-                        instruction = func(*args)
+                        # during the first pass, symbols are not all known yet.
+                        # so some expressions may not evaluate to something (yet).
+                        # instruction building requires sane arguments however.
+                        # since all instructions are 4 bytes long, we simply skip
+                        # building instructions during pass 1, and append an "empty
+                        # instruction" to the section to get the right section size.
+                        instruction = 0 if self.a_pass == 1 else func(*args)
                         self.append_section(instruction.to_bytes(4, 'little'), TEXT)
                         continue
-                raise Exception('Unknown opcode or directive: %s' % opcode)
+                raise ValueError('Unknown opcode or directive: %s' % opcode)
         self.finalize_sections()
 
-    def assemble(self, text):
-        lines = remove_comments(text)
+    def assemble(self, text, remove_comments=True):
+        lines = do_remove_comments(text) if remove_comments else text.splitlines()
         self.init(1)  # pass 1 is only to get the symbol table right
         self.assembler_pass(lines)
         self.symbols.set_bases(self.compute_bases())

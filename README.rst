@@ -17,8 +17,17 @@ Status
 
 The most commonly used simple stuff should work.
 
+Expressions in assembly source code are supported and get evaluated during
+assembling. Only expressions evaluating to a single integer are supported.
+Constants defined with ``.set`` are supported in expressions.
+
 We have some unit tests and also compatibility tests that compare the output
 whether it is identical with binutils-esp32ulp output.
+
+There is a simple preprocessor that understands just enough to allow assembling
+ULP source files containing convenience macros such as WRITE_RTC_REG. The
+preprocessor and how to use it is documented here:
+`Preprocessor support <docs/preprocess.rst>`_.
 
 There might be some stuff missing, some bugs and other symptoms of alpha
 software. Also, error and exception handling is rather rough yet.
