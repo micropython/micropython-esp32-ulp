@@ -312,6 +312,26 @@ def test_preprocess_should_ensure_no_definesdb_is_created_when_only_reading_from
     assert not file_exists(DBNAME)
 
 
+@test
+def test_preprocess_should_ensure_the_definesdb_is_properly_closed_after_use():
+    content = """\
+    #define CONST 42
+    move r1, CONST"""
+
+    # remove any existing db
+    db = DefinesDB()
+    db.open()
+    assert db.is_open()
+
+    # now preprocess using db
+    p = Preprocessor()
+    p.use_db(db)
+
+    p.preprocess(content)
+
+    assert not db.is_open()
+
+
 if __name__ == '__main__':
     # run all methods marked with @test
     for t in tests:

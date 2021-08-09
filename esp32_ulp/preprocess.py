@@ -14,13 +14,12 @@ class RTC_Macros:
 
     @staticmethod
     def WRITE_RTC_REG(rtc_reg, low_bit, bit_width, value):
-        args = (
+        return '\treg_wr ' + ', '.join((
             rtc_reg,
             '%s + %s - 1' % (low_bit, bit_width),
             low_bit,
             value
-        )
-        return '\treg_wr ' + ', '.join(args)
+        ))
 
     @staticmethod
     def READ_RTC_FIELD(rtc_reg, low_bit):

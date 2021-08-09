@@ -19,8 +19,11 @@ class DefinesDB:
         except OSError:
             pass
 
+    def is_open(self):
+        return self._db is not None
+
     def open(self):
-        if self._db:
+        if self.is_open():
             return
         try:
             self._file = open(DBNAME, 'r+b')
@@ -30,7 +33,7 @@ class DefinesDB:
         self._db_exists = True
 
     def close(self):
-        if not self._db:
+        if not self.is_open():
             return
         self._db.close()
         self._db = None

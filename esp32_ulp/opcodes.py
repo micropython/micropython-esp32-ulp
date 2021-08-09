@@ -307,10 +307,10 @@ def arg_qualify(arg):
         pass
     try:
         entry = symbols.get_sym(arg)
-        return ARG(SYM, entry, arg)
     except KeyError:
-        pass
-    return ARG(IMM, int(eval_arg(arg)), arg)
+        return ARG(IMM, int(eval_arg(arg)), arg)
+    else:
+        return ARG(SYM, entry, arg)
 
 
 def get_reg(arg):

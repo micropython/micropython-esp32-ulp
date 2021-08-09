@@ -19,14 +19,14 @@ def split_tokens(line):
     tokens = []
     state = NORMAL
     for c in line:
-        if ('a' <= c <= 'z') or ('A' <= c <= 'Z') or ('0' <= c <= '9') or c == '_':
+        if c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_":
             if state != NORMAL:
                 if len(buf) > 0:
                     tokens.append(buf)
                     buf = ""
                 state = NORMAL
             buf += c
-        elif c == ' ' or c == '\t':
+        elif c in " \t":
             if state != WHITESPACE:
                 if len(buf) > 0:
                     tokens.append(buf)

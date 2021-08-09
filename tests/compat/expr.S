@@ -1,3 +1,4 @@
+# common example of real world code using expressions
   .set adc_channel, 6
 
   .set adc_oversampling_factor_log, 2
@@ -26,7 +27,13 @@ measure:
   move r3, result
   st r0, r3, 0
 
-  #test that expressions evaluate correctly for all supported operators
+exit:
+  halt
+
+
+# ---
+# test that expressions evaluate correctly for all supported operators
+# (these statements do not mean anything other than testing the operations)
   move r3, 1+2
   move r3, 3-5
   move r3, -5
@@ -39,6 +46,3 @@ measure:
   move r3, 0x1234 & ~2
   move r3, 42|4&0xf  # 46 (4&0xf is evaluated first)
   move r3, (42|4)&0xf  # 14 (42|4 is evaluated first)
-
-exit:
-  halt

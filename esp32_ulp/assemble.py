@@ -87,8 +87,8 @@ class SymbolTable:
 
 class Assembler:
 
-    def __init__(self, symbols=None, bases=None, globls=None):
-        self.symbols = SymbolTable(symbols or {}, bases or {}, globls or {})
+    def __init__(self, symbols=None, bases=None, globals=None):
+        self.symbols = SymbolTable(symbols or {}, bases or {}, globals or {})
         opcodes.symbols = self.symbols  # XXX dirty hack
 
     def init(self, a_pass):
@@ -223,7 +223,7 @@ class Assembler:
             self.fill(self.section, amount, fill)
 
     def d_set(self, symbol, expr):
-        value = int(opcodes.eval_arg(expr))  # TODO: support more than just integers
+        value = int(opcodes.eval_arg(expr))
         self.symbols.set_sym(symbol, ABS, None, value)
 
     def d_global(self, symbol):
@@ -265,6 +265,12 @@ class Assembler:
                     # machine instruction
                     func = getattr(opcodes, 'i_' + opcode.lower(), None)
                     if func is not None:
+                        # during the first pass, symbols are not all known yet.
+                        # so some expressions may not evaluate to something (yet).
+                        # instruction building requires sane arguments however.
+                        # since all instructions are 4 bytes long, we simply skip
+                        # building instructions during pass 1, and append an "empty
+                        # instruction" to the section to get the right section size.
                         instruction = 0 if self.a_pass == 1 else func(*args)
                         self.append_section(instruction.to_bytes(4, 'little'), TEXT)
                         continue
