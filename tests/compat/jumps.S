@@ -1,4 +1,6 @@
   .text
+  .set const, 3
+  .global const  # exporting symbol is required for binutils, not important for py-esp32-ulp
 
 entry:
   nop
@@ -27,6 +29,9 @@ entry:
   jumps -8, 42, lt
   jumps -32, 42, lt
 
+  # jumps with immediate offset from absolute symbol
+  jumps const, 42, lt
+
   # jumpr with labels
   jumpr entry, 42, lt
   jumpr later, 42, lt
@@ -49,6 +54,9 @@ entry:
   jumpr -4, 42, lt
   jumpr -8, 42, lt
   jumpr -32, 42, lt
+
+  # jumps with immediate offset from absolute symbol
+  jumpr const, 42, lt
 
   nop
   nop
