@@ -636,6 +636,19 @@ def i_jump(target, condition='--'):
     raise TypeError('unsupported operand: %s' % target.raw)
 
 
+def _jump_relr(threshold, cond, offset):
+    """
+    Equivalent of I_JUMP_RELR macro in binutils-esp32ulp
+    """
+    _br.imm = threshold
+    _br.cmp = cond
+    _br.offset = abs(offset)
+    _br.sign = 0 if offset >= 0 else 1
+    _br.sub_opcode = SUB_OPCODE_BR
+    _br.opcode = OPCODE_BRANCH
+    return _br.all
+
+
 def i_jumpr(offset, threshold, condition):
     offset = get_rel(offset)
     threshold = get_imm(threshold)
@@ -650,15 +663,16 @@ def i_jumpr(offset, threshold, condition):
     elif condition == 'gt':  # gt == ge(threshold+1)
         threshold += 1
         cmp_op = BRCOND_GE
+    elif condition == 'eq':  # eq == ge(threshold) but not ge(threshold+1)
+        # jump over next JUMPR
+        skip_ins = _jump_relr(threshold + 1, BRCOND_GE, 2)
+        # jump to target
+        offset -= 1  # adjust for the additional JUMPR instruction
+        jump_ins = _jump_relr(threshold, BRCOND_GE, offset)
+        return (skip_ins, jump_ins)
     else:
         raise ValueError("invalid comparison condition")
-    _br.imm = threshold
-    _br.cmp = cmp_op
-    _br.offset = abs(offset)
-    _br.sign = 0 if offset >= 0 else 1
-    _br.sub_opcode = SUB_OPCODE_BR
-    _br.opcode = OPCODE_BRANCH
-    return _br.all
+    return _jump_relr(threshold, cmp_op, offset)
 
 
 def i_jumps(offset, threshold, condition):
@@ -680,3 +694,10 @@ def i_jumps(offset, threshold, condition):
     _bs.sub_opcode = SUB_OPCODE_BS
     _bs.opcode = OPCODE_BRANCH
     return _bs.all
+
+
+def no_of_instr(opcode, args):
+    if opcode == 'jumpr' and get_cond(args[2]) == 'eq':
+        return 2
+
+    return 1

@@ -19,6 +19,8 @@ entry:
   jumpr later, 42, le
   jumpr entry, 42, gt
   jumpr later, 42, gt
+  jumpr entry, 42, eq
+  jumpr later, 42, eq
 
   nop
   nop
