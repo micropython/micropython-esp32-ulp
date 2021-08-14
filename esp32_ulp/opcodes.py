@@ -340,7 +340,9 @@ def get_rel(arg):
     if isinstance(arg, str):
         arg = arg_qualify(arg)
     if arg.type == IMM:
-        return arg.value
+        if arg.value & 3 != 0:  # bitwise version of: arg.value % 4 != 0
+            raise ValueError('Relative offset must be a multiple of 4')
+        return arg.value >> 2  # bitwise version of: arg.value // 4
     if arg.type == SYM:
         return symbols.resolve_relative(arg.value)
     raise TypeError('wanted: immediate, got: %s' % arg.raw)

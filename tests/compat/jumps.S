@@ -3,6 +3,7 @@
 entry:
   nop
 
+  # jumps with labels
   jumps entry, 42, lt
   jumps entry, 42, lt
   jumps later, 42, lt
@@ -15,6 +16,18 @@ entry:
   jumps entry, 42, gt
   jumps later, 42, gt
 
+  # jumps with immediate offset (specified in bytes, but real instruction uses words)
+  jumps 0, 42, lt
+
+  jumps 4, 42, lt
+  jumps 8, 42, lt
+  jumps 32, 42, lt
+
+  jumps -4, 42, lt
+  jumps -8, 42, lt
+  jumps -32, 42, lt
+
+  # jumpr with labels
   jumpr entry, 42, lt
   jumpr later, 42, lt
   jumpr entry, 42, ge
@@ -25,6 +38,17 @@ entry:
   jumpr later, 42, gt
   jumpr entry, 42, eq
   jumpr later, 42, eq
+
+  # jumpr with immediate offset (specified in bytes, but real instruction uses words)
+  jumpr 0, 42, lt
+
+  jumpr 4, 42, lt
+  jumpr 8, 42, lt
+  jumpr 32, 42, lt
+
+  jumpr -4, 42, lt
+  jumpr -8, 42, lt
+  jumpr -32, 42, lt
 
   nop
   nop
