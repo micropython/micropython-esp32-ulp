@@ -12,6 +12,8 @@ entry:
   jumps later, 42, ge
   jumps entry, 42, eq
   jumps later, 42, eq
+  jumps entry, 42, gt
+  jumps later, 42, gt
 
   jumpr entry, 42, lt
   jumpr later, 42, lt

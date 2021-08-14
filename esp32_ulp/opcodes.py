@@ -698,9 +698,13 @@ def i_jumps(offset, threshold, condition):
         cmp_op = BRCOND_LE
     elif condition == 'ge':
         cmp_op = BRCOND_GE
-    elif condition == 'eq':  # eq == le but not lt
-        skip_cond = BRCOND_LT
-        jump_cond = BRCOND_LE
+    elif condition in ('eq', 'gt'):
+        if condition == 'eq':  # eq == le but not lt
+            skip_cond = BRCOND_LT
+            jump_cond = BRCOND_LE
+        elif condition == 'gt':  # gt == ge but not le
+            skip_cond = BRCOND_LE
+            jump_cond = BRCOND_GE
 
         # jump over next JUMPS
         skip_ins = _jump_rels(threshold, skip_cond, 2)
@@ -718,7 +722,7 @@ def no_of_instr(opcode, args):
     if opcode == 'jumpr' and get_cond(args[2]) == 'eq':
         return 2
 
-    if opcode == 'jumps' and get_cond(args[2]) == 'eq':
+    if opcode == 'jumps' and get_cond(args[2]) in ('eq', 'gt'):
         return 2
 
     return 1
