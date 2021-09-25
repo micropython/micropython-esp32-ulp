@@ -301,7 +301,7 @@ def arg_qualify(arg):
             if 0 <= reg <= 3:
                 return ARG(REG, reg, arg)
             raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
-        if arg_lower in ['--', 'eq', 'ov', 'lt', 'gt', 'ge']:
+        if arg_lower in ['--', 'eq', 'ov', 'lt', 'gt', 'ge', 'le']:
             return ARG(COND, arg_lower, arg)
     try:
         return ARG(IMM, int(arg), arg)
@@ -661,10 +661,10 @@ def i_jumps(offset, threshold, condition):
     condition = get_cond(condition)
     if condition == 'lt':
         cmp_op = BRCOND_LT
-    elif condition == 'gt':
-        cmp_op = BRCOND_GT
-    elif condition == 'eq':
-        cmp_op = BRCOND_EQ
+    elif condition == 'le':
+        cmp_op = BRCOND_LE
+    elif condition == 'ge':
+        cmp_op = BRCOND_GE
     else:
         raise ValueError("invalid comparison condition")
     _bs.imm = threshold
