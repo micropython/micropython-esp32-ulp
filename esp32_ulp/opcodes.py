@@ -644,6 +644,12 @@ def i_jumpr(offset, threshold, condition):
         cmp_op = BRCOND_LT
     elif condition == 'ge':
         cmp_op = BRCOND_GE
+    elif condition == 'le':  # le == lt(threshold+1)
+        threshold += 1
+        cmp_op = BRCOND_LT
+    elif condition == 'gt':  # gt == ge(threshold+1)
+        threshold += 1
+        cmp_op = BRCOND_GE
     else:
         raise ValueError("invalid comparison condition")
     _br.imm = threshold
