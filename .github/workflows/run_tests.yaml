@@ -13,7 +13,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y git build-essential libffi-dev pkg-config python3 bison flex
+        sudo apt-get install -y git build-essential libffi-dev pkg-config python3 bison flex xxd
 
     - name: Record version
       run: |

@@ -47,17 +47,19 @@ ALU_SEL_DEC = 1
 ALU_SEL_RST = 2
 
 OPCODE_BRANCH = 8
+# https://github.com/espressif/binutils-esp32ulp/blob/d61f86f97eda43fc118df30d019fc062aaa6bc8d/include/opcode/esp32ulp_esp32.h#L85
 SUB_OPCODE_BX = 0
+SUB_OPCODE_BR = 1
+SUB_OPCODE_BS = 2
 BX_JUMP_TYPE_DIRECT = 0
 BX_JUMP_TYPE_ZERO = 1
 BX_JUMP_TYPE_OVF = 2
-SUB_OPCODE_B = 1
-B_CMP_L = 0
-B_CMP_GE = 1
-SUB_OPCODE_BC = 2
-BC_CMP_LT = 0
-BC_CMP_GT = 1
-BC_CMP_EQ = 2
+# https://github.com/espressif/binutils-esp32ulp/blob/d61f86f97eda43fc118df30d019fc062aaa6bc8d/gas/config/tc-esp32ulp.h#L91
+BRCOND_LT = 0
+BRCOND_GE = 1
+BRCOND_LE = 2
+BRCOND_EQ = 3
+BRCOND_GT = 4
 
 OPCODE_END = 9
 SUB_OPCODE_END = 0
@@ -210,23 +212,23 @@ _bx = make_ins("""
 """)
 
 
-_b = make_ins("""
+_br = make_ins("""
     imm : 16        # Immediate value to compare against
-    cmp : 1         # Comparison to perform: B_CMP_L or B_CMP_GE
+    cmp : 1         # Comparison to perform: BRCOND_LT or BRCOND_GE
     offset : 7      # Absolute value of target PC offset w.r.t. current PC, expressed in words
     sign : 1        # Sign of target PC offset: 0: positive, 1: negative
-    sub_opcode : 3  # Sub opcode (SUB_OPCODE_B)
+    sub_opcode : 3  # Sub opcode (SUB_OPCODE_BR)
     opcode : 4      # Opcode (OPCODE_BRANCH)
 """)
 
 
-_bc = make_ins("""
+_bs = make_ins("""
     imm : 8         # Immediate value to compare against
     unused : 7      # Unused
-    cmp : 2         # Comparison to perform: BC_CMP_LT, GT or EQ
+    cmp : 2         # Comparison to perform: BRCOND_LT, GT or EQ
     offset : 7      # Absolute value of target PC offset w.r.t. current PC, expressed in words
     sign : 1        # Sign of target PC offset: 0: positive, 1: negative
-    sub_opcode : 3  # Sub opcode (SUB_OPCODE_BC)
+    sub_opcode : 3  # Sub opcode (SUB_OPCODE_BS)
     opcode : 4      # Opcode (OPCODE_BRANCH)
 """)
 
@@ -299,7 +301,7 @@ def arg_qualify(arg):
             if 0 <= reg <= 3:
                 return ARG(REG, reg, arg)
             raise ValueError('arg_qualify: valid registers are r0, r1, r2, r3. Given: %s' % arg)
-        if arg_lower in ['--', 'eq', 'ov', 'lt', 'gt', 'ge']:
+        if arg_lower in ['--', 'eq', 'ov', 'lt', 'gt', 'ge', 'le']:
             return ARG(COND, arg_lower, arg)
     try:
         return ARG(IMM, int(arg), arg)
@@ -338,7 +340,9 @@ def get_rel(arg):
     if isinstance(arg, str):
         arg = arg_qualify(arg)
     if arg.type == IMM:
-        return arg.value
+        if arg.value & 3 != 0:  # bitwise version of: arg.value % 4 != 0
+            raise ValueError('Relative offset must be a multiple of 4')
+        return arg.value >> 2  # bitwise version of: arg.value // 4
     if arg.type == SYM:
         return symbols.resolve_relative(arg.value)
     raise TypeError('wanted: immediate, got: %s' % arg.raw)
@@ -634,23 +638,56 @@ def i_jump(target, condition='--'):
     raise TypeError('unsupported operand: %s' % target.raw)
 
 
+def _jump_relr(threshold, cond, offset):
+    """
+    Equivalent of I_JUMP_RELR macro in binutils-esp32ulp
+    """
+    _br.imm = threshold
+    _br.cmp = cond
+    _br.offset = abs(offset)
+    _br.sign = 0 if offset >= 0 else 1
+    _br.sub_opcode = SUB_OPCODE_BR
+    _br.opcode = OPCODE_BRANCH
+    return _br.all
+
+
 def i_jumpr(offset, threshold, condition):
     offset = get_rel(offset)
     threshold = get_imm(threshold)
     condition = get_cond(condition)
     if condition == 'lt':
-        cmp_op = B_CMP_L
+        cmp_op = BRCOND_LT
     elif condition == 'ge':
-        cmp_op = B_CMP_GE
+        cmp_op = BRCOND_GE
+    elif condition == 'le':  # le == lt(threshold+1)
+        threshold += 1
+        cmp_op = BRCOND_LT
+    elif condition == 'gt':  # gt == ge(threshold+1)
+        threshold += 1
+        cmp_op = BRCOND_GE
+    elif condition == 'eq':  # eq == ge(threshold) but not ge(threshold+1)
+        # jump over next JUMPR
+        skip_ins = _jump_relr(threshold + 1, BRCOND_GE, 2)
+        # jump to target
+        offset -= 1  # adjust for the additional JUMPR instruction
+        jump_ins = _jump_relr(threshold, BRCOND_GE, offset)
+        return (skip_ins, jump_ins)
     else:
         raise ValueError("invalid comparison condition")
-    _b.imm = threshold
-    _b.cmp = cmp_op
-    _b.offset = abs(offset)
-    _b.sign = 0 if offset >= 0 else 1
-    _b.sub_opcode = SUB_OPCODE_B
-    _b.opcode = OPCODE_BRANCH
-    return _b.all
+    return _jump_relr(threshold, cmp_op, offset)
+
+
+def _jump_rels(threshold, cond, offset):
+    """
+    Equivalent of I_JUMP_RELS macro in binutils-esp32ulp
+    """
+    _bs.imm = threshold
+    _bs.cmp = cond
+    _bs.offset = abs(offset)
+    _bs.sign = 0 if offset >= 0 else 1
+    _bs.sub_opcode = SUB_OPCODE_BS
+    _bs.opcode = OPCODE_BRANCH
+    return _bs.all
 
 
 def i_jumps(offset, threshold, condition):
@@ -658,17 +695,36 @@ def i_jumps(offset, threshold, condition):
     threshold = get_imm(threshold)
     condition = get_cond(condition)
     if condition == 'lt':
-        cmp_op = BC_CMP_LT
-    elif condition == 'gt':
-        cmp_op = BC_CMP_GT
-    elif condition == 'eq':
-        cmp_op = BC_CMP_EQ
+        cmp_op = BRCOND_LT
+    elif condition == 'le':
+        cmp_op = BRCOND_LE
+    elif condition == 'ge':
+        cmp_op = BRCOND_GE
+    elif condition in ('eq', 'gt'):
+        if condition == 'eq':  # eq == le but not lt
+            skip_cond = BRCOND_LT
+            jump_cond = BRCOND_LE
+        elif condition == 'gt':  # gt == ge but not le
+            skip_cond = BRCOND_LE
+            jump_cond = BRCOND_GE
+
+        # jump over next JUMPS
+        skip_ins = _jump_rels(threshold, skip_cond, 2)
+        # jump to target
+        offset -= 1  # adjust for the additional JUMPS instruction
+        jump_ins = _jump_rels(threshold, jump_cond, offset)
+
+        return (skip_ins, jump_ins)
     else:
         raise ValueError("invalid comparison condition")
-    _bc.imm = threshold
-    _bc.cmp = cmp_op
-    _bc.offset = abs(offset)
-    _bc.sign = 0 if offset >= 0 else 1
-    _bc.sub_opcode = SUB_OPCODE_BC
-    _bc.opcode = OPCODE_BRANCH
-    return _bc.all
+    return _jump_rels(threshold, cmp_op, offset)
+
+
+def no_of_instr(opcode, args):
+    if opcode == 'jumpr' and get_cond(args[2]) == 'eq':
+        return 2
+
+    if opcode == 'jumps' and get_cond(args[2]) in ('eq', 'gt'):
+        return 2
+
+    return 1

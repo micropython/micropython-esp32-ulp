@@ -263,16 +263,22 @@ class Assembler:
                         continue
                 else:
                     # machine instruction
-                    func = getattr(opcodes, 'i_' + opcode.lower(), None)
+                    opcode_lower = opcode.lower()
+                    func = getattr(opcodes, 'i_' + opcode_lower, None)
                     if func is not None:
-                        # during the first pass, symbols are not all known yet.
-                        # so some expressions may not evaluate to something (yet).
-                        # instruction building requires sane arguments however.
-                        # since all instructions are 4 bytes long, we simply skip
-                        # building instructions during pass 1, and append an "empty
-                        # instruction" to the section to get the right section size.
-                        instruction = 0 if self.a_pass == 1 else func(*args)
-                        self.append_section(instruction.to_bytes(4, 'little'), TEXT)
+                        if self.a_pass == 1:
+                            # during the first pass, symbols are not all known yet.
+                            # so we add empty instructions to the section, to determine
+                            # section sizes and symbol offsets for pass 2.
+                            result = (0,) * opcodes.no_of_instr(opcode_lower, args)
+                        else:
+                            result = func(*args)
+
+                        if not isinstance(result, tuple):
+                            result = (result,)
+
+                        for instruction in result:
+                            self.append_section(instruction.to_bytes(4, 'little'), TEXT)
                         continue
                 raise ValueError('Unknown opcode or directive: %s' % opcode)
         self.finalize_sections()
