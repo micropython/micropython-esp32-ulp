@@ -108,17 +108,21 @@ class Assembler:
         """
         if not line:
             return
-        has_label = line[0] not in '\t .'
+        has_label = ':' in line
         if has_label:
-            label_line = line.split(None, 1)
+            orig_line = line.strip()
+            label_line = orig_line.split(':', 1)
             if len(label_line) == 2:
                 label, line = label_line
             else:  # 1
                 label, line = label_line[0], None
-            label = label.rstrip(':')
+
+            if label.strip('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_$.'):  # if any chars remain
+                # if label contains other chars than allowed, it's not a label
+                label, line = None, orig_line
         else:
             label, line = None, line.lstrip()
-        if line is None:
+        if not line:
             opcode, args = None, ()
         else:
             opcode_args = line.split(None, 1)
