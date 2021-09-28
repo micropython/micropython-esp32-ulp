@@ -449,7 +449,7 @@ def i_tsens(reg_dest, delay):
     return _tsens.all
 
 
-def i_adc(reg_dest, adc_idx, mux):
+def i_adc(reg_dest, adc_idx, mux, _not_used=None):
     _adc.dreg = get_reg(reg_dest)
     _adc.mux = get_imm(mux)
     _adc.sar_sel = get_imm(adc_idx)
