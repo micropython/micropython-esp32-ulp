@@ -619,7 +619,7 @@ def i_jump(target, condition='--'):
         raise ValueError("invalid flags condition")
     if target.type == IMM or target.type == SYM:
         _bx.dreg = 0
-        _bx.addr = get_abs(target)
+        _bx.addr = get_abs(target) if target.type == SYM else get_abs(target) >> 2  # bitwise version of "// 4"
         _bx.unused = 0
         _bx.reg = 0
         _bx.type = jump_type

@@ -5,6 +5,12 @@
 entry:
   nop
 
+  # simple jumps
+  jump entry
+  jump later
+  jump 0x120, EQ
+  jump -288, EQ
+
   # jumps with labels
   jumps entry, 42, lt
   jumps entry, 42, lt
