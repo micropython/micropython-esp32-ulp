@@ -244,6 +244,21 @@ def test_symbols():
     assert st.resolve_absolute('const') == 123
 
 
+def test_support_multiple_statements_per_line():
+    src = """
+label: nop; nop;
+    wait 42
+"""
+
+    lines = Assembler().parse(src.splitlines())
+
+    assert lines == [
+        ('label', 'nop', ()),
+        (None, 'nop', ()),
+        (None, 'wait', ('42',))
+    ]
+
+
 test_parse_line()
 test_parse()
 test_assemble()
@@ -254,4 +269,5 @@ test_assemble_uppercase_opcode()
 test_assemble_evalulate_expressions()
 test_assemble_optional_comment_removal()
 test_assemble_test_regressions_from_evaluation()
+test_support_multiple_statements_per_line()
 test_symbols()
