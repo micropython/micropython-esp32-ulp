@@ -25,4 +25,7 @@ entry:
   reg_rd 12, 7, 0
   reg_rd 0x3ff48000, 7, 0
 
+  # interpret ; as statement separator - this results in 2 NOP machine instructions
+  nop; nop;
+
   halt

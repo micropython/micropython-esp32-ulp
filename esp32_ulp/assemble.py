@@ -129,9 +129,13 @@ class Assembler:
                 opcode, args = opcode_args[0], ()
         return label, opcode, args
 
+    def split_statements(self, lines):
+        for line in lines:
+            for statement in line.split(';'):
+                yield statement.rstrip()
 
     def parse(self, lines):
-        parsed = [self.parse_line(line) for line in lines]
+        parsed = [self.parse_line(line) for line in self.split_statements(lines)]
         return [p for p in parsed if p is not None]
 
 
