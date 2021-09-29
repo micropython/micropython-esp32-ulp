@@ -66,7 +66,7 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
     test_name="${src_name##*/}"
 
     # for now, skip files that contain known bugs in esp32_ulp (essentially a todo list of what to fix)
-    for I in esp32ulp_all esp32ulp_globals esp32ulp_jumpr esp32ulp_ranges test_reg; do
+    for I in esp32ulp_jumpr esp32ulp_ranges; do
         if [ "${test_name}" = "$I" ]; then
             # these are old bugs, and not related to the RTC macro handling functionality
             # they will still be great to fix over time
