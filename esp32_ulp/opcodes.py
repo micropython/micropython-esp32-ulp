@@ -358,7 +358,7 @@ def get_cond(arg):
 
 def _soc_reg_to_ulp_periph_sel(reg):
     # Map SoC peripheral register to periph_sel field of RD_REG and WR_REG instructions.
-    if reg < DR_REG_MAX_DIRECT:
+    if reg <= DR_REG_MAX_DIRECT:
         ret = RD_REG_PERIPH_RTC_CNTL
     elif reg < DR_REG_RTCCNTL_BASE:
         raise ValueError("invalid register base")
@@ -377,7 +377,7 @@ def _soc_reg_to_ulp_periph_sel(reg):
 
 def i_reg_wr(reg, high_bit, low_bit, val):
     reg = get_imm(reg)
-    if reg < DR_REG_MAX_DIRECT:  # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
+    if reg <= DR_REG_MAX_DIRECT:  # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
         _wr_reg.addr = reg
     else:
         _wr_reg.addr = (reg & 0xff) >> 2
@@ -391,7 +391,7 @@ def i_reg_wr(reg, high_bit, low_bit, val):
 
 def i_reg_rd(reg, high_bit, low_bit):
     reg = get_imm(reg)
-    if reg < DR_REG_MAX_DIRECT: # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
+    if reg <= DR_REG_MAX_DIRECT:  # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
         _rd_reg.addr = reg
     else:
         _rd_reg.addr = (reg & 0xff) >> 2
