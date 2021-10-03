@@ -60,6 +60,7 @@ def test_parse_labels_correctly():
     https://sourceware.org/binutils/docs/as/Labels.html
     """
     a = Assembler()
+    assert a.parse_line('') is None
     assert a.parse_line('label: .set const, 42') == ('label', '.set', ('const', '42',))
     assert a.parse_line('label:.set const, 42') == ('label', '.set', ('const', '42',))
     assert a.parse_line('label:') == ('label', None, ())
@@ -75,6 +76,7 @@ def test_parse_labels_correctly():
     assert a.parse_line('a_label:') == ('a_label', None, ())
     assert a.parse_line('$label:') == ('$label', None, ())
     assert a.parse_line('.label:') == ('.label', None, ())
+    assert a.parse_line('&label:') == (None, '&label:', ())  # & not a valid char in a label
 
 
 def test_parse():

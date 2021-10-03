@@ -2,6 +2,7 @@
 ESP32 ULP Co-Processor Assembler
 """
 
+import re
 from . import opcodes
 from .nocomment import remove_comments as do_remove_comments
 from .util import garbage_collect
@@ -91,6 +92,12 @@ class Assembler:
         self.symbols = SymbolTable(symbols or {}, bases or {}, globals or {})
         opcodes.symbols = self.symbols  # XXX dirty hack
 
+        # regex for parsing assembly lines
+        # format: [[whitespace]label:][whitespace][opcode[whitespace arg[,arg...]]]
+        # where [] means optional
+        # initialised here once, instead of compiling once per line
+        self.line_regex = re.compile(r'^(\s*([a-zA-Z0-9_$.]+):)?\s*((\S*)\s*(.*))$')
+
     def init(self, a_pass):
         self.a_pass = a_pass
         self.sections = dict(text=[], data=[])
@@ -108,29 +115,14 @@ class Assembler:
         """
         if not line:
             return
-        has_label = ':' in line
-        if has_label:
-            orig_line = line.strip()
-            label_line = orig_line.split(':', 1)
-            if len(label_line) == 2:
-                label, line = label_line
-            else:  # 1
-                label, line = label_line[0], None
 
-            if label.strip('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_$.'):  # if any chars remain
-                # if label contains other chars than allowed, it's not a label
-                label, line = None, orig_line
-        else:
-            label, line = None, line.lstrip()
-        if not line:
-            opcode, args = None, ()
-        else:
-            opcode_args = line.split(None, 1)
-            if len(opcode_args) == 2:
-                opcode, args = opcode_args
-                args = tuple(arg.strip() for arg in args.split(','))
-            else:  # 1
-                opcode, args = opcode_args[0], ()
+        matches = self.line_regex.match(line)
+        label, opcode, args = matches.group(2), matches.group(4), matches.group(5)
+
+        label = label if label else None  # force empty strings to None
+        opcode = opcode if opcode else None  # force empty strings to None
+        args = tuple(arg.strip() for arg in args.split(',')) if args else ()
+
         return label, opcode, args
 
     def split_statements(self, lines):
