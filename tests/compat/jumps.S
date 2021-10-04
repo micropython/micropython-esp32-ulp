@@ -5,6 +5,12 @@
 entry:
   nop
 
+  # simple jumps
+  jump entry
+  jump later
+  jump 0x120, EQ
+  jump -288, EQ
+
   # jumps with labels
   jumps entry, 42, lt
   jumps entry, 42, lt
@@ -20,12 +26,15 @@ entry:
 
   # jumps with immediate offset (specified in bytes, but real instruction uses words)
   jumps 0, 42, lt
+  jumps 0, 42, eq  # dual-instruction condition
 
   jumps 4, 42, lt
+  jumps 4, 42, eq  # dual-instruction condition
   jumps 8, 42, lt
   jumps 32, 42, lt
 
   jumps -4, 42, lt
+  jumps -4, 42, eq  # dual-instruction condition
   jumps -8, 42, lt
   jumps -32, 42, lt
 
@@ -46,12 +55,15 @@ entry:
 
   # jumpr with immediate offset (specified in bytes, but real instruction uses words)
   jumpr 0, 42, lt
+  jumpr 0, 42, eq  # dual-instruction condition
 
   jumpr 4, 42, lt
+  jumpr 4, 42, eq  # dual-instruction condition
   jumpr 8, 42, lt
   jumpr 32, 42, lt
 
   jumpr -4, 42, lt
+  jumpr -4, 42, eq  # dual-instruction condition
   jumpr -8, 42, lt
   jumpr -32, 42, lt
 

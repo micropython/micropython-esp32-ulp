@@ -342,9 +342,9 @@ def get_rel(arg):
     if arg.type == IMM:
         if arg.value & 3 != 0:  # bitwise version of: arg.value % 4 != 0
             raise ValueError('Relative offset must be a multiple of 4')
-        return arg.value >> 2  # bitwise version of: arg.value // 4
+        return IMM, arg.value >> 2  # bitwise version of: arg.value // 4
     if arg.type == SYM:
-        return symbols.resolve_relative(arg.value)
+        return SYM, symbols.resolve_relative(arg.value)
     raise TypeError('wanted: immediate, got: %s' % arg.raw)
 
 
@@ -449,7 +449,7 @@ def i_tsens(reg_dest, delay):
     return _tsens.all
 
 
-def i_adc(reg_dest, adc_idx, mux):
+def i_adc(reg_dest, adc_idx, mux, _not_used=None):
     _adc.dreg = get_reg(reg_dest)
     _adc.mux = get_imm(mux)
     _adc.sar_sel = get_imm(adc_idx)
@@ -619,7 +619,8 @@ def i_jump(target, condition='--'):
         raise ValueError("invalid flags condition")
     if target.type == IMM or target.type == SYM:
         _bx.dreg = 0
-        _bx.addr = get_abs(target)
+        # we track label addresses in 32bit words, but immediate values are in bytes and need to get divided by 4.
+        _bx.addr = get_abs(target) if target.type == SYM else get_abs(target) >> 2  # bitwise version of "// 4"
         _bx.unused = 0
         _bx.reg = 0
         _bx.type = jump_type
@@ -652,7 +653,7 @@ def _jump_relr(threshold, cond, offset):
 
 
 def i_jumpr(offset, threshold, condition):
-    offset = get_rel(offset)
+    offset_type, offset = get_rel(offset)
     threshold = get_imm(threshold)
     condition = get_cond(condition)
     if condition == 'lt':
@@ -669,7 +670,11 @@ def i_jumpr(offset, threshold, condition):
         # jump over next JUMPR
         skip_ins = _jump_relr(threshold + 1, BRCOND_GE, 2)
         # jump to target
-        offset -= 1  # adjust for the additional JUMPR instruction
+        if (offset_type == IMM and offset < 0) or offset_type == SYM:
+            # adjust for the additional JUMPR instruction
+            # for IMM offsets, the offset is relative to the 2nd instruction, so only backwards jumps need adjusting
+            # for SYM offsets, label offsets already include the extra instruction, so both directions need adjusting
+            offset -= 1
         jump_ins = _jump_relr(threshold, BRCOND_GE, offset)
         return (skip_ins, jump_ins)
     else:
@@ -691,7 +696,7 @@ def _jump_rels(threshold, cond, offset):
 
 
 def i_jumps(offset, threshold, condition):
-    offset = get_rel(offset)
+    offset_type, offset = get_rel(offset)
     threshold = get_imm(threshold)
     condition = get_cond(condition)
     if condition == 'lt':
@@ -711,7 +716,11 @@ def i_jumps(offset, threshold, condition):
         # jump over next JUMPS
         skip_ins = _jump_rels(threshold, skip_cond, 2)
         # jump to target
-        offset -= 1  # adjust for the additional JUMPS instruction
+        if (offset_type == IMM and offset < 0) or offset_type == SYM:
+            # adjust for the additional JUMPS instruction
+            # for IMM offsets, the offset is relative to the 2nd instruction, so only backwards jumps need adjusting
+            # for SYM offsets, label offsets already include the extra instruction, so both directions need adjusting
+            offset -= 1
         jump_ins = _jump_rels(threshold, jump_cond, offset)
 
         return (skip_ins, jump_ins)

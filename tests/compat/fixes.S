@@ -28,4 +28,9 @@ entry:
   # interpret ; as statement separator - this results in 2 NOP machine instructions
   nop; nop;
 
+  # adc supports an undocumented 4th argument, which should be entirely ignored
+  # binutils-esp32ulp also ignores this argument, if present, see:
+  # https://github.com/espressif/binutils-esp32ulp/blob/249ec34cc2c9574a86f3f86bbb175a863f988bcf/gas/config/esp32ulp-parse.y#L810
+  adc r1, 0, 1, 100
+
   halt

@@ -53,6 +53,32 @@ def test_parse_line():
     assert a.parse_line(next(lines)) == (None, '.data', ())  # test left-aligned directive is not treated as label
 
 
+def test_parse_labels_correctly():
+    """
+    description of what defines a label
+    https://sourceware.org/binutils/docs/as/Statements.html
+    https://sourceware.org/binutils/docs/as/Labels.html
+    """
+    a = Assembler()
+    assert a.parse_line('') is None
+    assert a.parse_line('label: .set const, 42') == ('label', '.set', ('const', '42',))
+    assert a.parse_line('label:.set const, 42') == ('label', '.set', ('const', '42',))
+    assert a.parse_line('label:') == ('label', None, ())
+    assert a.parse_line('    label:') == ('label', None, ())
+    assert a.parse_line('    label:  ') == ('label', None, ())
+    assert a.parse_line('nop  ') == (None, 'nop', ())
+    assert a.parse_line('.set c, 1  ') == (None, '.set', ('c', '1',))
+    assert a.parse_line('invalid : nop') == (None, 'invalid', (': nop',))  # no whitespace between label and colon
+    assert a.parse_line('.string "hello world"') == (None, '.string', ('"hello world"',))
+    assert a.parse_line('.string "hello : world"') == (None, '.string', ('"hello : world"',))  # colon in string
+    assert a.parse_line('label::') == ('label', ':', ())
+    assert a.parse_line('label: :') == ('label', ':', ())
+    assert a.parse_line('a_label:') == ('a_label', None, ())
+    assert a.parse_line('$label:') == ('$label', None, ())
+    assert a.parse_line('.label:') == ('.label', None, ())
+    assert a.parse_line('&label:') == (None, '&label:', ())  # & not a valid char in a label
+
+
 def test_parse():
     a = Assembler()
     lines = remove_comments(src)
@@ -260,6 +286,7 @@ label: nop; nop;
 
 
 test_parse_line()
+test_parse_labels_correctly()
 test_parse()
 test_assemble()
 test_assemble_bss()
