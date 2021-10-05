@@ -379,9 +379,10 @@ def i_reg_wr(reg, high_bit, low_bit, val):
     reg = get_imm(reg)
     if reg <= DR_REG_MAX_DIRECT:  # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
         _wr_reg.addr = reg
+        _wr_reg.periph_sel = reg >> 8
     else:
         _wr_reg.addr = (reg & 0xff) >> 2
-    _wr_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
+        _wr_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _wr_reg.data = get_imm(val)
     _wr_reg.low = get_imm(low_bit)
     _wr_reg.high = get_imm(high_bit)
@@ -393,9 +394,10 @@ def i_reg_rd(reg, high_bit, low_bit):
     reg = get_imm(reg)
     if reg <= DR_REG_MAX_DIRECT:  # see https://github.com/espressif/binutils-esp32ulp/blob/master/gas/config/tc-esp32ulp_esp32.c
         _rd_reg.addr = reg
+        _rd_reg.periph_sel = reg >> 8
     else:
         _rd_reg.addr = (reg & 0xff) >> 2
-    _rd_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
+        _rd_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _rd_reg.unused = 0
     _rd_reg.low = get_imm(low_bit)
     _rd_reg.high = get_imm(high_bit)
