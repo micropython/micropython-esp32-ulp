@@ -51,6 +51,42 @@ build_defines_db() {
         esp-idf/components/esp_common/include/*.h 1>$log_file
 }
 
+patch_test() {
+    local test_name=$1
+    local out_file="${test_name}.tmp"
+
+    if [ "${test_name}" = esp32ulp_jumpr ]; then
+        (
+            cd binutils-esp32ulp/gas/testsuite/gas/esp32ulp/esp32
+            cp ${test_name}.s ${out_file}
+            echo -e "\tPatching test to work around binutils-esp32ulp .global bug"
+            cat >> ${out_file} <<EOF
+                .global check_jump1
+EOF
+        )
+        return 0
+
+    elif [ "${test_name}" = esp32ulp_ranges ]; then
+        (
+            cd binutils-esp32ulp/gas/testsuite/gas/esp32ulp/esp32
+            # merge 2 files: https://github.com/espressif/binutils-esp32ulp/blob/249ec34/gas/testsuite/gas/esp32ulp/esp32/check_as_ld.sh#L31
+            echo -e "\t${test_name} requires esp32ulp_globals. Merging both files into ${out_file}"
+            cat esp32ulp_globals.s ${test_name}.s > ${out_file}
+            echo -e "\tPatching test to work around binutils-esp32ulp .global bug"
+            cat >> ${out_file} <<EOF
+                .global min_add
+                .global min_jump1
+                .global max_jump1
+                .global min_jumpr1
+                .global max_jumpr1
+EOF
+        )
+        return 0
+    fi
+
+    return 1  # nothing was patched
+}
+
 make_log_dir
 fetch_esp_idf
 fetch_ulptool_examples
@@ -60,20 +96,11 @@ build_defines_db $1
 for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/gas/esp32ulp/esp32/*.s; do
 
     src_name="${src_file%.s}"
+    src_dir="${src_name%/*}"
 
     echo "Testing $src_file"
 
     test_name="${src_name##*/}"
-
-    # for now, skip files that contain known bugs in esp32_ulp (essentially a todo list of what to fix)
-    for I in esp32ulp_jumpr esp32ulp_ranges; do
-        if [ "${test_name}" = "$I" ]; then
-            # these are old bugs, and not related to the RTC macro handling functionality
-            # they will still be great to fix over time
-            echo -e "\tSkipping... known bugs in esp32_ulp"
-            continue 2
-        fi
-    done
 
     # for now, skip files that contain unsupported things (macros)
     for I in i2c i2c_dev stack i2c_wr test1 test_jumpr test_macro; do
@@ -83,8 +110,18 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
         fi
     done
 
-    echo -e "\tBuilding using py-esp32-ulp"
+    # BEGIN: work around known issues with binutils-esp32ulp
     ulp_file="${src_name}.ulp"
+
+    if patch_test ${test_name}; then
+        # switch to the patched file instead of original one
+        src_file="${src_dir}/${test_name}.tmp"
+        src_name="${src_file%.tmp}"
+        ulp_file="${src_name}.tmp.ulp"  # when extension is not .s, py-esp32-ulp doesn't remove original extension
+    fi
+    # END: work around known issues with binutils-esp32ulp
+
+    echo -e "\tBuilding using py-esp32-ulp"
     log_file="${src_name}.log"
     micropython -m esp32_ulp $src_file 1>$log_file   # generates $ulp_file
 
