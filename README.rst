@@ -29,6 +29,11 @@ ULP source files containing convenience macros such as WRITE_RTC_REG. The
 preprocessor and how to use it is documented here:
 `Preprocessor support <docs/preprocess.rst>`_.
 
+The minimum supported version of MicroPython is v1.12. py-esp32-ulp has been
+tested with MicroPython v1.12 and v1.17. It has been tested on real ESP32
+devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM. It has
+also been tested on the Unix port.
+
 There might be some stuff missing, some bugs and other symptoms of alpha
 software. Also, error and exception handling is rather rough yet.
 
