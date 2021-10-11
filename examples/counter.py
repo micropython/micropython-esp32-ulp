@@ -12,7 +12,7 @@ incrementing (see loop at the end).
 from esp32 import ULP
 from machine import mem32
 
-from esp32_ulp.__main__ import src_to_binary
+from esp32_ulp import src_to_binary
 
 source = """\
 data:       .long 0

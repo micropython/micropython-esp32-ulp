@@ -4,6 +4,12 @@
 
 set -e
 
+calc_file_hash() {
+    local filename=$1
+
+    shasum < $1 | cut -d' ' -f1
+}
+
 for src_file in $(ls -1 compat/*.S); do
     src_name="${src_file%.S}"
     
@@ -36,6 +42,6 @@ for src_file in $(ls -1 compat/*.S); do
         xxd $bin_file
         exit 1
     else
-        echo -e "\tBuild outputs match"
+        echo -e "\tBuild outputs match (sha1: $(calc_file_hash $ulp_file))"
     fi
 done

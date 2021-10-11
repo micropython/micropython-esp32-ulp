@@ -15,7 +15,9 @@ development machine using the binutils-esp32ulp toolchain from Espressif.
 Status
 ------
 
-The most commonly used simple stuff should work.
+The most commonly used stuff should work. Many ULP code examples found on
+the web will work unmodified. Notably, assembler macros and #include processing
+are not supported.
 
 Expressions in assembly source code are supported and get evaluated during
 assembling. Only expressions evaluating to a single integer are supported.
@@ -29,7 +31,12 @@ ULP source files containing convenience macros such as WRITE_RTC_REG. The
 preprocessor and how to use it is documented here:
 `Preprocessor support <docs/preprocess.rst>`_.
 
-There might be some stuff missing, some bugs and other symptoms of alpha
+The minimum supported version of MicroPython is v1.12. py-esp32-ulp has been
+tested with MicroPython v1.12 and v1.17. It has been tested on real ESP32
+devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM. It has
+also been tested on the Unix port.
+
+There might be some stuff missing, some bugs and other symptoms of beta
 software. Also, error and exception handling is rather rough yet.
 
 Please be patient or contribute missing parts or fixes.

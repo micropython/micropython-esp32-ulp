@@ -11,6 +11,21 @@ def test(param):
     tests.append(param)
 
 
+def resolve_relative_path(filename):
+    """
+    Returns the full path to the filename provided, taken relative to the current file
+    e.g.
+      if this file was file.py at /path/to/file.py
+      and the provided relative filename was tests/unit.py
+      then the resulting path would be /path/to/tests/unit.py
+    """
+    r = __file__.rsplit("/", 1)  # poor man's os.path.dirname(__file__)
+    head = r[0]
+    if len(r) == 1 or not head:
+        return filename
+    return "%s/%s" % (head, filename)
+
+
 @test
 def test_replace_defines_should_return_empty_line_given_empty_string():
     p = Preprocessor()
@@ -204,7 +219,7 @@ def preprocess_should_replace_BIT_with_empty_string_unless_defined():
 def test_process_include_file():
     p = Preprocessor()
 
-    defines = p.process_include_file('fixtures/incl.h')
+    defines = p.process_include_file(resolve_relative_path('fixtures/incl.h'))
 
     assert defines['CONST1'] == '42'
     assert defines['CONST2'] == '99'
@@ -216,8 +231,8 @@ def test_process_include_file():
 def test_process_include_file_with_multiple_files():
     p = Preprocessor()
 
-    defines = p.process_include_file('fixtures/incl.h')
-    defines = p.process_include_file('fixtures/incl2.h')
+    defines = p.process_include_file(resolve_relative_path('fixtures/incl.h'))
+    defines = p.process_include_file(resolve_relative_path('fixtures/incl2.h'))
 
     assert defines['CONST1'] == '42', "constant from incl.h"
     assert defines['CONST2'] == '123', "constant overridden by incl2.h"
@@ -232,8 +247,8 @@ def test_process_include_file_using_database():
     p = Preprocessor()
     p.use_db(db)
 
-    p.process_include_file('fixtures/incl.h')
-    p.process_include_file('fixtures/incl2.h')
+    p.process_include_file(resolve_relative_path('fixtures/incl.h'))
+    p.process_include_file(resolve_relative_path('fixtures/incl2.h'))
 
     assert db['CONST1'] == '42', "constant from incl.h"
     assert db['CONST2'] == '123', "constant overridden by incl2.h"
@@ -250,7 +265,7 @@ def test_process_include_file_should_not_load_database_keys_into_instance_define
     p = Preprocessor()
     p.use_db(db)
 
-    p.process_include_file('fixtures/incl.h')
+    p.process_include_file(resolve_relative_path('fixtures/incl.h'))
 
     # a bit hackish to reference instance-internal state
     # but it's important to verify this, as we otherwise run out of memory on device

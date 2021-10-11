@@ -51,6 +51,12 @@ build_defines_db() {
         esp-idf/components/esp_common/include/*.h 1>$log_file
 }
 
+calc_file_hash() {
+    local filename=$1
+
+    shasum < $1 | cut -d' ' -f1
+}
+
 patch_test() {
     local test_name=$1
     local out_file="${test_name}.tmp"
@@ -150,6 +156,6 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
         xxd $bin_file
         exit 1
     else
-        echo -e "\tBuild outputs match"
+        echo -e "\tBuild outputs match (sha1: $(calc_file_hash $ulp_file))"
     fi
 done
