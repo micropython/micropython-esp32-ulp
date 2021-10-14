@@ -24,7 +24,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: Implementation :: MicroPython',
     ],
-    platforms=["esp32"],
+    platforms=["esp32", "linux", "darwin"],
     cmdclass={"sdist": sdist_upip.sdist},
     packages=["esp32_ulp"],
 )
