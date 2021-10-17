@@ -2,6 +2,11 @@
 py-esp32-ulp
 =====================
 
+.. image:: ../../actions/workflows/run_tests.yaml/badge.svg
+   :height: 20px
+   :target: ../../actions/workflows/run_tests.yaml
+   :alt: Build Status
+
 py-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
 Co-Processor, written in MicroPython.
 
