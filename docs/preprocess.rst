@@ -1,5 +1,6 @@
+=====================
 Preprocessor
----------------------
+=====================
 
 py-esp32-ulp contains a small preprocessor, which aims to fulfill one goal:
 facilitate assembling of ULP code from Espressif and other open-source
