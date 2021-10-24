@@ -57,18 +57,18 @@ Support
 
 The following features are supported:
 
-* The entire `ESP32 ULP instruction set <https://esp-idf.readthedocs.io/en/latest/api-guides/ulp_instruction_set.html>`_
-* Constants defined with ``.set``
-* Constants defined with ``#define``
-* Expressions in assembly code and constant definitions
+* the entire `ESP32 ULP instruction set <https://esp-idf.readthedocs.io/en/latest/api-guides/ulp_instruction_set.html>`_
+* constants defined with ``.set``
+* constants defined with ``#define``
+* expressions in assembly code and constant definitions
 * RTC convenience macros (e.g. WRITE_RTC_REG)
-* Many ESP32 ULP code examples found on the web will work unmodified
+* many ESP32 ULP code examples found on the web will work unmodified
 
-Not currently supported:
+Currently not supported:
 
-* Assembler macros using ``.macro``
-* Preprocessor macros using ``#define A(x,y) ...``
-* Including files using ``#include``
+* assembler macros using ``.macro``
+* preprocessor macros using ``#define A(x,y) ...``
+* including files using ``#include``
 * ESP32-S2 (not binary compatible with the ESP32)
 
 
