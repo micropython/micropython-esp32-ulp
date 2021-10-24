@@ -86,6 +86,12 @@ Advanced usage
 
 In real world applications, you might want to separate the assembly stage from
 the loading/running stage, to avoid having to assemble the code on every startup.
+This can be useful for battery-powered applications, where every second of sleep
+time matters.
+
+Splitting the assembly and load stage can be combined with other techniques to
+for example implement a caching mechansim for the ULP binary, which automatically
+updates the binary every time the assembly source code changes.
 
 The ``esp32_ulp.assemble_file`` function stores the assembled and linked binary
 into a file with a ``.ulp`` extension, which can later be loaded directly without
@@ -98,16 +104,6 @@ assembling the source again.
 
       import esp32_ulp
       esp32_ulp.assemble_file('code.S')  # this results in code.ulp
-
-   Alternatively you can assemble the source on a PC with MicroPython, and transfer
-   the resulting ULP binary to the ESP32.
-
-   .. code-block:: python
-
-      git clone https://github.com/ThomasWaldmann/py-esp32-ulp
-      cd py-esp32-ulp
-      micropython -m esp32_ulp path/to/code.S  # this results in path/to/code.ulp
-      # now upload path/to/code.ulp to the ESP32
 
 2. The above prints out the offsets of all global symbols/labels. For the next step,
    you will need to note down the offset of the label, which represents the entry
@@ -134,6 +130,10 @@ assembling the source again.
           # e.g. for an offset of 2:
           #   2 words * 4 = 8 bytes
           ulp.run(2*4)  # specify the offset of the entry point label
+
+To update the binary every time the source code changes, you would need a mechanism
+to detect that the source code changed. Whenever needed, manually re-running the
+``assemble_file`` function as shown above, would also work.
 
 
 Preprocessor
