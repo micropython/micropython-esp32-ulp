@@ -1,47 +1,13 @@
 py-esp32-ulp Documentation
 ==========================
 
-py-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
-Co-Processor, written in MicroPython.
-
 .. contents:: Table of Contents
 
 
-What is it useful for?
-----------------------
-
-py-esp32-ulp can translate small assembly language programs to a
-loadable/executable ULP machine code binary, directly on the ESP32
-microcontroller.
-
-This is intended as an alternative approach to assembling such programs using
-the binutils-esp32ulp toolchain from Espressif on a development machine.
-
-It can also be useful in cases where binutils-esp32ulp is not available.
-
-
-Features
+Overview
 --------
 
-The following features are supported:
-
-* the entire `ESP32 ULP instruction set <https://esp-idf.readthedocs.io/en/latest/api-guides/ulp_instruction_set.html>`_
-* constants defined with ``.set``
-* constants defined with ``#define``
-* expressions in assembly code and constant definitions
-* RTC convenience macros (e.g. WRITE_RTC_REG)
-* many ESP32 ULP code examples found on the web will work unmodified
-
-
-Limitations
------------
-
-Currently the following are not supported:
-
-* assembler macros using ``.macro``
-* preprocessor macros using ``#define A(x,y) ...``
-* including files using ``#include``
-* ESP32-S2 (not binary compatible with the ESP32)
+`README.rst </README.rst>`_ gives a general overview of this project.
 
 
 Installation
@@ -168,6 +134,17 @@ especially useful for assembling ULP examples from Espressif or other ULP code
 found as part of Arduino/ESP-IDF projects.
 
 The preprocessor and how to use it is documented here: `Preprocessor support </docs/preprocess.rst>`_.
+
+
+Limitations
+-----------
+
+Currently the following are not supported:
+
+* assembler macros using ``.macro``
+* preprocessor macros using ``#define A(x,y) ...``
+* including files using ``#include``
+* ESP32-S2 (not binary compatible with the ESP32)
 
 
 Testing

@@ -1,11 +1,15 @@
-=====================
-py-esp32-ulp
-=====================
+.. start-badges
 
 .. image:: ../../actions/workflows/run_tests.yaml/badge.svg
    :height: 20px
    :target: ../../actions/workflows/run_tests.yaml
    :alt: Build Status
+
+.. end-badges
+
+=====================
+py-esp32-ulp
+=====================
 
 py-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
 Co-Processor, written in MicroPython.
@@ -15,6 +19,8 @@ ULP machine code binary, directly on the ESP32 microcontroller.
 
 This is intended as an alternative approach to assembling such programs using
 the binutils-esp32ulp toolchain from Espressif on a development machine.
+
+It can also be useful in cases where binutils-esp32ulp is not available.
 
 
 Features
@@ -48,9 +54,6 @@ To get going run the following directly on the ESP32:
 
 The `counter.py </examples/counter.py>`_ example shows how to assemble code, load
 and run the resulting binary and exchange data between the ULP and the main CPU.
-
-You can also try the `blink.py </examples/blink.py>`_ example, which shows how to
-let the ULP blink an LED.
 
 
 Documentation
