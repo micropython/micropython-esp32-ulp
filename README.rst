@@ -33,17 +33,17 @@ The following features are supported:
 Quick start
 -----------
 
-You can get going, run the following directly on the ESP32:
+To get going run the following directly on the ESP32:
 
 .. code-block:: python
 
-   # step 1: install py-esp32-ulp
-   # important: ensure the ESP32 is connected to a network with internet connectivity
+   # Step 1: Install py-esp32-ulp
+   # IMPORTANT: Ensure the ESP32 is connected to a network with internet connectivity.
    import upip
    upip.install('micropython-py-esp32-ulp')
 
-   # step 2: run an example
-   # first, upload examples/counter.py to the ESP32
+   # Step 2: Run an example
+   # First, upload examples/counter.py to the ESP32.
    import counter
 
 The `counter.py </examples/counter.py>`_ example shows how to assemble code, load

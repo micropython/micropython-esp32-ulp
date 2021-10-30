@@ -4,12 +4,15 @@ py-esp32-ulp Documentation
 py-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
 Co-Processor, written in MicroPython.
 
+.. contents:: Table of Contents
+
 
 What is it useful for?
 ----------------------
 
-It can translate small assembly language programs to a loadable/executable
-ULP machine code binary, directly on the ESP32 microcontroller.
+py-esp32-ulp can translate small assembly language programs to a
+loadable/executable ULP machine code binary, directly on the ESP32
+microcontroller.
 
 This is intended as an alternative approach to assembling such programs using
 the binutils-esp32ulp toolchain from Espressif on a development machine.
@@ -55,21 +58,20 @@ On the ESP32, install using upip:
 On a PC, simply ``git clone`` this repo.
 
 
-Examples
---------
+Getting started
+---------------
 
-Quick start
-+++++++++++
-The quickest way to get started is to try one of the `examples </examples/>`_.
+On the ESP32
+++++++++++++
 
-The simplest example is `counter.py </examples/counter.py>`_. It shows how to
-assemble code, load and run the resulting binary and exchange data between the
-ULP and the main CPU.
+The simplest example to try on the ESP32 is `counter.py </examples/counter.py>`_.
+It shows how to assemble code, load and run the resulting binary and exchange
+data between the ULP and the main CPU.
 
 Run the ``counter.py`` example:
 
 1. Install py-esp32-ulp onto the ESP32 as shown above
-2. Upload the `counter.py </examples/counter.py>`_ file to the ESP32
+2. Upload the `examples/counter.py </examples/counter.py>`_ file to the ESP32
 3. Run with ``import counter``
 
 You can also try the `blink.py </examples/blink.py>`_ example, which shows how to
@@ -77,8 +79,10 @@ let the ULP blink an LED.
 
 Look inside each example for a more detailed description.
 
-Using on a PC
-+++++++++++++
+
+On a PC
++++++++
+
 On a PC with the unix port of MicroPython, you can assemble source code as
 follows:
 
@@ -88,9 +92,11 @@ follows:
    cd py-esp32-ulp
    micropython -m esp32_ulp path/to/code.S  # this results in path/to/code.ulp
 
+
 More examples
 +++++++++++++
-More ULP examples from around the web:
+
+Other ULP examples from around the web:
 
 * https://github.com/espressif/esp-iot-solution/tree/master/examples/ulp_examples
 * https://github.com/duff2013/ulptool
@@ -100,30 +106,30 @@ More ULP examples from around the web:
 Advanced usage
 --------------
 
-In real world applications, you might want to separate the assembly stage from
-the loading/running stage, to avoid having to assemble the code on every startup.
-This can be useful for battery-powered applications, where every second of sleep
+In some applications you might want to separate the assembly stage from the
+loading/running stage, to avoid having to assemble the code on every startup.
+This can be useful in battery-powered applications where every second of sleep
 time matters.
 
-Splitting the assembly and load stage can be combined with other techniques to
-for example implement a caching mechansim for the ULP binary, which automatically
-updates the binary every time the assembly source code changes.
+Splitting the assembly and load stage can be combined with other techniques,
+for example to implement a caching mechansim for the ULP binary that
+automatically updates the binary every time the assembly source code changes.
 
-The ``esp32_ulp.assemble_file`` function stores the assembled and linked binary
-into a file with a ``.ulp`` extension, which can later be loaded directly without
-assembling the source again.
+The ``esp32_ulp.assemble_file`` function can be used to assemble and link an
+assembly source file into a machine code binary file with a ``.ulp`` extension.
+That file can then be loaded directly without assembling the source again.
 
-1. Create/upload an assembly source file and run the following to get a loadable
-   ULP binary as a ``.ulp`` file:
+1. Create/upload an assembly source file and run the following to get a
+   loadable ULP binary as a ``.ulp`` file:
 
    .. code-block:: python
 
       import esp32_ulp
       esp32_ulp.assemble_file('code.S')  # this results in code.ulp
 
-2. The above prints out the offsets of all global symbols/labels. For the next step,
-   you will need to note down the offset of the label, which represents the entry
-   point to your code.
+2. The above prints out the offsets of all global symbols/labels. For the next
+   step, you will need to note down the offset of the label, which represents
+   the entry point to your code.
 
 3. Now load and run the resulting binary as follows:
 
@@ -147,9 +153,10 @@ assembling the source again.
           #   2 words * 4 = 8 bytes
           ulp.run(2*4)  # specify the offset of the entry point label
 
-To update the binary every time the source code changes, you would need a mechanism
-to detect that the source code changed. Whenever needed, manually re-running the
-``assemble_file`` function as shown above, would also work.
+To update the binary every time the source code changes, you would need a
+mechanism to detect that the source code changed. This could trigger a re-run
+of the ``assemble_file`` function to update the binary. Manually re-running
+this function as needed would also work.
 
 
 Preprocessor
