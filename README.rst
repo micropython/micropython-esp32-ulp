@@ -32,7 +32,7 @@ The following features are supported:
 * constants defined with ``.set``
 * constants defined with ``#define``
 * expressions in assembly code and constant definitions
-* RTC convenience macros (e.g. WRITE_RTC_REG)
+* RTC convenience macros (e.g. ``WRITE_RTC_REG``)
 * many ESP32 ULP code examples found on the web will work unmodified
 
 
@@ -52,7 +52,7 @@ To get going run the following directly on the ESP32:
    # First, upload examples/counter.py to the ESP32.
    import counter
 
-The `counter.py </examples/counter.py>`_ example shows how to assemble code, load
+The `examples/counter.py </examples/counter.py>`_ example shows how to assemble code, load
 and run the resulting binary and exchange data between the ULP and the main CPU.
 
 
