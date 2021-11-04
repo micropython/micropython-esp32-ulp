@@ -1,3 +1,0 @@
-To run the micropython examples which load and run binaries on the ULP,
-you need a ESP32 MicroPython build that was made after 2018-05-01.
-

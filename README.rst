@@ -1,63 +1,76 @@
-What is py-esp32-ulp?
----------------------
+.. start-badges
 
-It is an assembler toolchain for the ESP32 ULP (Ultra Low-Power) Co-Processor,
-written in MicroPython.
+.. image:: ../../actions/workflows/run_tests.yaml/badge.svg
+   :height: 20px
+   :target: ../../actions/workflows/run_tests.yaml
+   :alt: Build Status
 
-It is able to translate small, simple assembler language programs to a
-loadable/executable machine code binary, at runtime, on the ESP32
-microcontroller, from projects implemented in MicroPython.
+.. end-badges
 
-This is intended as an alternative approach to assembling such programs on a
-development machine using the binutils-esp32ulp toolchain from Espressif.
+=====================
+py-esp32-ulp
+=====================
 
+py-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
+Co-Processor, written in MicroPython.
 
-Status
-------
+It can translate small assembly language programs to a loadable/executable
+ULP machine code binary, directly on the ESP32 microcontroller.
 
-The most commonly used stuff should work. Many ULP code examples found on
-the web will work unmodified. Notably, assembler macros and #include processing
-are not supported.
+This is intended as an alternative approach to assembling such programs using
+the binutils-esp32ulp toolchain from Espressif on a development machine.
 
-Expressions in assembly source code are supported and get evaluated during
-assembling. Only expressions evaluating to a single integer are supported.
-Constants defined with ``.set`` are supported in expressions.
-
-We have some unit tests and also compatibility tests that compare the output
-whether it is identical with binutils-esp32ulp output.
-
-There is a simple preprocessor that understands just enough to allow assembling
-ULP source files containing convenience macros such as WRITE_RTC_REG. The
-preprocessor and how to use it is documented here:
-`Preprocessor support <docs/preprocess.rst>`_.
-
-The minimum supported version of MicroPython is v1.12. py-esp32-ulp has been
-tested with MicroPython v1.12 and v1.17. It has been tested on real ESP32
-devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM. It has
-also been tested on the Unix port.
-
-There might be some stuff missing, some bugs and other symptoms of beta
-software. Also, error and exception handling is rather rough yet.
-
-Please be patient or contribute missing parts or fixes.
-
-See the issue tracker for known bugs and todo items.
+It can also be useful in cases where binutils-esp32ulp is not available.
 
 
-Links
------
+Features
+--------
 
-We are NOT (fully) compatible with "as", but we try to be close for the stuff
-that is actually implemented:
+The following features are supported:
 
-https://sourceware.org/binutils/docs/as/index.html
+* the entire `ESP32 ULP instruction set <https://esp-idf.readthedocs.io/en/latest/api-guides/ulp_instruction_set.html>`_
+* constants defined with ``.set``
+* constants defined with ``#define``
+* expressions in assembly code and constant definitions
+* RTC convenience macros (e.g. ``WRITE_RTC_REG``)
+* many ESP32 ULP code examples found on the web will work unmodified
 
-Espressif docs:
 
-https://esp-idf.readthedocs.io/en/latest/api-guides/ulp_instruction_set.html
+Quick start
+-----------
 
-https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf
+To get going run the following directly on the ESP32:
 
-Espressif ULP examples:
+.. code-block:: python
 
-https://github.com/espressif/esp-iot-solution/tree/master/examples/ulp_examples
+   # Step 1: Install py-esp32-ulp
+   # IMPORTANT: Ensure the ESP32 is connected to a network with internet connectivity.
+   import upip
+   upip.install('micropython-py-esp32-ulp')
+
+   # Step 2: Run an example
+   # First, upload examples/counter.py to the ESP32.
+   import counter
+
+The `examples/counter.py </examples/counter.py>`_ example shows how to assemble code, load
+and run the resulting binary and exchange data between the ULP and the main CPU.
+
+
+Documentation
+-------------
+See `docs/index.rst </docs/index.rst>`_.
+
+
+Requirements
+------------
+
+The minimum supported version of MicroPython is v1.12.
+
+An ESP32 is required to run the ULP machine code binary produced by py-esp32-ulp
+(the ESP32-S2 will not work as it is not binary compatible with the ESP32).
+
+
+License
+-------
+
+This project is released under the `MIT License </LICENSE>`_.
