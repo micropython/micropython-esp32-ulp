@@ -2,8 +2,6 @@ import re
 import sdist_upip
 from setuptools import setup
 
-VERSION = "1.0.0"
-
 
 def long_desc_from_readme():
     with open('README.rst', 'r') as fd:
@@ -20,7 +18,9 @@ def long_desc_from_readme():
 
 setup(
     name="micropython-py-esp32-ulp",
-    version=VERSION,
+    use_scm_version={
+        'local_scheme': 'no-local-version',
+    },
     description="Assembler toolchain for the ESP32 ULP co-processor, written in MicroPython",
     long_description=long_desc_from_readme(),
     long_description_content_type='text/x-rst',
@@ -34,6 +34,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: Implementation :: MicroPython',
     ],
+    setup_requires=['setuptools_scm'],
     platforms=["esp32", "linux", "darwin"],
     cmdclass={"sdist": sdist_upip.sdist},
     packages=["esp32_ulp"],
