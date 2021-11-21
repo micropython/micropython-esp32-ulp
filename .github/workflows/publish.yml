@@ -1,0 +1,42 @@
+name: Publish Python Package
+
+on:
+  # trigger when publishing a release
+  release:
+    types: [published]
+
+  # also allow triggering this workflow manually for testing
+  workflow_dispatch:
+
+jobs:
+  publish:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        # just fetching 1 commit is not enough for setuptools-scm, so we fetch all
+        fetch-depth: 0
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        pip install setuptools setuptools_scm
+    - name: Build package
+      run: |
+        python setup.py sdist
+        rm dist/*.orig  # clean sdist_upip noise
+    - name: Publish to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      if: github.event.release.tag_name  # only when releasing a new version
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
