@@ -1,5 +1,11 @@
 # stuff we need to include into the sdist is handled automatically by
 # setuptools_scm - it includes all git-committed files.
-# but we want to exclude some committed files/dirs not needed in the sdist:
-exclude .gitattributes .gitignore
+# but we want only the main source code and exclude everything else
+# to not waste space on the esp32
+# (upip packages are not installable by pip on a PC, so on a PC one
+# would git clone anyway and get all the other files)
+exclude *  # exclude all files in repo root
 prune .github
+prune docs
+prune examples
+prune tests
