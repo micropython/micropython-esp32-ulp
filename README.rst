@@ -7,9 +7,9 @@
 
 .. end-badges
 
-=====================
+============
 py-esp32-ulp
-=====================
+============
 
 py-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
 Co-Processor, written in MicroPython.
