@@ -52,8 +52,8 @@ To get going run the following directly on the ESP32:
    # First, upload examples/counter.py to the ESP32.
    import counter
 
-The `examples/counter.py </examples/counter.py>`_ example shows how to assemble code, load
-and run the resulting binary and exchange data between the ULP and the main CPU.
+The `examples/counter.py </examples/counter.py>`_ example shows how to assemble code,
+load and run the resulting binary and exchange data between the ULP and the main CPU.
 
 
 Documentation
@@ -74,3 +74,4 @@ License
 -------
 
 This project is released under the `MIT License </LICENSE>`_.
+
