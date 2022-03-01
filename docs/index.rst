@@ -54,8 +54,8 @@ follows:
 
 .. code-block:: shell
 
-   git clone https://github.com/ThomasWaldmann/py-esp32-ulp.git
-   cd py-esp32-ulp
+   git clone https://github.com/micropython/micropython-py-esp32-ulp.git
+   cd micropython-py-esp32-ulp
    micropython -m esp32_ulp path/to/code.S  # this results in path/to/code.ulp
 
 

@@ -24,7 +24,7 @@ setup(
     description="Assembler toolchain for the ESP32 ULP co-processor, written in MicroPython",
     long_description=long_desc_from_readme(),
     long_description_content_type='text/x-rst',
-    url="https://github.com/ThomasWaldmann/py-esp32-ulp",
+    url="https://github.com/micropython/micropython-py-esp32-ulp",
     license="MIT",
     author="py-esp32-ulp authors",
     author_email="tw@waldmann-edv.de",
