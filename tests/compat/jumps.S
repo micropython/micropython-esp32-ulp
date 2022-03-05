@@ -1,6 +1,6 @@
   .text
   .set const, 3
-  .global const  # exporting symbol is required for binutils, not important for py-esp32-ulp
+  .global const  # exporting symbol is required for binutils, not important for micropython-esp32-ulp
 
 entry:
   nop

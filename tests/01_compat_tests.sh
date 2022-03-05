@@ -14,7 +14,7 @@ for src_file in $(ls -1 compat/*.S); do
     src_name="${src_file%.S}"
     
     echo "Testing $src_file"
-    echo -e "\tBuilding using py-esp32-ulp"
+    echo -e "\tBuilding using micropython-esp32-ulp"
     ulp_file="${src_name}.ulp"
     log_file="${src_name}.log"
     micropython -m esp32_ulp $src_file 1>$log_file   # generates $ulp_file
@@ -34,9 +34,9 @@ for src_file in $(ls -1 compat/*.S); do
         echo -e "\tBuild outputs differ!"
         echo ""
         echo "Compatibility test failed for $src_file"
-        echo "py-esp32-ulp log:"
+        echo "micropython-esp32-ulp log:"
         cat $log_file
-        echo "py-esp32-ulp output:"
+        echo "micropython-esp32-ulp output:"
         xxd $ulp_file
         echo "binutils output:"
         xxd $bin_file

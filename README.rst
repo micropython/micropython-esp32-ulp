@@ -7,11 +7,11 @@
 
 .. end-badges
 
-============
-py-esp32-ulp
-============
+=====================
+micropython-esp32-ulp
+=====================
 
-py-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
+micropython-esp32-ulp is an assembler toolchain for the ESP32 ULP (Ultra Low-Power)
 Co-Processor, written in MicroPython.
 
 It can translate small assembly language programs to a loadable/executable
@@ -43,10 +43,10 @@ To get going run the following directly on the ESP32:
 
 .. code-block:: python
 
-   # Step 1: Install py-esp32-ulp
+   # Step 1: Install micropython-esp32-ulp
    # IMPORTANT: Ensure the ESP32 is connected to a network with internet connectivity.
    import upip
-   upip.install('micropython-py-esp32-ulp')
+   upip.install('micropython-esp32-ulp')
 
    # Step 2: Run an example
    # First, upload examples/counter.py to the ESP32.
@@ -66,7 +66,7 @@ Requirements
 
 The minimum supported version of MicroPython is v1.12.
 
-An ESP32 is required to run the ULP machine code binary produced by py-esp32-ulp
+An ESP32 is required to run the ULP machine code binary produced by micropython-esp32-ulp
 (the ESP32-S2 will not work as it is not binary compatible with the ESP32).
 
 
