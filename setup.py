@@ -1,6 +1,6 @@
 import re
-import sdist_upip
 from setuptools import setup
+import sdist_upip
 
 
 def long_desc_from_readme():
@@ -17,18 +17,18 @@ def long_desc_from_readme():
 
 
 setup(
-    name="micropython-py-esp32-ulp",
+    name="micropython-esp32-ulp",
     use_scm_version={
         'local_scheme': 'no-local-version',
     },
     description="Assembler toolchain for the ESP32 ULP co-processor, written in MicroPython",
     long_description=long_desc_from_readme(),
     long_description_content_type='text/x-rst',
-    url="https://github.com/ThomasWaldmann/py-esp32-ulp",
+    url="https://github.com/micropython/micropython-esp32-ulp",
     license="MIT",
-    author="py-esp32-ulp authors",
+    author="micropython-esp32-ulp authors",
     author_email="tw@waldmann-edv.de",
-    maintainer="py-esp32-ulp authors",
+    maintainer="micropython-esp32-ulp authors",
     maintainer_email="tw@waldmann-edv.de",
     classifiers=[
         'License :: OSI Approved :: MIT License',

@@ -2,7 +2,7 @@
 Preprocessor
 =====================
 
-py-esp32-ulp contains a small preprocessor, which aims to fulfill one goal:
+micropython-esp32-ulp contains a small preprocessor, which aims to fulfill one goal:
 facilitate assembling of ULP code from Espressif and other open-source
 projects to loadable/executable machine code without modification.
 
@@ -46,7 +46,7 @@ With the preprocessor, simply pass the source code via the preprocessor first:
 Using a "Defines Database"
 --------------------------
 
-Because the py-esp32-ulp assembler was built for running on the ESP32
+Because the micropython-esp32-ulp assembler was built for running on the ESP32
 microcontroller with limited RAM, the preprocessor aims to work there too.
 
 To handle large number of defined constants (such as the ``RTC_*`` constants from

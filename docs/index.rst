@@ -1,5 +1,5 @@
-py-esp32-ulp Documentation
-==========================
+micropython-esp32-ulp Documentation
+===================================
 
 .. contents:: Table of Contents
 
@@ -19,7 +19,7 @@ On the ESP32, install using upip:
 
    # ensure the ESP32 is connected to a network with internet connectivity
    import upip
-   upip.install('micropython-py-esp32-ulp')
+   upip.install('micropython-esp32-ulp')
 
 On a PC, simply ``git clone`` this repo.
 
@@ -36,7 +36,7 @@ data between the ULP and the main CPU.
 
 Run the ``counter.py`` example:
 
-1. Install py-esp32-ulp onto the ESP32 as shown above
+1. Install micropython-esp32-ulp onto the ESP32 as shown above
 2. Upload the `examples/counter.py </examples/counter.py>`_ file to the ESP32
 3. Run with ``import counter``
 
@@ -54,8 +54,8 @@ follows:
 
 .. code-block:: shell
 
-   git clone https://github.com/ThomasWaldmann/py-esp32-ulp.git
-   cd py-esp32-ulp
+   git clone https://github.com/micropython/micropython-esp32-ulp.git
+   cd micropython-esp32-ulp
    micropython -m esp32_ulp path/to/code.S  # this results in path/to/code.ulp
 
 
@@ -153,7 +153,7 @@ Testing
 There are unit tests and also compatibility tests that check whether the binary
 output is identical with what binutils-esp32ulp produces.
 
-py-esp32-ulp has been tested on the Unix port of MicroPython and on real ESP32
+micropython-esp32-ulp has been tested on the Unix port of MicroPython and on real ESP32
 devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM.
 
 Consult the Github Actions `workflow definition file </.github/workflows/run_tests.yaml>`_

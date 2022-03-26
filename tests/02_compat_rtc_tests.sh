@@ -123,11 +123,11 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
         # switch to the patched file instead of original one
         src_file="${src_dir}/${test_name}.tmp"
         src_name="${src_file%.tmp}"
-        ulp_file="${src_name}.tmp.ulp"  # when extension is not .s, py-esp32-ulp doesn't remove original extension
+        ulp_file="${src_name}.tmp.ulp"  # when extension is not .s, micropython-esp32-ulp doesn't remove original extension
     fi
     # END: work around known issues with binutils-esp32ulp
 
-    echo -e "\tBuilding using py-esp32-ulp"
+    echo -e "\tBuilding using micropython-esp32-ulp"
     log_file="${src_name}.log"
     micropython -m esp32_ulp $src_file 1>$log_file   # generates $ulp_file
 
@@ -148,9 +148,9 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
         echo -e "\tBuild outputs differ!"
         echo ""
         echo "Compatibility test failed for $src_file"
-        echo "py-esp32-ulp log:"
+        echo "micropython-esp32-ulp log:"
         cat $log_file
-        echo "py-esp32-ulp output:"
+        echo "micropython-esp32-ulp output:"
         xxd $ulp_file
         echo "binutils output:"
         xxd $bin_file
