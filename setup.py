@@ -1,6 +1,6 @@
 import re
-import sdist_upip
 from setuptools import setup
+import sdist_upip
 
 
 def long_desc_from_readme():
