@@ -44,6 +44,10 @@ def test_validate_expression():
     assert validate_expression('0x100 & ~2') is True
     assert validate_expression('0xabcdef') is True
     assert validate_expression('0x123def') is True
+    assert validate_expression('0xABC') is True
+    assert validate_expression('0xaBc') is True
+    assert validate_expression('0Xabc') is True
+    assert validate_expression('0X123ABC') is True
     assert validate_expression('2*3+4/5&6|7') is True
     assert validate_expression('(((((1+1) * 2') is True  # valid characters, even if expression is not valid
 
@@ -55,6 +59,7 @@ def test_validate_expression():
     assert validate_expression('123 ^ 4') is False  # operator not supported for now
     assert validate_expression('evil()') is False
     assert validate_expression('def cafe()') is False  # valid hex digits, but potentially dangerous code
+    assert validate_expression('def CAFE()') is False
 
 
 @test

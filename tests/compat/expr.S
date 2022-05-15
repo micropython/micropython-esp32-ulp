@@ -46,3 +46,11 @@ exit:
   move r3, 0x1234 & ~2
   move r3, 42|4&0xf  # 46 (4&0xf is evaluated first)
   move r3, (42|4)&0xf  # 14 (42|4 is evaluated first)
+
+# ---
+# test that expressions accept hex characters in either upper or lower case
+  move r3, 0xaa - 1
+  move r3, 0xBB - 1
+  move r3, 0xCc - 1
+  move r3, 0Xdd - 1
+  move r3, 0XEF - 1
