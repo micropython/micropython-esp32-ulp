@@ -28,7 +28,7 @@ Features
 
 The following features are supported:
 
-* the entire `ESP32 ULP instruction set <https://esp-idf.readthedocs.io/en/latest/api-guides/ulp_instruction_set.html>`_
+* the entire `ESP32 ULP instruction set <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/ulp_instruction_set.html>`_
 * constants defined with ``.set``
 * constants defined with ``#define``
 * expressions in assembly code and constant definitions
