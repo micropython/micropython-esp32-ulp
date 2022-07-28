@@ -30,10 +30,8 @@ source = """\
 #define RTC_IO_TOUCH_PAD2_REG        (DR_REG_RTCIO_BASE + 0x9c)
 #define RTC_IO_TOUCH_PAD2_MUX_SEL_M  (BIT(19))
 #define RTC_GPIO_OUT_REG             (DR_REG_RTCIO_BASE + 0x0)
-#define RTC_GPIO_ENABLE_W1TS_REG     (DR_REG_RTCIO_BASE + 0x10)
-#define RTC_GPIO_ENABLE_W1TC_REG     (DR_REG_RTCIO_BASE + 0x14)
-#define RTC_GPIO_ENABLE_W1TS_S       14
-#define RTC_GPIO_ENABLE_W1TC_S       14
+#define RTC_GPIO_ENABLE_REG          (DR_REG_RTCIO_BASE + 0xc)
+#define RTC_GPIO_ENABLE_S            14
 #define RTC_GPIO_OUT_DATA_S          14
 
 # constants from:
@@ -62,8 +60,8 @@ init:
   # connect GPIO to ULP (0: GPIO connected to digital GPIO module, 1: GPIO connected to analog RTC module)
   WRITE_RTC_REG(RTC_IO_TOUCH_PAD2_REG, RTC_IO_TOUCH_PAD2_MUX_SEL_M, 1, 1);
 
-  # GPIO shall be output, not input
-  WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + gpio, 1, 1);
+  # GPIO shall be output, not input (this also enables a pull-down by default)
+  WRITE_RTC_REG(RTC_GPIO_ENABLE_REG, RTC_GPIO_ENABLE_S + gpio, 1, 1)
 
   # store that we're done with initialisation
   move r0, magic
@@ -83,12 +81,12 @@ after_init:
 
 on:
   # turn on led (set GPIO)
-  WRITE_RTC_REG(RTC_GPIO_ENABLE_W1TS_REG, RTC_GPIO_ENABLE_W1TS_S + gpio, 1, 1)
+  WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + gpio, 1, 1)
   jump exit
 
 off:
   # turn off led (clear GPIO)
-  WRITE_RTC_REG(RTC_GPIO_ENABLE_W1TC_REG, RTC_GPIO_ENABLE_W1TC_S + gpio, 1, 1)
+  WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + gpio, 1, 0)
   jump exit
 
 exit:
