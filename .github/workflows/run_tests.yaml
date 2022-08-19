@@ -34,8 +34,9 @@ jobs:
         git describe --always --tags
         make submodules
         make
-        export PATH=$PATH:$PWD
-        echo "::set-output name=bin_dir::$PWD"
+        export OUTDIR=$PWD/build-standard
+        export PATH=$PATH:$OUTDIR
+        echo "::set-output name=bin_dir::$OUTDIR"
         test $(micropython -c 'print("test")') = "test"
         popd
 
