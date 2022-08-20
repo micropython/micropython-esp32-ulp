@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   tests:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
@@ -44,6 +44,10 @@ jobs:
       id: build_binutils
       run: |
         echo "Building binutils-esp32ulp"
+        # building requires an older version of gcc
+        sudo apt-get install -y gcc-7 g++-7
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 7
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 7
         git clone --depth 1 https://github.com/espressif/binutils-esp32ulp.git
         pushd binutils-esp32ulp
         git describe --always --tags
