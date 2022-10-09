@@ -40,25 +40,32 @@ jobs:
         test $(micropython -c 'print("test")') = "test"
         popd
 
-    - name: Build binutils-esp32ulp
-      id: build_binutils
+    - name: Fetch binutils-esp32ulp
+      id: fetch_binutils
       run: |
-        echo "Building binutils-esp32ulp"
-        # building requires an older version of gcc
-        sudo apt-get install -y gcc-7 g++-7
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 7
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 7
-        git clone --depth 1 https://github.com/espressif/binutils-esp32ulp.git
-        pushd binutils-esp32ulp
-        git describe --always --tags
-        ./configure --target=esp32ulp-elf --prefix=$PWD/dist --disable-doc --disable-gdb --disable-libdecnumber --disable-readline --disable-sim
-        echo "MAKEINFO = :" >> Makefile
-        make
-        make install-strip
-        export PATH=$PATH:$PWD/dist/bin
-        echo "bin_dir=$PWD/dist/bin" >> $GITHUB_OUTPUT
+        echo "Fetching URL of pre-built esp32ulp-elf binaries"
+        ## URL to pre-built binaries is published in esp-idf
+        IDFVER=v5.0.1
+        curl -s \
+          -o tools.json \
+          https://raw.githubusercontent.com/espressif/esp-idf/$IDFVER/tools/tools.json
+        URL=$(<tools.json jq -r '
+          .tools[]
+            | select(.name == "esp32ulp-elf").versions[]
+            | select(.status == "recommended")
+            | .["linux-amd64"]
+            | .url
+            // empty
+        ')
+
+        echo "Downloading esp32ulp-elf from $URL"
+        curl -sL \
+           -o /tmp/esp32ulp-elf.tar.gz \
+           $URL
+        tar xfvz /tmp/esp32ulp-elf.tar.gz esp32ulp-elf/bin
+        export PATH=$PATH:$PWD/esp32ulp-elf/bin
+        echo "bin_dir=$PWD/esp32ulp-elf/bin" >> $GITHUB_OUTPUT
         esp32ulp-elf-as --version | grep 'esp32ulp-elf' > /dev/null
-        popd
 
     ###### Run tests ######
 
@@ -73,7 +80,7 @@ jobs:
       id: compat_tests
       run: |
         export PATH=$PATH:${{ steps.build_micropython.outputs.bin_dir }}
-        export PATH=$PATH:${{ steps.build_binutils.outputs.bin_dir }}
+        export PATH=$PATH:${{ steps.fetch_binutils.outputs.bin_dir }}
         cd tests
         ./01_compat_tests.sh
 
@@ -81,7 +88,6 @@ jobs:
       id: compat_rtc_tests
       run: |
         export PATH=$PATH:${{ steps.build_micropython.outputs.bin_dir }}
-        export PATH=$PATH:${{ steps.build_binutils.outputs.bin_dir }}
+        export PATH=$PATH:${{ steps.fetch_binutils.outputs.bin_dir }}
         cd tests
-        ln -s ../binutils-esp32ulp  # already cloned earlier. reuse.
         ./02_compat_rtc_tests.sh
