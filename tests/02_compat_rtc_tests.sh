@@ -141,7 +141,7 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-gdb/gas/testsuite/gas/es
     gcc -I esp-idf/components/soc/esp32/include -I esp-idf/components/esp_common/include \
         -x assembler-with-cpp \
         -E -o ${pre_file} $src_file
-    esp32ulp-elf-as -o $obj_file ${pre_file}
+    esp32ulp-elf-as --mcpu=esp32 -o $obj_file ${pre_file}
     esp32ulp-elf-ld -T esp32.ulp.ld -o $elf_file $obj_file
     esp32ulp-elf-objcopy -O binary $elf_file $bin_file
 
