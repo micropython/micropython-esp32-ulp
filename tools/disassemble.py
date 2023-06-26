@@ -1,82 +1,122 @@
+from esp32_ulp.opcodes import RD_REG_PERIPH_RTC_CNTL, RD_REG_PERIPH_RTC_IO, RD_REG_PERIPH_RTC_I2C, \
+    RD_REG_PERIPH_SENS, DR_REG_MAX_DIRECT
 import esp32_ulp.opcodes as opcodes
+import esp32_ulp.soc as soc
 import ubinascii
 import sys
 
 
+alu_cnt_ops = ('STAGE_INC', 'STAGE_DEC', 'STAGE_RST')
+alu_ops = ('ADD', 'SUB', 'AND', 'OR', 'MOVE', 'LSH', 'RSH')
+jump_types = ('--', 'EQ', 'OV')
+cmp_ops = ('LT', 'GE', 'LE', 'EQ', 'GT')
+
+lookup = {
+    opcodes.OPCODE_ADC: ('ADC', opcodes._adc, lambda op: 'ADC r%s, %s, %s' % (op.dreg, op.mux, op.sar_sel)),
+    opcodes.OPCODE_ALU: ('ALU', opcodes._alu_imm, {
+        opcodes.SUB_OPCODE_ALU_CNT: (
+            'ALU_CNT',
+            opcodes._alu_cnt,
+            lambda op: '%s%s' % (alu_cnt_ops[op.sel], '' if op.sel == opcodes.ALU_SEL_RST else ' %s' % op.imm)
+        ),
+        opcodes.SUB_OPCODE_ALU_IMM: (
+            'ALU_IMM',
+            opcodes._alu_imm,
+            lambda op: '%s r%s, %s' % (alu_ops[op.sel], op.dreg, op.imm) if op.sel == opcodes.ALU_SEL_MOV
+                else '%s r%s, r%s, %s' % (alu_ops[op.sel], op.dreg, op.sreg, op.imm)
+        ),
+        opcodes.SUB_OPCODE_ALU_REG: (
+            'ALU_REG',
+            opcodes._alu_reg,
+            lambda op: '%s r%s, r%s, r%s' % (alu_ops[op.sel], op.dreg, op.sreg, op.treg)
+        ),
+    }),
+    opcodes.OPCODE_BRANCH: ('BRANCH', opcodes._bx, {
+        opcodes.SUB_OPCODE_BX: (
+            'BX',
+            opcodes._bx,
+            lambda op: 'JUMP %s%s' % (op.addr if op.reg == 0 else 'r%s' % op.dreg, ', %s' % jump_types[op.type]
+                if op.type != 0 else '')
+        ),
+        opcodes.SUB_OPCODE_BR: (
+            'BR',
+            opcodes._br,
+            lambda op: 'JUMPR %s, %s, %s' % ('%s%s' % ('-' if op.sign == 1 else '', op.offset), op.imm, cmp_ops[op.cmp])
+        ),
+        opcodes.SUB_OPCODE_BS: (
+            'BS',
+            opcodes._bs,
+            lambda op: 'JUMPS %s, %s, %s' % ('%s%s' % ('-' if op.sign == 1 else '', op.offset), op.imm, cmp_ops[op.cmp])
+        ),
+    }),
+    opcodes.OPCODE_DELAY: (
+        'DELAY',
+        opcodes._delay,
+        lambda op: 'NOP' if op.cycles == 0 else 'WAIT %s' % op.cycles
+    ),
+    opcodes.OPCODE_END: ('END', opcodes._end, {
+        opcodes.SUB_OPCODE_END: (
+            'WAKE',
+            opcodes._end
+        ),
+        opcodes.SUB_OPCODE_SLEEP: (
+            'SLEEP',
+            opcodes._sleep,
+            lambda op: 'SLEEP %s' % op.cycle_sel
+        ),
+    }),
+    opcodes.OPCODE_HALT: ('HALT', opcodes._halt),
+    opcodes.OPCODE_I2C: (
+        'I2C',
+        opcodes._i2c,
+        lambda op: 'I2C_%s %s, %s, %s, %s' % ('RD' if op.rw == 0 else 'WR', op.sub_addr, op.high, op.low, op.i2c_sel)
+    ),
+    opcodes.OPCODE_LD: ('LD', opcodes._ld, lambda op: 'LD r%s, r%s, %s' % (op.dreg, op.sreg, op.offset)),
+    opcodes.OPCODE_ST: ('ST', opcodes._st, lambda op: 'ST r%s, r%s, %s' % (op.sreg, op.dreg, op.offset)),
+    opcodes.OPCODE_RD_REG: (
+        'RD_REG',
+        opcodes._rd_reg,
+        lambda op: 'REG_RD 0x%x, %s, %s' % (op.periph_sel << 8 | op.addr, op.high, op.low)
+    ),
+    opcodes.OPCODE_WR_REG: (
+        'WR_REG',
+        opcodes._wr_reg,
+        lambda op: 'REG_WR 0x%x, %s, %s, %s' % (op.periph_sel << 8 | op.addr, op.high, op.low, op.data)
+    ),
+    opcodes.OPCODE_TSENS: ('TSENS', opcodes._tsens, lambda op: 'TSENS r%s, %s' % (op.dreg, op.delay)),
+}
+
+
 def decode_instruction(i):
     ins = opcodes._end
-    ins.all = i  # abuse a struct to get opcode and sub_opcode
+    ins.all = i  # abuse a struct to get opcode
 
     print(ubinascii.hexlify(i.to_bytes(4, 'little')))
 
-    if ins.opcode == opcodes.OPCODE_ADC:
-        print('OPCODE_ADC')
-        opcodes._adc.all = i
-        ins = opcodes._adc
-    elif ins.opcode == opcodes.OPCODE_ALU and ins.sub_opcode == opcodes.SUB_OPCODE_ALU_CNT:
-        print('OPCODE_ALU / SUB_OPCODE_ALU_CNT')
-        opcodes._alu_cnt.all = i
-        ins = opcodes._alu_cnt
-    elif ins.opcode == opcodes.OPCODE_ALU and ins.sub_opcode == opcodes.SUB_OPCODE_ALU_IMM:
-        print('OPCODE_ALU / SUB_OPCODE_ALU_IMM')
-        opcodes._alu_imm.all = i
-        ins = opcodes._alu_imm
-    elif ins.opcode == opcodes.OPCODE_ALU and ins.sub_opcode == opcodes.SUB_OPCODE_ALU_REG:
-        print('OPCODE_ALU / SUB_OPCODE_ALU_REG')
-        opcodes._alu_reg.all = i
-        ins = opcodes._alu_reg
-    elif ins.opcode == opcodes.OPCODE_BRANCH and ins.sub_opcode == opcodes.SUB_OPCODE_BX:
-        print('JUMP')
-        opcodes._bx.all = i
-        ins = opcodes._bx
-    elif ins.opcode == opcodes.OPCODE_BRANCH and ins.sub_opcode == opcodes.SUB_OPCODE_BR:
-        print('JUMPR')
-        opcodes._br.all = i
-        ins = opcodes._br
-    elif ins.opcode == opcodes.OPCODE_BRANCH and ins.sub_opcode == opcodes.SUB_OPCODE_BS:
-        print('JUMPS')
-        opcodes._bs.all = i
-        ins = opcodes._bs
-    elif ins.opcode == opcodes.OPCODE_DELAY:
-        print('OPCODE_DELAY')
-        opcodes._delay.all = i
-        ins = opcodes._delay
-    elif ins.opcode == opcodes.OPCODE_END and ins.sub_opcode == opcodes.SUB_OPCODE_END:
-        print('OPCODE_END')
-        opcodes._end.all = i
-        ins = opcodes._end
-    elif ins.opcode == opcodes.OPCODE_END and ins.sub_opcode == opcodes.SUB_OPCODE_SLEEP:
-        print('OPCODE_SLEEP')
-        opcodes._sleep.all = i
-        ins = opcodes._sleep
-    elif ins.opcode == opcodes.OPCODE_HALT:
-        print('OPCODE_HALT')
-        opcodes._halt.all = i
-        ins = opcodes._halt
-    elif ins.opcode == opcodes.OPCODE_I2C:
-        print('OPCODE_I2C')
-        opcodes._i2c.all = i
-        ins = opcodes._i2c
-    elif ins.opcode == opcodes.OPCODE_LD:
-        print('OPCODE_LD')
-        opcodes._ld.all = i
-        ins = opcodes._ld
-    elif ins.opcode == opcodes.OPCODE_RD_REG:
-        print('OPCODE_RD_REG')
-        opcodes._rd_reg.all = i
-        ins = opcodes._rd_reg
-    elif ins.opcode == opcodes.OPCODE_ST:
-        print('OPCODE_ST')
-        opcodes._st.all = i
-        ins = opcodes._st
-    elif ins.opcode == opcodes.OPCODE_TSENS:
-        print('OPCODE_TSENS')
-        opcodes._tsens.all = i
-        ins = opcodes._tsens
-    elif ins.opcode == opcodes.OPCODE_WR_REG:
-        print('OPCODE_WR_REG')
-        opcodes._wr_reg.all = i
-        ins = opcodes._wr_reg
+    params = lookup.get(ins.opcode, None)
+
+    if not params:
+        print('Unknown instruction')
+        return
+
+    if len(params) == 3:
+        name, ins, third = params
+        ins.all = i
+
+        if callable(third):
+            params = (third(ins), ins)
+        else:
+            params = third.get(ins.sub_opcode, ())
+
+    if len(params) == 3:
+        name, ins, pretty = params
+        ins.all = i
+        name = pretty(ins)
+    else:
+        name, ins = params
+        ins.all = i
+
+    print(name)
 
     possible_fields = (
         'addr', 'cmp', 'cycle_sel', 'cycles', 'data', 'delay', 'dreg',
@@ -94,12 +134,10 @@ def decode_instruction(i):
         extra = ''
         if field == 'sel':
             if ins.sub_opcode == opcodes.SUB_OPCODE_ALU_CNT:
-                alu_ops = ('INC', 'DEC', 'RST')
+                extra = ' (%s)' % alu_cnt_ops[val]
             else:
-                alu_ops = ('ADD', 'SUB', 'AND', 'OR', 'MOV', 'LSH', 'RSH')
-            extra = ' (%s)' % alu_ops[val]
+                extra = ' (%s)' % alu_ops[val]
         elif field == 'cmp':
-            cmp_ops = ('LT', 'GE', 'LE', 'EQ', 'GT')
             extra = ' (%s)' % cmp_ops[val]
         print("  {:10} = {:3}{}".format(field, val, extra))
 
