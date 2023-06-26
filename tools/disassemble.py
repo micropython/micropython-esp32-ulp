@@ -156,8 +156,27 @@ def disassemble_manually(byte_sequence_string):
         decode_instruction(i)
 
 
+def print_help():
+    print('Usage: disassemble.py [<options>] <byte_sequence>')
+    print('')
+    print('Options:')
+    print('  -h               Show this help text')
+    print('  <byte_sequence>  Sequence of hex bytes (8 per instruction)')
+    pass
+
+
 def handle_cmdline(params):
-    byte_sequence = "".join(params)
+    byte_sequence = ''
+
+    while params:
+        if params[0] == '-h':
+            print_help()
+            sys.exit(0)
+        else:
+            byte_sequence += params[0]
+
+        params = params[1:]  # remove first param from list
+
     disassemble_manually(byte_sequence)
 
 
