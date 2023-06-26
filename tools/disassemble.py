@@ -28,7 +28,8 @@ lookup = {
         opcodes.SUB_OPCODE_ALU_REG: (
             'ALU_REG',
             opcodes._alu_reg,
-            lambda op: '%s r%s, r%s, r%s' % (alu_ops[op.sel], op.dreg, op.sreg, op.treg)
+            lambda op: '%s r%s, r%s' % (alu_ops[op.sel], op.dreg, op.sreg) if op.sel == opcodes.ALU_SEL_MOV
+                else '%s r%s, r%s, r%s' % (alu_ops[op.sel], op.dreg, op.sreg, op.treg)
         ),
     }),
     opcodes.OPCODE_BRANCH: ('BRANCH', opcodes._bx, {
@@ -91,13 +92,10 @@ def decode_instruction(i):
     ins = opcodes._end
     ins.all = i  # abuse a struct to get opcode
 
-    print(ubinascii.hexlify(i.to_bytes(4, 'little')))
-
     params = lookup.get(ins.opcode, None)
 
     if not params:
-        print('Unknown instruction')
-        return
+        raise Exception('Unknown instruction')
 
     if len(params) == 3:
         name, ins, third = params
@@ -116,6 +114,18 @@ def decode_instruction(i):
         name, ins = params
         ins.all = i
 
+    return ins, name
+
+
+def decode_instruction_and_print(i):
+    print(ubinascii.hexlify(i.to_bytes(4, 'little')))
+
+    try:
+        ins, name = decode_instruction(i)
+    except Exception as e:
+        print(e)
+        return
+
     print(name)
 
     possible_fields = (
@@ -132,12 +142,14 @@ def decode_instruction(i):
         except KeyError:
             continue
         extra = ''
-        if field == 'sel':
+        if field == 'sel':  # ALU
             if ins.sub_opcode == opcodes.SUB_OPCODE_ALU_CNT:
                 extra = ' (%s)' % alu_cnt_ops[val]
             else:
                 extra = ' (%s)' % alu_ops[val]
-        elif field == 'cmp':
+        elif field == 'type':  # JUMP
+            extra = ' (%s)' % jump_types[val]
+        elif field == 'cmp':  # JUMPR/JUMPS
             extra = ' (%s)' % cmp_ops[val]
         print("  {:10} = {:3}{}".format(field, val, extra))
 
@@ -153,7 +165,7 @@ def disassemble_manually(byte_sequence_string):
     for instruction in list:
         byte_sequence = ubinascii.unhexlify(instruction.replace(' ',''))
         i = int.from_bytes(byte_sequence, 'little')
-        decode_instruction(i)
+        decode_instruction_and_print(i)
 
 
 def print_help():
