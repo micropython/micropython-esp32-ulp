@@ -52,6 +52,11 @@ def test_unknown_instruction():
     assert_decode_exception("10000001", 'Unknown instruction')
 
 
+@test
+def test_empty_instruction():
+    assert_decode_exception("00000000", '<empty>')
+
+
 # All hex sequences were generated using our assembler.
 # Note: disassembled instructions always show field values according
 # to what is actually encoded into the binary instruction, not as per

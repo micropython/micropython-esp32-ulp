@@ -89,6 +89,9 @@ lookup = {
 
 
 def decode_instruction(i):
+    if i == 0:
+        raise Exception('<empty>')
+
     ins = opcodes._end
     ins.all = i  # abuse a struct to get opcode
 
