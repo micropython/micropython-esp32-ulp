@@ -18,9 +18,10 @@ It can translate small assembly language programs to a loadable/executable
 ULP machine code binary, directly on the ESP32 microcontroller.
 
 This is intended as an alternative approach to assembling such programs using
-the binutils-esp32ulp toolchain from Espressif on a development machine.
+the `binutils-gdb toolchain <https://github.com/espressif/binutils-gdb/tree/esp32ulp-elf-2.35>`_
+(esp32-elf-as) from Espressif on a development machine.
 
-It can also be useful in cases where binutils-esp32ulp is not available.
+It can also be useful in cases where esp32-elf-as is not available.
 
 
 Features

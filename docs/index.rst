@@ -151,7 +151,8 @@ Testing
 -------
 
 There are unit tests and also compatibility tests that check whether the binary
-output is identical with what binutils-esp32ulp produces.
+output is identical with what Espressif's esp32-elf-as (from their `binutils-gdb fork
+<https://github.com/espressif/binutils-gdb/tree/esp32ulp-elf-2.35>`_) produces.
 
 micropython-esp32-ulp has been tested on the Unix port of MicroPython and on real ESP32
 devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM.
