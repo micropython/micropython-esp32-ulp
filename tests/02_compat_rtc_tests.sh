@@ -27,12 +27,13 @@ fetch_ulptool_examples() {
 }
 
 fetch_binutils_esp32ulp_examples() {
-    [ -d binutils-esp32ulp ] && return
+    [ -d binutils-gdb ] && return
 
-    echo "Fetching binutils-esp32ulp examples"
+    echo "Fetching binutils-gdb (esp32ulp) examples"
     log_file=log/fetch-binutils.log
     git clone --depth 1 \
-        https://github.com/espressif/binutils-esp32ulp.git 1>$log_file 2>&1
+        -b esp32ulp-elf-v2.35_20220830 \
+        https://github.com/espressif/binutils-gdb.git 1>$log_file 2>&1
 }
 
 build_defines_db() {
@@ -63,7 +64,7 @@ patch_test() {
 
     if [ "${test_name}" = esp32ulp_jumpr ]; then
         (
-            cd binutils-esp32ulp/gas/testsuite/gas/esp32ulp/esp32
+            cd binutils-gdb/gas/testsuite/gas/esp32ulp/esp32
             cp ${test_name}.s ${out_file}
             echo -e "\tPatching test to work around binutils-esp32ulp .global bug"
             cat >> ${out_file} <<EOF
@@ -74,11 +75,11 @@ EOF
 
     elif [ "${test_name}" = esp32ulp_ranges ]; then
         (
-            cd binutils-esp32ulp/gas/testsuite/gas/esp32ulp/esp32
+            cd binutils-gdb/gas/testsuite/gas/esp32ulp/esp32
             # merge 2 files: https://github.com/espressif/binutils-esp32ulp/blob/249ec34/gas/testsuite/gas/esp32ulp/esp32/check_as_ld.sh#L31
             echo -e "\t${test_name} requires esp32ulp_globals. Merging both files into ${out_file}"
             cat esp32ulp_globals.s ${test_name}.s > ${out_file}
-            echo -e "\tPatching test to work around binutils-esp32ulp .global bug"
+            echo -e "\tPatching test to work around binutils-gdb (esp32ulp) .global bug"
             cat >> ${out_file} <<EOF
                 .global min_add
                 .global min_jump1
@@ -99,7 +100,7 @@ fetch_ulptool_examples
 fetch_binutils_esp32ulp_examples
 build_defines_db $1
 
-for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/gas/esp32ulp/esp32/*.s; do
+for src_file in ulptool/src/ulp_examples/*/*.s binutils-gdb/gas/testsuite/gas/esp32ulp/esp32/*.s; do
 
     src_name="${src_file%.s}"
     src_dir="${src_name%/*}"
@@ -116,7 +117,7 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
         fi
     done
 
-    # BEGIN: work around known issues with binutils-esp32ulp
+    # BEGIN: work around known issues with binutils-gdb (esp32ulp)
     ulp_file="${src_name}.ulp"
 
     if patch_test ${test_name}; then
@@ -125,7 +126,7 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
         src_name="${src_file%.tmp}"
         ulp_file="${src_name}.tmp.ulp"  # when extension is not .s, micropython-esp32-ulp doesn't remove original extension
     fi
-    # END: work around known issues with binutils-esp32ulp
+    # END: work around known issues with binutils-gdb (esp32ulp)
 
     echo -e "\tBuilding using micropython-esp32-ulp"
     log_file="${src_name}.log"
@@ -140,7 +141,7 @@ for src_file in ulptool/src/ulp_examples/*/*.s binutils-esp32ulp/gas/testsuite/g
     gcc -I esp-idf/components/soc/esp32/include -I esp-idf/components/esp_common/include \
         -x assembler-with-cpp \
         -E -o ${pre_file} $src_file
-    esp32ulp-elf-as -o $obj_file ${pre_file}
+    esp32ulp-elf-as --mcpu=esp32 -o $obj_file ${pre_file}
     esp32ulp-elf-ld -T esp32.ulp.ld -o $elf_file $obj_file
     esp32ulp-elf-objcopy -O binary $elf_file $bin_file
 
