@@ -151,6 +151,17 @@ def get_instruction_fields(ins):
     return field_details
 
 
+def chunk_into_words(code, bytes_per_word, byteorder):
+    chunks = [
+        ubinascii.hexlify(code[i:i + bytes_per_word])
+        for i in range(0, len(code), bytes_per_word)
+    ]
+
+    words = [int.from_bytes(ubinascii.unhexlify(i), byteorder) for i in chunks]
+
+    return words
+
+
 def decode_instruction_and_print(i):
     print(ubinascii.hexlify(i.to_bytes(4, 'little')))
 
@@ -180,28 +191,66 @@ def disassemble_manually(byte_sequence_string):
         decode_instruction_and_print(i)
 
 
+def disassemble_file(filename):
+    with open(filename, 'rb') as f:
+        data = f.read()
+
+    code = data[12:]  # text_offset (where code starts) is always 12 for ULP binaries
+    words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
+
+    for i in words:
+        decode_instruction_and_print(i)
+
+
 def print_help():
-    print('Usage: disassemble.py [<options>] <byte_sequence>')
+    print('Usage: disassemble.py [<options>] [-m <byte_sequence> | <filename>]')
     print('')
     print('Options:')
-    print('  -h               Show this help text')
-    print('  <byte_sequence>  Sequence of hex bytes (8 per instruction)')
+    print('  -h                  Show this help text')
+    print('  -m <byte_sequence>  Sequence of hex bytes (8 per instruction)')
+    print('  <filename>          Path to ULP binary')
     pass
 
 
 def handle_cmdline(params):
-    byte_sequence = ''
+    filename = None
+    byte_sequence = None
 
     while params:
         if params[0] == '-h':
             print_help()
             sys.exit(0)
+        elif params[0] == '-m':
+            if len(params) == 1:
+                print_help()
+                sys.exit(1)
+            params = params[1:] # remove -m from list
+
+            sequence_len = len(params)
+            for i in range(0, len(params)):
+                if params[i][0] == '-':  # start of a next option
+                    sequence_len = i-1
+                    break
+
+            if sequence_len < 0:
+                print_help()
+                sys.exit(1)
+
+            byte_sequence = "".join(params[:sequence_len+1])
+            params = params[sequence_len:]
+        elif params[0][0] == '-':
+            # ignore unknown options for now
+            pass
         else:
-            byte_sequence += params[0]
+            if not filename:
+                filename = params[0]
 
         params = params[1:]  # remove first param from list
 
-    disassemble_manually(byte_sequence)
+    if byte_sequence:
+        disassemble_manually(byte_sequence)
+    elif filename:
+        disassemble_file(filename)
 
 
 if sys.argv: # if run from cmdline
