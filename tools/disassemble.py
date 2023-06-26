@@ -117,17 +117,7 @@ def decode_instruction(i):
     return ins, name
 
 
-def decode_instruction_and_print(i):
-    print(ubinascii.hexlify(i.to_bytes(4, 'little')))
-
-    try:
-        ins, name = decode_instruction(i)
-    except Exception as e:
-        print(e)
-        return
-
-    print(name)
-
+def get_instruction_fields(ins):
     possible_fields = (
         'addr', 'cmp', 'cycle_sel', 'cycles', 'data', 'delay', 'dreg',
         'high', 'i2c_sel', 'imm', 'low', 'mux', 'offset', 'opcode',
@@ -135,6 +125,7 @@ def decode_instruction_and_print(i):
         'sub_addr', 'sub_opcode', 'treg', 'type', 'unused', 'unused1',
         'unused2', 'wakeup'
     )
+    field_details = []
     for field in possible_fields:
         try:
             # eval is ugly but constrained to possible_fields and variable ins
@@ -151,6 +142,24 @@ def decode_instruction_and_print(i):
             extra = ' (%s)' % jump_types[val]
         elif field == 'cmp':  # JUMPR/JUMPS
             extra = ' (%s)' % cmp_ops[val]
+
+        field_details.append((field, val, extra))
+
+    return field_details
+
+
+def decode_instruction_and_print(i):
+    print(ubinascii.hexlify(i.to_bytes(4, 'little')))
+
+    try:
+        ins, name = decode_instruction(i)
+    except Exception as e:
+        print(e)
+        return
+
+    print(name)
+
+    for field, val, extra in get_instruction_fields(ins):
         print("  {:10} = {:3}{}".format(field, val, extra))
 
 
