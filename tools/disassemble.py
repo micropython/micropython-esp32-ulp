@@ -1,3 +1,4 @@
+from uctypes import struct, addressof, LITTLE_ENDIAN, UINT16, UINT32
 from esp32_ulp.opcodes import RD_REG_PERIPH_RTC_CNTL, RD_REG_PERIPH_RTC_IO, RD_REG_PERIPH_RTC_I2C, \
     RD_REG_PERIPH_SENS, DR_REG_MAX_DIRECT
 import esp32_ulp.opcodes as opcodes
@@ -200,7 +201,16 @@ def disassemble_file(filename, verbose=False):
     with open(filename, 'rb') as f:
         data = f.read()
 
-    code = data[12:]  # text_offset (where code starts) is always 12 for ULP binaries
+    binary_header_struct_def = dict(
+        magic = 0 | UINT32,
+        text_offset = 4 | UINT16,
+        text_size = 6 | UINT16,
+        data_size = 8 | UINT16,
+        bss_size = 10 | UINT16,
+    )
+    h = struct(addressof(data), binary_header_struct_def, LITTLE_ENDIAN)
+
+    code = data[h.text_offset:]
     words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
 
     for idx, i in enumerate(words):
