@@ -163,6 +163,16 @@ def chunk_into_words(code, bytes_per_word, byteorder):
     return words
 
 
+def print_ulp_header(h):
+    print('ULP magic    : %s (0x%08x)' % (h.magic.to_bytes(4, 'little'), h.magic))
+    print('.text offset : %s (0x%02x)' % (h.text_offset, h.text_offset))
+    print('.text size   : %s (0x%02x)' % (h.text_size, h.text_size))
+    print('.data offset : %s (0x%02x)' % (h.text_offset+h.text_size, h.text_offset+h.text_size))
+    print('.data size   : %s (0x%02x)' % (h.data_size, h.data_size))
+    print('.bss size    : %s (0x%02x)' % (h.bss_size, h.bss_size))
+    print('----------------------------------------')
+
+
 def print_code_line(byte_offset, i, asm):
     lineformat = '{0:04x}  {1}  {2}'
     hex = ubinascii.hexlify(i.to_bytes(4, 'little'))
@@ -210,6 +220,13 @@ def disassemble_file(filename, verbose=False):
     )
     h = struct(addressof(data), binary_header_struct_def, LITTLE_ENDIAN)
 
+    if (h.magic != 0x00706c75):
+        print('Invalid signature: 0x%08x (should be: 0x%08x)' % (h.magic, 0x00706c75))
+        return
+
+    if verbose:
+        print_ulp_header(h)
+
     code = data[h.text_offset:]
     words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
 
@@ -223,7 +240,7 @@ def print_help():
     print('Options:')
     print('  -h                  Show this help text')
     print('  -m <byte_sequence>  Sequence of hex bytes (8 per instruction)')
-    print('  -v                  Verbose mode. Also show instruction fields')
+    print('  -v                  Verbose mode. Show ULP header and fields of each instruction')
     print('  <filename>          Path to ULP binary')
     pass
 
