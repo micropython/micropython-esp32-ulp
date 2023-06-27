@@ -162,7 +162,7 @@ def chunk_into_words(code, bytes_per_word, byteorder):
     return words
 
 
-def decode_instruction_and_print(i):
+def decode_instruction_and_print(i, verbose=False):
     print(ubinascii.hexlify(i.to_bytes(4, 'little')))
 
     try:
@@ -173,11 +173,12 @@ def decode_instruction_and_print(i):
 
     print(name)
 
-    for field, val, extra in get_instruction_fields(ins):
-        print("  {:10} = {:3}{}".format(field, val, extra))
+    if verbose:
+        for field, val, extra in get_instruction_fields(ins):
+            print("  {:10} = {:3}{}".format(field, val, extra))
 
 
-def disassemble_manually(byte_sequence_string):
+def disassemble_manually(byte_sequence_string, verbose=False):
     sequence = byte_sequence_string.strip().replace(' ','')
     chars_per_instruction = 8
     list = [
@@ -188,10 +189,10 @@ def disassemble_manually(byte_sequence_string):
     for instruction in list:
         byte_sequence = ubinascii.unhexlify(instruction.replace(' ',''))
         i = int.from_bytes(byte_sequence, 'little')
-        decode_instruction_and_print(i)
+        decode_instruction_and_print(i, verbose)
 
 
-def disassemble_file(filename):
+def disassemble_file(filename, verbose=False):
     with open(filename, 'rb') as f:
         data = f.read()
 
@@ -199,7 +200,7 @@ def disassemble_file(filename):
     words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
 
     for i in words:
-        decode_instruction_and_print(i)
+        decode_instruction_and_print(i, verbose)
 
 
 def print_help():
@@ -208,11 +209,13 @@ def print_help():
     print('Options:')
     print('  -h                  Show this help text')
     print('  -m <byte_sequence>  Sequence of hex bytes (8 per instruction)')
+    print('  -v                  Verbose mode. Also show instruction fields')
     print('  <filename>          Path to ULP binary')
     pass
 
 
 def handle_cmdline(params):
+    verbose = False
     filename = None
     byte_sequence = None
 
@@ -238,6 +241,8 @@ def handle_cmdline(params):
 
             byte_sequence = "".join(params[:sequence_len+1])
             params = params[sequence_len:]
+        elif params[0] == '-v':
+            verbose = True
         elif params[0][0] == '-':
             # ignore unknown options for now
             pass
@@ -248,9 +253,9 @@ def handle_cmdline(params):
         params = params[1:]  # remove first param from list
 
     if byte_sequence:
-        disassemble_manually(byte_sequence)
+        disassemble_manually(byte_sequence, verbose)
     elif filename:
-        disassemble_file(filename)
+        disassemble_file(filename, verbose)
 
 
 if sys.argv: # if run from cmdline
