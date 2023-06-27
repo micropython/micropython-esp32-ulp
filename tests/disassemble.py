@@ -150,22 +150,22 @@ def test_all_instructions():
 @test
 def test_instruction_field_decoding():
     # OPCODE_WR_REG = 1
-    assert_decode_fields("000c8810", [  # REG_WR 0x0, 1, 2, 3
-        ('addr'      ,  0, ''),
+    assert_decode_fields("230d8810", [  # REG_WR 0x123, 1, 2, 3
+        ('addr'      , 35, ' (0x23)'),
         ('data'      ,  3, ''),
         ('high'      ,  1, ''),
         ('low'       ,  2, ''),
         ('opcode'    ,  1, ''),
-        ('periph_sel',  0, ''),
+        ('periph_sel',  1, ''),
     ])
 
     # OPCODE_RD_REG = 2
-    assert_decode_fields("03000421", [  # REG_RD 0x3, 2, 1
-        ('addr'      ,  3, ''),
+    assert_decode_fields("21030421", [  # REG_RD 0x321, 2, 1
+        ('addr'      , 33, ' (0x21)'),
         ('high'      ,  2, ''),
         ('low'       ,  1, ''),
         ('opcode'    ,  2, ''),
-        ('periph_sel',  0, ''),
+        ('periph_sel',  3, ''),
         ('unused'    ,  0, ''),
     ])
 
@@ -558,13 +558,13 @@ def test_instruction_field_decoding():
     assert_decode_fields("090000a0", [  # TSENS r0, 0
         ('delay'     ,  2, ''),
         ('dreg'      ,  1, ''),
-        ('opcode'    , 10, ''),
+        ('opcode'    , 10, ' (0x0a)'),
         ('unused'    ,  0, ''),
     ])
 
     # OPCODE_HALT = 11
     assert_decode_fields("000000b0", [  # HALT
-        ('opcode'    , 11, ''),
+        ('opcode'    , 11, ' (0x0b)'),
         ('unused'    ,  0, ''),
     ])
 
@@ -572,7 +572,7 @@ def test_instruction_field_decoding():
     assert_decode_fields("060000d0", [  # LD r2, r1, 0
         ('dreg'      ,  2, ''),
         ('offset'    ,  0, ''),
-        ('opcode'    , 13, ''),
+        ('opcode'    , 13, ' (0x0d)'),
         ('sreg'      ,  1, ''),
         ('unused1'   ,  0, ''),
         ('unused2'   ,  0, ''),

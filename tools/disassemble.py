@@ -131,12 +131,15 @@ def get_instruction_fields(ins):
     )
     field_details = []
     for field in possible_fields:
+        extra = ''
         try:
             # eval is ugly but constrained to possible_fields and variable ins
             val = eval('i.%s' % field, {}, {'i': ins})
+            if (val>9):
+                extra = ' (0x%02x)' % val
         except KeyError:
             continue
-        extra = ''
+
         if field == 'sel':  # ALU
             if ins.sub_opcode == opcodes.SUB_OPCODE_ALU_CNT:
                 extra = ' (%s)' % alu_cnt_ops[val]
