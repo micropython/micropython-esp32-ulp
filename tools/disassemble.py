@@ -164,6 +164,7 @@ def chunk_into_words(code, bytes_per_word, byteorder):
 
 
 def print_ulp_header(h):
+    print('header')
     print('ULP magic    : %s (0x%08x)' % (h.magic.to_bytes(4, 'little'), h.magic))
     print('.text offset : %s (0x%02x)' % (h.text_offset, h.text_offset))
     print('.text size   : %s (0x%02x)' % (h.text_size, h.text_size))
@@ -191,6 +192,25 @@ def decode_instruction_and_print(byte_offset, i, verbose=False):
     if verbose:
         for field, val, extra in get_instruction_fields(ins):
             print("                 {:10} = {:3}{}".format(field, val, extra))
+
+
+def print_text_section(code, verbose=False):
+    print('.text')
+
+    words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
+
+    for idx, i in enumerate(words):
+        decode_instruction_and_print(idx << 2,i , verbose)
+
+
+def print_data_section(data_offset, code):
+    print('.data')
+
+    words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
+
+    for idx, i in enumerate(words):
+        asm = "<empty>" if i == 0 else "<non-empty>"
+        print_code_line(data_offset + (idx << 2), i, asm)
 
 
 def disassemble_manually(byte_sequence_string, verbose=False):
@@ -227,11 +247,15 @@ def disassemble_file(filename, verbose=False):
     if verbose:
         print_ulp_header(h)
 
-    code = data[h.text_offset:]
-    words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
+    code = data[h.text_offset:(h.text_offset+h.text_size)]
+    print_text_section(code, verbose)
 
-    for idx, i in enumerate(words):
-        decode_instruction_and_print(idx << 2, i, verbose)
+    if verbose:
+        print('----------------------------------------')
+
+    data_offset = h.text_offset+h.text_size
+    code = data[data_offset:(data_offset+h.data_size)]
+    print_data_section(data_offset-h.text_offset, code)
 
 
 def print_help():
