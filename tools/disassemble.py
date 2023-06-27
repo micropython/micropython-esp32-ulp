@@ -162,20 +162,24 @@ def chunk_into_words(code, bytes_per_word, byteorder):
     return words
 
 
-def decode_instruction_and_print(i, verbose=False):
-    print(ubinascii.hexlify(i.to_bytes(4, 'little')))
+def print_code_line(i, asm):
+    lineformat = '{0}  {1}'
+    hex = ubinascii.hexlify(i.to_bytes(4, 'little'))
+    print(lineformat.format(hex.decode('utf-8'), asm))
 
+
+def decode_instruction_and_print(i, verbose=False):
     try:
         ins, name = decode_instruction(i)
     except Exception as e:
-        print(e)
+        print_code_line(i, e)
         return
 
-    print(name)
+    print_code_line(i, name)
 
     if verbose:
         for field, val, extra in get_instruction_fields(ins):
-            print("  {:10} = {:3}{}".format(field, val, extra))
+            print("           {:10} = {:3}{}".format(field, val, extra))
 
 
 def disassemble_manually(byte_sequence_string, verbose=False):
