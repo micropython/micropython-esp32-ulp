@@ -91,3 +91,10 @@ jobs:
         export PATH=$PATH:${{ steps.fetch_binutils.outputs.bin_dir }}
         cd tests
         ./02_compat_rtc_tests.sh
+
+    - name: Run disassembler tests
+      id: disassembler_tests
+      run: |
+        export PATH=$PATH:${{ steps.build_micropython.outputs.bin_dir }}
+        cd tests
+        ./03_disassembler_tests.sh
