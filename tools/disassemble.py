@@ -162,24 +162,24 @@ def chunk_into_words(code, bytes_per_word, byteorder):
     return words
 
 
-def print_code_line(i, asm):
-    lineformat = '{0}  {1}'
+def print_code_line(byte_offset, i, asm):
+    lineformat = '{0:04x}  {1}  {2}'
     hex = ubinascii.hexlify(i.to_bytes(4, 'little'))
-    print(lineformat.format(hex.decode('utf-8'), asm))
+    print(lineformat.format(byte_offset, hex.decode('utf-8'), asm))
 
 
-def decode_instruction_and_print(i, verbose=False):
+def decode_instruction_and_print(byte_offset, i, verbose=False):
     try:
         ins, name = decode_instruction(i)
     except Exception as e:
-        print_code_line(i, e)
+        print_code_line(byte_offset, i, e)
         return
 
-    print_code_line(i, name)
+    print_code_line(byte_offset, i, name)
 
     if verbose:
         for field, val, extra in get_instruction_fields(ins):
-            print("           {:10} = {:3}{}".format(field, val, extra))
+            print("                 {:10} = {:3}{}".format(field, val, extra))
 
 
 def disassemble_manually(byte_sequence_string, verbose=False):
@@ -190,10 +190,10 @@ def disassemble_manually(byte_sequence_string, verbose=False):
         for i in range(0, len(sequence), chars_per_instruction)
     ]
 
-    for instruction in list:
+    for idx, instruction in enumerate(list):
         byte_sequence = ubinascii.unhexlify(instruction.replace(' ',''))
         i = int.from_bytes(byte_sequence, 'little')
-        decode_instruction_and_print(i, verbose)
+        decode_instruction_and_print(idx << 2, i, verbose)
 
 
 def disassemble_file(filename, verbose=False):
@@ -203,8 +203,8 @@ def disassemble_file(filename, verbose=False):
     code = data[12:]  # text_offset (where code starts) is always 12 for ULP binaries
     words = chunk_into_words(code, bytes_per_word=4, byteorder='little')
 
-    for i in words:
-        decode_instruction_and_print(i, verbose)
+    for idx, i in enumerate(words):
+        decode_instruction_and_print(idx << 2, i, verbose)
 
 
 def print_help():
