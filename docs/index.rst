@@ -136,6 +136,15 @@ found as part of Arduino/ESP-IDF projects.
 The preprocessor and how to use it is documented here: `Preprocessor support </docs/preprocess.rst>`_.
 
 
+Disassembler
+------------
+There is a disassembler for disassembling ULP binary code. This is mainly used to
+inspect what instructions our assembler created, however it can be used to analyse
+any ULP binaries.
+
+The disassembler and how to use it is documented here: `Disassembler </docs/disassembler.rst>`_.
+
+
 Limitations
 -----------
 

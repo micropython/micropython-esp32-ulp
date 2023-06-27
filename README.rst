@@ -35,6 +35,7 @@ The following features are supported:
 * expressions in assembly code and constant definitions
 * RTC convenience macros (e.g. ``WRITE_RTC_REG``)
 * many ESP32 ULP code examples found on the web will work unmodified
+* a simple disassembler is also provided
 
 
 Quick start
