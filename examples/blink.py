@@ -93,7 +93,7 @@ exit:
   halt  # go back to sleep until next wakeup period
 """
 
-binary = src_to_binary(source)
+binary = src_to_binary(source, cpu="esp32")  # cpu is esp32 or esp32s2
 
 load_addr, entry_addr = 0, 8
 
