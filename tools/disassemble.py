@@ -11,6 +11,8 @@ decode_instruction, get_instruction_fields = None, None
 def load_decoder(cpu):
     if cpu == 'esp32':
         mod = 'decode'
+    elif cpu == 'esp32s2':
+        mod = 'decode_s2'
     else:
         raise ValueError('Invalid cpu')
 
@@ -136,7 +138,7 @@ def print_help():
     print('Usage: disassemble.py [<options>] [-m <byte_sequence> | <filename>]')
     print('')
     print('Options:')
-    print('  -c                  Choose ULP variant: only esp32 supported for now')
+    print('  -c                  Choose ULP variant: either esp32 or esp32s2')
     print('  -h                  Show this help text')
     print('  -m <byte_sequence>  Sequence of hex bytes (8 per instruction)')
     print('  -v                  Verbose mode. Show ULP header and fields of each instruction')

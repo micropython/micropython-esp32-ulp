@@ -1,0 +1,339 @@
+header
+ULP magic    : b'ulp\x00' (0x00706c75)
+.text offset : 12 (0x0c)
+.text size   : 168 (0xa8)
+.data offset : 180 (0xb4)
+.data size   : 8 (0x08)
+.bss size    : 0 (0x00)
+----------------------------------------
+.text
+0000  230d8810  REG_WR 0x123, 1, 2, 3
+                 addr       =  35 (0x23)
+                 data       =   3
+                 high       =   1
+                 low        =   2
+                 opcode     =   1
+                 periph_sel =   1
+0004  21030421  REG_RD 0x321, 2, 1
+                 addr       =  33 (0x21)
+                 high       =   2
+                 low        =   1
+                 opcode     =   2
+                 periph_sel =   3
+                 unused     =   0
+0008  03001130  I2C_RD 3, 2, 1, 0
+                 data       =   0
+                 high       =   2
+                 i2c_sel    =   0
+                 low        =   1
+                 opcode     =   3
+                 rw         =   0
+                 sub_addr   =   3
+                 unused     =   0
+000c  00011339  I2C_WR 0, 2, 3, 4
+                 data       =   1
+                 high       =   2
+                 i2c_sel    =   4
+                 low        =   3
+                 opcode     =   3
+                 rw         =   1
+                 sub_addr   =   0
+                 unused     =   0
+0010  00000040  NOP
+                 cycles     =   0
+                 opcode     =   4
+                 unused     =   0
+0014  07000040  WAIT 7
+                 cycles     =   7
+                 opcode     =   4
+                 unused     =   0
+0018  07000050  ADC r3, 1, 0
+                 cycles     =   0
+                 dreg       =   3
+                 mux        =   1
+                 opcode     =   5
+                 sar_sel    =   0
+                 unused1    =   0
+                 unused2    =   0
+001c  8b010068  ST r3, r2, 0
+                 dreg       =   2
+                 offset     =   0
+                 opcode     =   6
+                 sreg       =   3
+                 sub_opcode =   4
+                 unused1    =   0
+                 unused2    =   0
+0020  06000070  ADD r2, r1, r0
+                 dreg       =   2
+                 opcode     =   7
+                 sel        =   0 (ADD)
+                 sreg       =   1
+                 sub_opcode =   0
+                 treg       =   0
+                 unused1    =   0
+                 unused2    =   0
+0024  06002070  SUB r2, r1, r0
+                 dreg       =   2
+                 opcode     =   7
+                 sel        =   1 (SUB)
+                 sreg       =   1
+                 sub_opcode =   0
+                 treg       =   0
+                 unused1    =   0
+                 unused2    =   0
+0028  06004070  AND r2, r1, r0
+                 dreg       =   2
+                 opcode     =   7
+                 sel        =   2 (AND)
+                 sreg       =   1
+                 sub_opcode =   0
+                 treg       =   0
+                 unused1    =   0
+                 unused2    =   0
+002c  06006070  OR r2, r1, r0
+                 dreg       =   2
+                 opcode     =   7
+                 sel        =   3 (OR)
+                 sreg       =   1
+                 sub_opcode =   0
+                 treg       =   0
+                 unused1    =   0
+                 unused2    =   0
+0030  16008070  MOVE r2, r1
+                 dreg       =   2
+                 opcode     =   7
+                 sel        =   4 (MOVE)
+                 sreg       =   1
+                 sub_opcode =   0
+                 treg       =   1
+                 unused1    =   0
+                 unused2    =   0
+0034  0600a070  LSH r2, r1, r0
+                 dreg       =   2
+                 opcode     =   7
+                 sel        =   5 (LSH)
+                 sreg       =   1
+                 sub_opcode =   0
+                 treg       =   0
+                 unused1    =   0
+                 unused2    =   0
+0038  0600c070  RSH r2, r1, r0
+                 dreg       =   2
+                 opcode     =   7
+                 sel        =   6 (RSH)
+                 sreg       =   1
+                 sub_opcode =   0
+                 treg       =   0
+                 unused1    =   0
+                 unused2    =   0
+003c  06000074  ADD r2, r1, 0
+                 dreg       =   2
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   0 (ADD)
+                 sreg       =   1
+                 sub_opcode =   1
+                 unused1    =   0
+                 unused2    =   0
+0040  06002074  SUB r2, r1, 0
+                 dreg       =   2
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   1 (SUB)
+                 sreg       =   1
+                 sub_opcode =   1
+                 unused1    =   0
+                 unused2    =   0
+0044  06004074  AND r2, r1, 0
+                 dreg       =   2
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   2 (AND)
+                 sreg       =   1
+                 sub_opcode =   1
+                 unused1    =   0
+                 unused2    =   0
+0048  06006074  OR r2, r1, 0
+                 dreg       =   2
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   3 (OR)
+                 sreg       =   1
+                 sub_opcode =   1
+                 unused1    =   0
+                 unused2    =   0
+004c  01008074  MOVE r1, 0
+                 dreg       =   1
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   4 (MOVE)
+                 sreg       =   0
+                 sub_opcode =   1
+                 unused1    =   0
+                 unused2    =   0
+0050  0600a074  LSH r2, r1, 0
+                 dreg       =   2
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   5 (LSH)
+                 sreg       =   1
+                 sub_opcode =   1
+                 unused1    =   0
+                 unused2    =   0
+0054  0600c074  RSH r2, r1, 0
+                 dreg       =   2
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   6 (RSH)
+                 sreg       =   1
+                 sub_opcode =   1
+                 unused1    =   0
+                 unused2    =   0
+0058  00004078  STAGE_RST
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   2 (STAGE_RST)
+                 sub_opcode =   2
+                 unused1    =   0
+                 unused2    =   0
+005c  70000078  STAGE_INC 7
+                 imm        =   7
+                 opcode     =   7
+                 sel        =   0 (STAGE_INC)
+                 sub_opcode =   2
+                 unused1    =   0
+                 unused2    =   0
+0060  30002078  STAGE_DEC 3
+                 imm        =   3
+                 opcode     =   7
+                 sel        =   1 (STAGE_DEC)
+                 sub_opcode =   2
+                 unused1    =   0
+                 unused2    =   0
+0064  00002084  JUMP r0
+                 addr       =   0
+                 dreg       =   0
+                 opcode     =   8
+                 reg        =   1
+                 sub_opcode =   1
+                 type       =   0 (--)
+                 unused1    =   0
+                 unused2    =   0
+0068  01006084  JUMP r1, EQ
+                 addr       =   0
+                 dreg       =   1
+                 opcode     =   8
+                 reg        =   1
+                 sub_opcode =   1
+                 type       =   1 (EQ)
+                 unused1    =   0
+                 unused2    =   0
+006c  0200a084  JUMP r2, OV
+                 addr       =   0
+                 dreg       =   2
+                 opcode     =   8
+                 reg        =   1
+                 sub_opcode =   1
+                 type       =   2 (OV)
+                 unused1    =   0
+                 unused2    =   0
+0070  00000084  JUMP 0
+                 addr       =   0
+                 dreg       =   0
+                 opcode     =   8
+                 reg        =   0
+                 sub_opcode =   1
+                 type       =   0 (--)
+                 unused1    =   0
+                 unused2    =   0
+0074  00004084  JUMP 0, EQ
+                 addr       =   0
+                 dreg       =   0
+                 opcode     =   8
+                 reg        =   0
+                 sub_opcode =   1
+                 type       =   1 (EQ)
+                 unused1    =   0
+                 unused2    =   0
+0078  00008084  JUMP 0, OV
+                 addr       =   0
+                 dreg       =   0
+                 opcode     =   8
+                 reg        =   0
+                 sub_opcode =   1
+                 type       =   2 (OV)
+                 unused1    =   0
+                 unused2    =   0
+007c  01000080  JUMPR 0, 1, LT
+                 cmp        =   0 (LT)
+                 imm        =   1
+                 offset     =   0
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   0
+0080  05000580  JUMPR 1, 5, GT
+                 cmp        =   1 (GT)
+                 imm        =   5
+                 offset     =   1
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   0
+0084  05000680  JUMPR 1, 5, EQ
+                 cmp        =   2 (EQ)
+                 imm        =   5
+                 offset     =   1
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   0
+0088  01800088  JUMPS 0, 1, LT
+                 cmp        =   1 (LT)
+                 imm        =   1
+                 offset     =   0
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+008c  05801388  JUMPS 4, 5, GE
+                 cmp        =   7 (GE)
+                 imm        =   5
+                 offset     =   4
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+0090  09802288  JUMPS 8, 9, LE
+                 cmp        =   5 (LE)
+                 imm        =   9
+                 offset     =   8
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+0094  01000090  WAKE
+                 opcode     =   9
+                 sub_opcode =   0
+                 unused     =   0
+                 wakeup     =   1
+0098  07000040  WAIT 7
+                 cycles     =   7
+                 opcode     =   4
+                 unused     =   0
+009c  090000a0  TSENS r1, 2
+                 delay      =   2
+                 dreg       =   1
+                 opcode     =  10 (0x0a)
+                 unused     =   0
+00a0  000000b0  HALT
+                 opcode     =  11 (0x0b)
+                 unused     =   0
+00a4  060000d0  LD r2, r1, 0
+                 dreg       =   2
+                 offset     =   0
+                 opcode     =  13 (0x0d)
+                 sreg       =   1
+                 unused1    =   0
+                 unused2    =   0
+----------------------------------------
+.data
+00a8  00000000  <empty>
+00ac  fecadec0  <non-empty>

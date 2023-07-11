@@ -46,7 +46,11 @@ test_disassembling_a_manual_sequence() {
         echo -e "Testing disassembling a manual byte sequence in NORMAL mode"
     fi
 
-    sequence="e1af 8c72 0100 0068 2705 cc19 0005 681d 0000 00a0 0000 0074"
+    if [ "$cpu" == "esp32s2" ]; then
+        sequence="e1af 8c74 8101 0068 2705 cc19 0005 681d 0000 00a0 0000 0078"
+    else
+        sequence="e1af 8c72 0100 0068 2705 cc19 0005 681d 0000 00a0 0000 0074"
+    fi
 
     lst_file="manual_bytes.$cpu.lst"
     lst_file_fixture=fixtures/manual_bytes${verbose}.$cpu.lst
@@ -69,3 +73,13 @@ test_disassembling_a_file esp32 verbose
 
 test_disassembling_a_manual_sequence esp32
 test_disassembling_a_manual_sequence esp32 verbose
+
+echo ""
+
+# esp32s2
+echo "Testing for CPU: esp32s2"
+test_disassembling_a_file esp32s2
+test_disassembling_a_file esp32s2 verbose
+
+test_disassembling_a_manual_sequence esp32s2
+test_disassembling_a_manual_sequence esp32s2 verbose
