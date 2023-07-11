@@ -4,7 +4,7 @@
 
 set -e
 
-LIST=${1:-opcodes opcodes_s2 assemble link util preprocess definesdb disassemble}
+LIST=${1:-opcodes opcodes_s2 assemble link util preprocess definesdb decode}
 
 for file in $LIST; do
     echo testing $file...

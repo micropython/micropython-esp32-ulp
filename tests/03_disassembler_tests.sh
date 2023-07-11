@@ -22,7 +22,7 @@ test_disassembling_a_file() {
     lst_file="${testname}.lst"
     lst_file_fixture=fixtures/${testname}${verbose}.lst
     echo -e "\tDisassembling $ulp_file using micropython-esp32-ulp disassembler"
-    micropython tools/disassemble.py $verbose $ulp_file > $lst_file
+    micropython -m tools.disassemble $verbose $ulp_file > $lst_file
 
     if ! diff $lst_file_fixture $lst_file 1>/dev/null; then
         echo -e "\tDisassembled output differs from expected output!"
@@ -49,7 +49,7 @@ test_disassembling_a_manual_sequence() {
     lst_file="manual_bytes.lst"
     lst_file_fixture=fixtures/manual_bytes${verbose}.lst
     echo -e "\tDisassembling manual byte sequence using micropython-esp32-ulp disassembler"
-    micropython tools/disassemble.py $verbose -m $sequence > $lst_file
+    micropython -m tools.disassemble $verbose -m $sequence > $lst_file
 
     if ! diff $lst_file_fixture $lst_file 1>/dev/null; then
         echo -e "\tDisassembled output differs from expected output!"
