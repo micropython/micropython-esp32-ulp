@@ -32,7 +32,17 @@ OPCODE_ADC = 5
 
 OPCODE_ST = 6
 SUB_OPCODE_ST_AUTO = 1
-SUB_OPCODE_ST_OFFSET = 3
+# Note: SUB_OPCODE_ST_OFFSET should be 3
+# But in binutils-gdb they hardcoded the value to 2
+# This appears to be a bug, if one looks at the Technical
+# Reference Manual of the ESP32-S2.
+#
+# This issue is reported as a pull-request with fix:
+# https://github.com/espressif/binutils-gdb/pull/2
+#
+# We'll hard code this to 2 for now, until this is resolved in
+# binutils-gdb or the Technical Reference Manual is updated.
+SUB_OPCODE_ST_OFFSET = 2  # should be 3
 SUB_OPCODE_ST = 4
 
 OPCODE_ALU = 7
@@ -467,12 +477,12 @@ def i_adc(reg_dest, adc_idx, mux, _not_used=None):
     return _adc.all
 
 
-def i_st(reg_val, reg_addr, offset): ## FIXME do via i_st_manual
+def i_st_manual(reg_val, reg_addr, offset, label, upper, wr_way):
     _st.dreg = get_reg(reg_addr)
     _st.sreg = get_reg(reg_val)
-    _st.label = 0
-    _st.upper = 0
-    _st.wr_way = 3
+    _st.label = get_imm(label)
+    _st.upper = upper
+    _st.wr_way = wr_way
     _st.unused1 = 0
     _st.offset = get_imm(offset) // 4
     _st.unused2 = 0
@@ -481,21 +491,85 @@ def i_st(reg_val, reg_addr, offset): ## FIXME do via i_st_manual
     return _st.all
 
 
+def i_stl(reg_val, reg_addr, offset, label="0"):
+    return i_st_manual(reg_val, reg_addr, offset, label, 0, 3 if label=="0" else 1)
+
+
+def i_sth(reg_val, reg_addr, offset, label="0"):
+    return i_st_manual(reg_val, reg_addr, offset, label, 1, 3 if label=="0" else 1)
+
+
+def i_st(reg_val, reg_addr, offset):
+    return i_stl(reg_val, reg_addr, offset)
+
+
+def i_st32(reg_val, reg_addr, offset, label):
+    return i_st_manual(reg_val, reg_addr, offset, label, 0, 0)
+
+
+def i_st_auto(reg_val, reg_addr, label, wr_way):
+    _st.dreg = get_reg(reg_addr)
+    _st.sreg = get_reg(reg_val)
+    _st.label = get_imm(label)
+    _st.upper = 0
+    _st.wr_way = wr_way
+    _st.unused1 = 0
+    _st.offset = 0
+    _st.unused2 = 0
+    _st.sub_opcode = SUB_OPCODE_ST_AUTO
+    _st.opcode = OPCODE_ST
+    return _st.all
+
+
+def i_sto(offset):
+    _st.dreg = 0
+    _st.sreg = 0
+    _st.label = 0
+    _st.upper = 0
+    _st.wr_way = 0
+    _st.unused1 = 0
+    _st.offset = get_imm(offset) // 4
+    _st.unused2 = 0
+    _st.sub_opcode = SUB_OPCODE_ST_OFFSET
+    _st.opcode = OPCODE_ST
+    return _st.all
+
+
+def i_sti(reg_val, reg_addr, label="0"):
+    return i_st_auto(reg_val, reg_addr, label, 3 if label=="0" else 1)
+
+
+def i_sti32(reg_val, reg_addr, label):
+    return i_st_auto(reg_val, reg_addr, label, 0)
+
+
 def i_halt():
     _halt.unused = 0
     _halt.opcode = OPCODE_HALT
     return _halt.all
 
 
-def i_ld(reg_dest, reg_addr, offset): ## FIXME do via i_ld_manual
+def i_ld_manual(reg_dest, reg_addr, offset, rd_upper):
     _ld.dreg = get_reg(reg_dest)
     _ld.sreg = get_reg(reg_addr)
     _ld.unused1 = 0
     _ld.offset = get_imm(offset) // 4
     _ld.unused2 = 0
-    _ld.rd_upper = 0
+    _ld.rd_upper = rd_upper
     _ld.opcode = OPCODE_LD
     return _ld.all
+
+
+def i_ldl(reg_dest, reg_addr, offset):
+    return i_ld_manual(reg_dest, reg_addr, offset, 0)
+
+
+def i_ldh(reg_dest, reg_addr, offset):
+    return i_ld_manual(reg_dest, reg_addr, offset, 1)
+
+
+def i_ld(reg_dest, reg_addr, offset):
+    return i_ldl(reg_dest, reg_addr, offset)
 
 
 def i_move(reg_dest, reg_imm_src):

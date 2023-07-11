@@ -17,6 +17,10 @@ run_tests_for_cpu() {
     for src_file in $(ls -1 compat/*.S); do
         src_name="${src_file%.S}"
 
+        # files with a cpu encoded into their name are only run for that cpu
+        if [[ $src_file =~ \.esp32\. && $cpu != esp32 ]] || [[ $src_file =~ \.esp32s2?\. && $cpu != esp32s2 ]]; then
+            continue
+        fi
         echo "Testing $src_file"
         echo -e "\tBuilding using micropython-esp32-ulp ($cpu)"
         ulp_file="${src_name}.ulp"
