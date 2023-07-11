@@ -1,7 +1,25 @@
 from uctypes import struct, addressof, LITTLE_ENDIAN, UINT16, UINT32
-from .decode import decode_instruction, get_instruction_fields
 import ubinascii
 import sys
+
+
+# placeholders:
+# these functions will be dynamically loaded later based on the chosen cpu
+decode_instruction, get_instruction_fields = None, None
+
+
+def load_decoder(cpu):
+    if cpu == 'esp32':
+        mod = 'decode'
+    else:
+        raise ValueError('Invalid cpu')
+
+    relative_import = 1 if '/' in __file__ else 0
+    decode = __import__(mod, globals(), locals(), [], relative_import)
+
+    global decode_instruction, get_instruction_fields
+    decode_instruction = decode.decode_instruction
+    get_instruction_fields = decode.get_instruction_fields
 
 
 def chunk_into_words(code, bytes_per_word, byteorder):
@@ -65,7 +83,9 @@ def print_data_section(data_offset, code):
         print_code_line(data_offset + (idx << 2), i, asm)
 
 
-def disassemble_manually(byte_sequence_string, verbose=False):
+def disassemble_manually(byte_sequence_string, cpu, verbose=False):
+    load_decoder(cpu)
+
     sequence = byte_sequence_string.strip().replace(' ','')
     chars_per_instruction = 8
     list = [
@@ -79,7 +99,9 @@ def disassemble_manually(byte_sequence_string, verbose=False):
         decode_instruction_and_print(idx << 2, i, verbose)
 
 
-def disassemble_file(filename, verbose=False):
+def disassemble_file(filename, cpu, verbose=False):
+    load_decoder(cpu)
+
     with open(filename, 'rb') as f:
         data = f.read()
 
@@ -114,6 +136,7 @@ def print_help():
     print('Usage: disassemble.py [<options>] [-m <byte_sequence> | <filename>]')
     print('')
     print('Options:')
+    print('  -c                  Choose ULP variant: only esp32 supported for now')
     print('  -h                  Show this help text')
     print('  -m <byte_sequence>  Sequence of hex bytes (8 per instruction)')
     print('  -v                  Verbose mode. Show ULP header and fields of each instruction')
@@ -122,6 +145,7 @@ def print_help():
 
 
 def handle_cmdline(params):
+    cpu = 'esp32'
     verbose = False
     filename = None
     byte_sequence = None
@@ -130,6 +154,9 @@ def handle_cmdline(params):
         if params[0] == '-h':
             print_help()
             sys.exit(0)
+        elif params[0] == '-c':
+            cpu = params[1]
+            params = params[1:]  # remove first param from list
         elif params[0] == '-m':
             if len(params) == 1:
                 print_help()
@@ -159,10 +186,11 @@ def handle_cmdline(params):
 
         params = params[1:]  # remove first param from list
 
+
     if byte_sequence:
-        disassemble_manually(byte_sequence, verbose)
+        disassemble_manually(byte_sequence, cpu, verbose)
     elif filename:
-        disassemble_file(filename, verbose)
+        disassemble_file(filename, cpu, verbose)
 
 
 if sys.argv: # if run from cmdline
