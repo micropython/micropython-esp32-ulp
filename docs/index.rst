@@ -93,7 +93,8 @@ assembly source file into a machine code binary file with a ``.ulp`` extension.
 That file can then be loaded directly without assembling the source again.
 
 1. Create/upload an assembly source file and run the following to get a
-   loadable ULP binary as a ``.ulp`` file:
+   loadable ULP binary as a ``.ulp`` file (specify ``cpu='esp32s2'`` if you
+   have an ESP32-S2 or ESP32-S3 device):
 
    .. code-block:: python
 
@@ -160,7 +161,6 @@ Currently the following are not supported:
 * assembler macros using ``.macro``
 * preprocessor macros using ``#define A(x,y) ...``
 * including files using ``#include``
-* ESP32-S2 (not binary compatible with the ESP32)
 
 
 Testing
@@ -171,7 +171,8 @@ output is identical with what Espressif's esp32-elf-as (from their `binutils-gdb
 <https://github.com/espressif/binutils-gdb/tree/esp32ulp-elf-2.35>`_) produces.
 
 micropython-esp32-ulp has been tested on the Unix port of MicroPython and on real ESP32
-devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM.
+devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM as well as ESP32-S2
+(ESP32-S2FH4) and ESP32-S3 (ESP32-S3R8) devices.
 
 Consult the Github Actions `workflow definition file </.github/workflows/run_tests.yaml>`_
 for how to run the different tests.
