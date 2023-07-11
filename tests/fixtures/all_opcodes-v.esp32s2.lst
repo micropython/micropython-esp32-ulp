@@ -1,8 +1,8 @@
 header
 ULP magic    : b'ulp\x00' (0x00706c75)
 .text offset : 12 (0x0c)
-.text size   : 168 (0xa8)
-.data offset : 180 (0xb4)
+.text size   : 176 (0xb0)
+.data offset : 188 (0xbc)
 .data size   : 8 (0x08)
 .bss size    : 0 (0x00)
 ----------------------------------------
@@ -278,10 +278,10 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  opcode     =   8
                  sign       =   0
                  sub_opcode =   0
-0084  05000680  JUMPR 1, 5, EQ
+0084  07000a80  JUMPR 2, 7, EQ
                  cmp        =   2 (EQ)
-                 imm        =   5
-                 offset     =   1
+                 imm        =   7
+                 offset     =   2
                  opcode     =   8
                  sign       =   0
                  sub_opcode =   0
@@ -293,40 +293,56 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  sign       =   0
                  sub_opcode =   2
                  unused     =   0
-008c  05801388  JUMPS 4, 5, GE
-                 cmp        =   7 (GE)
+008c  05801188  JUMPS 4, 5, GT
+                 cmp        =   3 (GT)
                  imm        =   5
                  offset     =   4
                  opcode     =   8
                  sign       =   0
                  sub_opcode =   2
                  unused     =   0
-0090  09802288  JUMPS 8, 9, LE
-                 cmp        =   5 (LE)
-                 imm        =   9
+0090  07002288  JUMPS 8, 7, EQ
+                 cmp        =   4 (EQ)
+                 imm        =   7
                  offset     =   8
                  opcode     =   8
                  sign       =   0
                  sub_opcode =   2
                  unused     =   0
-0094  01000090  WAKE
+0094  09803288  JUMPS 12, 9, LE
+                 cmp        =   5 (LE)
+                 imm        =   9
+                 offset     =  12 (0x0c)
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+0098  0b804388  JUMPS 16, 11, GE
+                 cmp        =   7 (GE)
+                 imm        =  11 (0x0b)
+                 offset     =  16 (0x10)
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+009c  01000090  WAKE
                  opcode     =   9
                  sub_opcode =   0
                  unused     =   0
                  wakeup     =   1
-0098  07000040  WAIT 7
+00a0  07000040  WAIT 7
                  cycles     =   7
                  opcode     =   4
                  unused     =   0
-009c  090000a0  TSENS r1, 2
+00a4  090000a0  TSENS r1, 2
                  delay      =   2
                  dreg       =   1
                  opcode     =  10 (0x0a)
                  unused     =   0
-00a0  000000b0  HALT
+00a8  000000b0  HALT
                  opcode     =  11 (0x0b)
                  unused     =   0
-00a4  060000d0  LD r2, r1, 0
+00ac  060000d0  LD r2, r1, 0
                  dreg       =   2
                  offset     =   0
                  opcode     =  13 (0x0d)
@@ -335,5 +351,5 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  unused2    =   0
 ----------------------------------------
 .data
-00a8  00000000  <empty>
-00ac  fecadec0  <non-empty>
+00b0  00000000  <empty>
+00b4  fecadec0  <non-empty>
