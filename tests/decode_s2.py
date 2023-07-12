@@ -86,8 +86,23 @@ def test_all_instructions():
     # OPCODE_ADC = 5
     assert_decode("00000050", opcodes._adc, 'ADC r0, 0, 0')
 
-    # OPCODE_ST = 6
+    # OPCODE_ST = 6, SUB_OPCODE_ST
     assert_decode("80010068", opcodes._st, 'ST r0, r0, 0')
+    assert_decode("c0010068", opcodes._st, 'STH r0, r0, 0')
+    assert_decode("90000068", opcodes._st, 'STL r0, r0, 0, 1')
+    assert_decode("d0000068", opcodes._st, 'STH r0, r0, 0, 1')
+    assert_decode("00000068", opcodes._st, 'ST32 r0, r0, 0, 0')
+    assert_decode("10000068", opcodes._st, 'ST32 r0, r0, 0, 1')
+
+    # OPCODE_ST = 6, SUB_OPCODE_ST_AUTO
+    assert_decode("80010062", opcodes._st, 'STI r0, r0')
+    assert_decode("90000062", opcodes._st, 'STI r0, r0, 1')
+    assert_decode("00000062", opcodes._st, 'STI32 r0, r0, 0')
+    assert_decode("10000062", opcodes._st, 'STI32 r0, r0, 1')
+
+    # OPCODE_ST = 6, SUB_OPCODE_ST_OFFSET
+    assert_decode("00000064", opcodes._st, 'STO 0')
+    assert_decode("00040064", opcodes._st, 'STO 1')
 
     # OPCODE_ALU = 7, SUB_OPCODE_ALU_REG
     assert_decode("00000070", opcodes._alu_reg, 'ADD r0, r0, r0')

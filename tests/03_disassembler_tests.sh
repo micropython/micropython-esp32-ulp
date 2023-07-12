@@ -13,11 +13,11 @@ test_disassembling_a_file() {
     fi
 
     testname=all_opcodes
-    fixture=fixtures/${testname}.S
+    fixture=fixtures/${testname}.${cpu}.S
     echo -e "\tBuilding $fixture using micropython-esp32-ulp ($cpu)"
 
     log_file="${testname}.log"
-    ulp_file="fixtures/${testname}.ulp"
+    ulp_file="fixtures/${testname}.${cpu}.ulp"
     micropython -m esp32_ulp -c $cpu $fixture 1>$log_file   # generates $ulp_file
 
     lst_file="${testname}.$cpu.lst"

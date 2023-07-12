@@ -63,8 +63,32 @@ lookup = {
         opcodes._i2c,
         lambda op: 'I2C_%s %s, %s, %s, %s' % ('RD' if op.rw == 0 else 'WR', op.sub_addr, op.high, op.low, op.i2c_sel)
     ),
-    opcodes.OPCODE_LD: ('LD', opcodes._ld, lambda op: 'LD r%s, r%s, %s' % (op.dreg, op.sreg, op.offset)),
-    opcodes.OPCODE_ST: ('ST', opcodes._st, lambda op: 'ST r%s, r%s, %s' % (op.sreg, op.dreg, op.offset)),
+    opcodes.OPCODE_LD: (
+        'LD/LDH',
+        opcodes._ld,
+        lambda op: '%s r%s, r%s, %s' % ('LDH' if op.rd_upper else 'LD', op.dreg, op.sreg, op.offset)
+    ),
+    opcodes.OPCODE_ST: ('ST', opcodes._st, {
+        opcodes.SUB_OPCODE_ST_AUTO: (
+            'STI/STI32',
+            opcodes._st,
+            lambda op: 'STI32 r%s, r%s, %s' % (op.sreg, op.dreg, op.label) if op.wr_way == 0
+                else 'STI r%s, r%s, %s' % (op.sreg, op.dreg, op.label) if op.label
+                else 'STI r%s, r%s' % (op.sreg, op.dreg)
+        ),
+        opcodes.SUB_OPCODE_ST_OFFSET: (
+            'STO',
+            opcodes._st,
+            lambda op: 'STO %s' % op.offset
+        ),
+        opcodes.SUB_OPCODE_ST: (
+            'ST/STH/ST32',
+            opcodes._st,
+            lambda op: '%s r%s, r%s, %s, %s' % ('STH' if op.upper else 'STL', op.sreg, op.dreg, op.offset, op.label) if op.wr_way and op.label
+                else '%s r%s, r%s, %s' % ('STH' if op.upper else 'ST', op.sreg, op.dreg, op.offset) if op.wr_way
+                else 'ST32 r%s, r%s, %s, %s' % (op.sreg, op.dreg, op.offset, op.label)
+        )
+    }),
     opcodes.OPCODE_RD_REG: (
         'RD_REG',
         opcodes._rd_reg,
@@ -117,7 +141,8 @@ def get_instruction_fields(ins):
         'high', 'i2c_sel', 'imm', 'low', 'mux', 'offset', 'opcode',
         'periph_sel', 'reg', 'rw', 'sar_sel', 'sel', 'sign', 'sreg',
         'sub_addr', 'sub_opcode', 'treg', 'type', 'unused', 'unused1',
-        'unused2', 'wakeup'
+        'unused2', 'wakeup',
+        'rd_upper', 'label', 'upper', 'wr_way',
     )
     field_details = []
     for field in possible_fields:

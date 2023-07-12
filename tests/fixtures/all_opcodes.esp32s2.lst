@@ -43,6 +43,23 @@
 00a4  090000a0  TSENS r1, 2
 00a8  000000b0  HALT
 00ac  060000d0  LD r2, r1, 0
+00b0  00000040  NOP
+00b4  092000d0  LD r1, r2, 8
+00b8  092000d8  LDH r1, r2, 8
+00bc  89210068  ST r1, r2, 8
+00c0  89210068  ST r1, r2, 8
+00c4  99200068  STL r1, r2, 8, 1
+00c8  c9210068  STH r1, r2, 8
+00cc  c9210068  STH r1, r2, 8
+00d0  d9200068  STH r1, r2, 8, 1
+00d4  09200068  ST32 r1, r2, 8, 0
+00d8  19200068  ST32 r1, r2, 8, 1
+00dc  89010062  STI r1, r2
+00e0  89010062  STI r1, r2
+00e4  99000062  STI r1, r2, 1
+00e8  09000062  STI32 r1, r2, 0
+00ec  19000062  STI32 r1, r2, 1
+00f0  00200064  STO 8
 .data
-00b0  00000000  <empty>
-00b4  fecadec0  <non-empty>
+00f4  00000000  <empty>
+00f8  fecadec0  <non-empty>
