@@ -1,0 +1,42 @@
+0000  e1af8c72  MOVE r1, 51966
+                 dreg       =   1
+                 imm        = 51966 (0xcafe)
+                 opcode     =   7
+                 sel        =   4 (MOVE)
+                 sreg       =   0
+                 sub_opcode =   1
+                 unused     =   0
+0004  01000068  ST r1, r0, 0
+                 dreg       =   0
+                 offset     =   0
+                 opcode     =   6
+                 sreg       =   1
+                 sub_opcode =   4
+                 unused1    =   0
+                 unused2    =   0
+0008  2705cc19  REG_WR 0x127, 19, 19, 1
+                 addr       =  39 (0x27)
+                 data       =   1
+                 high       =  19 (0x13)
+                 low        =  19 (0x13)
+                 opcode     =   1
+                 periph_sel =   1
+000c  0005681d  REG_WR 0x100, 26, 26, 1
+                 addr       =   0
+                 data       =   1
+                 high       =  26 (0x1a)
+                 low        =  26 (0x1a)
+                 opcode     =   1
+                 periph_sel =   1
+0010  000000a0  TSENS r0, 0
+                 delay      =   0
+                 dreg       =   0
+                 opcode     =  10 (0x0a)
+                 unused     =   0
+0014  00000074  STAGE_INC 0
+                 imm        =   0
+                 opcode     =   7
+                 sel        =   0 (STAGE_INC)
+                 sub_opcode =   2
+                 unused1    =   0
+                 unused2    =   0
