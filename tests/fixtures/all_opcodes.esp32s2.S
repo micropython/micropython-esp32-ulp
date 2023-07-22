@@ -89,3 +89,9 @@ STI32 R1, R2, 0
 STI32 R1, R2, 1
 
 STO   0x20
+
+LDL R1, R2, -0x20
+LDH R1, R2, -0x20
+
+STL R1, R2, -0x20
+STH R1, R2, -0x20

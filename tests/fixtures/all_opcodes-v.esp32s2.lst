@@ -1,8 +1,8 @@
 header
 ULP magic    : b'ulp\x00' (0x00706c75)
 .text offset : 12 (0x0c)
-.text size   : 244 (0xf4)
-.data offset : 256 (0x100)
+.text size   : 260 (0x104)
+.data offset : 272 (0x110)
 .data size   : 8 (0x08)
 .bss size    : 0 (0x00)
 ----------------------------------------
@@ -527,7 +527,45 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  label      =   0
                  upper      =   0
                  wr_way     =   0
+00f4  09e01fd0  LD r1, r2, -8
+                 dreg       =   1
+                 offset     =  -8 (0x7f8)
+                 opcode     =  13 (0x0d)
+                 sreg       =   2
+                 unused1    =   0
+                 unused2    =   0
+                 rd_upper   =   0
+00f8  09e01fd8  LDH r1, r2, -8
+                 dreg       =   1
+                 offset     =  -8 (0x7f8)
+                 opcode     =  13 (0x0d)
+                 sreg       =   2
+                 unused1    =   0
+                 unused2    =   0
+                 rd_upper   =   1
+00fc  89e11f68  ST r1, r2, -8
+                 dreg       =   2
+                 offset     =  -8 (0x7f8)
+                 opcode     =   6
+                 sreg       =   1
+                 sub_opcode =   4
+                 unused1    =   0
+                 unused2    =   0
+                 label      =   0
+                 upper      =   0
+                 wr_way     =   3
+0100  c9e11f68  STH r1, r2, -8
+                 dreg       =   2
+                 offset     =  -8 (0x7f8)
+                 opcode     =   6
+                 sreg       =   1
+                 sub_opcode =   4
+                 unused1    =   0
+                 unused2    =   0
+                 label      =   0
+                 upper      =   1
+                 wr_way     =   3
 ----------------------------------------
 .data
-00f4  00000000  <empty>
-00f8  fecadec0  <non-empty>
+0104  00000000  <empty>
+0108  fecadec0  <non-empty>

@@ -66,7 +66,7 @@ lookup = {
     opcodes.OPCODE_LD: (
         'LD/LDH',
         opcodes._ld,
-        lambda op: '%s r%s, r%s, %s' % ('LDH' if op.rd_upper else 'LD', op.dreg, op.sreg, op.offset)
+        lambda op: '%s r%s, r%s, %s' % ('LDH' if op.rd_upper else 'LD', op.dreg, op.sreg, twos_comp(op.offset, 11))
     ),
     opcodes.OPCODE_ST: ('ST', opcodes._st, {
         opcodes.SUB_OPCODE_ST_AUTO: (
@@ -79,14 +79,14 @@ lookup = {
         opcodes.SUB_OPCODE_ST_OFFSET: (
             'STO',
             opcodes._st,
-            lambda op: 'STO %s' % op.offset
+            lambda op: 'STO %s' % twos_comp(op.offset, 11)
         ),
         opcodes.SUB_OPCODE_ST: (
             'ST/STH/ST32',
             opcodes._st,
-            lambda op: '%s r%s, r%s, %s, %s' % ('STH' if op.upper else 'STL', op.sreg, op.dreg, op.offset, op.label) if op.wr_way and op.label
-                else '%s r%s, r%s, %s' % ('STH' if op.upper else 'ST', op.sreg, op.dreg, op.offset) if op.wr_way
-                else 'ST32 r%s, r%s, %s, %s' % (op.sreg, op.dreg, op.offset, op.label)
+            lambda op: '%s r%s, r%s, %s, %s' % ('STH' if op.upper else 'STL', op.sreg, op.dreg, twos_comp(op.offset, 11), op.label) if op.wr_way and op.label
+                else '%s r%s, r%s, %s' % ('STH' if op.upper else 'ST', op.sreg, op.dreg, twos_comp(op.offset, 11)) if op.wr_way
+                else 'ST32 r%s, r%s, %s, %s' % (op.sreg, op.dreg, twos_comp(op.offset, 11), op.label)
         )
     }),
     opcodes.OPCODE_RD_REG: (
@@ -101,6 +101,16 @@ lookup = {
     ),
     opcodes.OPCODE_TSENS: ('TSENS', opcodes._tsens, lambda op: 'TSENS r%s, %s' % (op.dreg, op.delay)),
 }
+
+
+def twos_comp(val, bits):
+    """
+    compute the correct value of a 2's complement
+    based on the number of bits in the source
+    """
+    if (val & (1 << (bits - 1))) != 0:  # if sign bit is set e.g., 8bit: 128-255
+        val = val - (1 << bits)         # compute negative value
+    return val
 
 
 def decode_instruction(i):
@@ -167,6 +177,9 @@ def get_instruction_fields(ins):
                 extra = ' (%s)' % bs_cmp_ops[val]
             else:
                 extra = ' (%s)' % cmp_ops[val]
+        elif field == 'offset':
+            if ins.opcode in (opcodes.OPCODE_ST, opcodes.OPCODE_LD):
+                val = twos_comp(val, 11)
 
         field_details.append((field, val, extra))
 

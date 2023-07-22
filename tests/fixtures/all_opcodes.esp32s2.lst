@@ -60,6 +60,10 @@
 00e8  09000062  STI32 r1, r2, 0
 00ec  19000062  STI32 r1, r2, 1
 00f0  00200064  STO 8
+00f4  09e01fd0  LD r1, r2, -8
+00f8  09e01fd8  LDH r1, r2, -8
+00fc  89e11f68  ST r1, r2, -8
+0100  c9e11f68  STH r1, r2, -8
 .data
-00f4  00000000  <empty>
-00f8  fecadec0  <non-empty>
+0104  00000000  <empty>
+0108  fecadec0  <non-empty>
