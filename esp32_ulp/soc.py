@@ -2,6 +2,9 @@
 Address / Register definitions for the ESP32 SoC
 """
 
+# Reference:
+# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32/include/soc/reg_base.h
+
 DR_REG_DPORT_BASE                       = 0x3ff00000
 DR_REG_AES_BASE                         = 0x3ff01000
 DR_REG_RSA_BASE                         = 0x3ff02000
@@ -38,7 +41,7 @@ DR_REG_EFUSE_BASE                       = 0x3ff5A000
 DR_REG_SPI_ENCRYPT_BASE                 = 0x3ff5B000
 DR_REG_NRX_BASE                         = 0x3ff5CC00
 DR_REG_BB_BASE                          = 0x3ff5D000
-DR_REG_PWM_BASE                         = 0x3ff5E000
+DR_REG_PWM0_BASE                        = 0x3ff5E000
 DR_REG_TIMERGROUP0_BASE                 = 0x3ff5F000
 DR_REG_TIMERGROUP1_BASE                 = 0x3ff60000
 DR_REG_RTCMEM0_BASE                     = 0x3ff61000
@@ -47,13 +50,12 @@ DR_REG_RTCMEM2_BASE                     = 0x3ff63000
 DR_REG_SPI2_BASE                        = 0x3ff64000
 DR_REG_SPI3_BASE                        = 0x3ff65000
 DR_REG_SYSCON_BASE                      = 0x3ff66000
-DR_REG_APB_CTRL_BASE                    = 0x3ff66000
+DR_REG_APB_CTRL_BASE                    = 0x3ff66000  # Old name for SYSCON, to be removed
 DR_REG_I2C1_EXT_BASE                    = 0x3ff67000
 DR_REG_SDMMC_BASE                       = 0x3ff68000
 DR_REG_EMAC_BASE                        = 0x3ff69000
+DR_REG_CAN_BASE                         = 0x3ff6B000
 DR_REG_PWM1_BASE                        = 0x3ff6C000
 DR_REG_I2S1_BASE                        = 0x3ff6D000
 DR_REG_UART2_BASE                       = 0x3ff6E000
-DR_REG_PWM2_BASE                        = 0x3ff6F000
-DR_REG_PWM3_BASE                        = 0x3ff70000
-
+PERIPHS_SPI_ENCRYPT_BASEADDR            = DR_REG_SPI_ENCRYPT_BASE
