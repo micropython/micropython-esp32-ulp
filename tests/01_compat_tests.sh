@@ -14,7 +14,7 @@ run_tests_for_cpu() {
     local cpu=$1
     echo "Testing for CPU: $cpu"
 
-    for src_file in $(ls -1 compat/*.S); do
+    for src_file in $(ls -1 compat/*.S fixtures/*.S); do
         src_name="${src_file%.S}"
 
         # files with a cpu encoded into their name are only run for that cpu

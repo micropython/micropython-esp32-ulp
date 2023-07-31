@@ -491,12 +491,12 @@ def i_st_manual(reg_val, reg_addr, offset, label, upper, wr_way):
     return _st.all
 
 
-def i_stl(reg_val, reg_addr, offset, label="0"):
-    return i_st_manual(reg_val, reg_addr, offset, label, 0, 3 if label=="0" else 1)
+def i_stl(reg_val, reg_addr, offset, label=None):
+    return i_st_manual(reg_val, reg_addr, offset, label if label else "0", 0, 1 if label else 3)
 
 
-def i_sth(reg_val, reg_addr, offset, label="0"):
-    return i_st_manual(reg_val, reg_addr, offset, label, 1, 3 if label=="0" else 1)
+def i_sth(reg_val, reg_addr, offset, label=None):
+    return i_st_manual(reg_val, reg_addr, offset, label if label else "0", 1, 1 if label else 3)
 
 
 def i_st(reg_val, reg_addr, offset):
@@ -535,8 +535,8 @@ def i_sto(offset):
     return _st.all
 
 
-def i_sti(reg_val, reg_addr, label="0"):
-    return i_st_auto(reg_val, reg_addr, label, 3 if label=="0" else 1)
+def i_sti(reg_val, reg_addr, label=None):
+    return i_st_auto(reg_val, reg_addr, label if label else "0", 1 if label else 3)
 
 
 def i_sti32(reg_val, reg_addr, label):
