@@ -36,20 +36,29 @@ fetch_binutils_esp32ulp_examples() {
         https://github.com/espressif/binutils-gdb.git 1>$log_file 2>&1
 }
 
-build_defines_db() {
-    local defines_db=defines.db
+REUSE_DEFINES_DB=0
 
-    if [ "$1" = "-r" ] && [ -s "${defines_db}" ]; then
+build_defines_db() {
+    local cpu=$1
+    local defines_db=defines.db
+    local defines_db_cpu=defines.$cpu.db
+
+    if [ "$REUSE_DEFINES_DB" = 1 ] && [ -s "${defines_db_cpu}" ]; then
         # reuse existing defines.db
+        echo "Reusing existing defines DB for cpu $cpu"
+        cp ${defines_db_cpu} ${defines_db}
         return
     fi
 
-    echo "Building defines DB from include files"
-    log_file=log/build_defines_db.log
+    echo "Building defines DB from $cpu include files"
+    log_file=log/build_defines_db.$cpu.log
     rm -f "${defines_db}"
     micropython -m esp32_ulp.parse_to_db \
-        esp-idf/components/soc/esp32/include/soc/*.h \
+        esp-idf/components/soc/$cpu/include/soc/*.h \
         esp-idf/components/esp_common/include/*.h 1>$log_file
+
+    # cache defines.db
+    cp ${defines_db} ${defines_db_cpu}
 }
 
 calc_file_hash() {
@@ -62,9 +71,9 @@ patch_test() {
     local test_name=$1
     local out_file="${test_name}.tmp"
 
-    if [ "${test_name}" = esp32ulp_jumpr ]; then
+    if [[ "${test_name}" =~ ^(esp32ulp_jumpr|esp32s2ulp_jumpr|esp32s2ulp_jump)$ ]]; then
         (
-            cd binutils-gdb/gas/testsuite/gas/esp32ulp/esp32
+            cd binutils-gdb/gas/testsuite/gas/esp32ulp/$cpu
             cp ${test_name}.s ${out_file}
             echo -e "\tPatching test to work around binutils-esp32ulp .global bug"
             cat >> ${out_file} <<EOF
@@ -89,6 +98,14 @@ EOF
 EOF
         )
         return 0
+    elif [ "${test_name}" = esp32s2ulp_ld ]; then
+        (
+            cd binutils-gdb/gas/testsuite/gas/esp32ulp/esp32s2
+            echo -e "\tPatching test to work around binutils-esp32ulp .global bug"
+            cp ${test_name}.s ${out_file}
+            echo ".global offs_min" >> ${out_file}
+        )
+        return 0
     fi
 
     return 1  # nothing was patched
@@ -98,13 +115,24 @@ make_log_dir
 fetch_esp_idf
 fetch_ulptool_examples
 fetch_binutils_esp32ulp_examples
-build_defines_db $1
 
 run_tests_for_cpu() {
     local cpu=$1
     echo "Testing for CPU: $cpu"
+    build_defines_db $cpu
 
-    for src_file in ulptool/src/ulp_examples/*/*.s binutils-gdb/gas/testsuite/gas/esp32ulp/esp32/*.s; do
+    LIST=$(echo binutils-gdb/gas/testsuite/gas/esp32ulp/$cpu/*.s)
+    if [ $cpu = esp32 ]; then
+        # append extra tests to test preprocessor
+        # examples have constants specific to ESP32 (original)
+        # so we only run these tests with cpu = esp32
+        # these tests primarily test our preprocessor, which is
+        # cpu independent, so we do not need to run them
+        # per each cpu.
+        LIST=$(echo ulptool/src/ulp_examples/*/*.s $LIST)
+    fi
+
+    for src_file in $LIST; do
 
         src_name="${src_file%.s}"
         src_dir="${src_name%/*}"
@@ -120,6 +148,13 @@ run_tests_for_cpu() {
                 continue 2
             fi
         done
+
+        if [ "$cpu" = esp32s2 ]; then
+            if [ "${test_name}" = "hall_sensor" ]; then
+                echo -e "\tSkipping... not supported on $cpu"
+                continue 1
+            fi
+        fi
 
         # BEGIN: work around known issues with binutils-gdb (esp32ulp)
         ulp_file="${src_name}.ulp"
@@ -142,7 +177,7 @@ run_tests_for_cpu() {
         bin_file="${src_name}.bin"
 
         echo -e "\tBuilding using binutils ($cpu)"
-        gcc -I esp-idf/components/soc/esp32/include -I esp-idf/components/esp_common/include \
+        gcc -I esp-idf/components/soc/$cpu/include -I esp-idf/components/esp_common/include \
             -x assembler-with-cpp \
             -E -o ${pre_file} $src_file
         esp32ulp-elf-as --mcpu=$cpu -o $obj_file ${pre_file}
@@ -166,6 +201,10 @@ run_tests_for_cpu() {
     done
     echo ""
 }
+
+if [ "$1" = -r ]; then
+    REUSE_DEFINES_DB=1
+fi
 
 run_tests_for_cpu esp32
 run_tests_for_cpu esp32s2
