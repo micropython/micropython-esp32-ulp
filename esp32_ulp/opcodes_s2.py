@@ -5,7 +5,6 @@ ESP32 ULP Co-Processor Instructions
 from ucollections import namedtuple
 from uctypes import struct, addressof, LITTLE_ENDIAN, UINT32, BFUINT32, BF_POS, BF_LEN
 
-from .soc import *
 from .util import split_tokens, validate_expression
 
 # XXX dirty hack: use a global for the symbol table
@@ -374,16 +373,43 @@ def get_cond(arg):
 
 
 def _soc_reg_to_ulp_periph_sel(reg):
-    # Map SoC peripheral register to periph_sel field of RD_REG and WR_REG instructions.
-    if reg < DR_REG_RTCCNTL_BASE:
+    # Accept peripheral register addresses of either the S2 or S3
+    # Since the address in the reg_rd or reg_wr instruction is an
+    # offset and not the actual address, and since the range of
+    # peripheral register addresses is the same for both the S2
+    # and S3, we will accept addresses in either address range.
+    # This allows us to avoid intruducing an additional cpu type
+    # for the S3, which is otherwise identical (binary format) to
+    # the S2.
+    if 0x3f408000 <= reg <= 0x3f40afff:  # ESP32-S2 address range
+        socmod = 'soc_s2'
+    elif 0x60008000 <= reg <= 0x6000afff:  # ESP32-S3 address range
+        socmod = 'soc_s3'
+    # Accept original ESP32 range too
+    # because binutils-gdb, when using cpu esp32s2 is broken
+    # and does not accept the address ranges of the esp32s2.
+    # As a nice side-effect some assembly written for an ESP32
+    # would work as-is when re-assembled for an ESP32-S2,
+    # because many (not all!) peripheral registers live at the
+    # same offset on all 3 ESP32s.
+    elif 0x3ff48000 <= reg <= 0x3ff4afff:  # original ESP32 address range
+        socmod = 'soc'
+    else:
         raise ValueError("invalid register base")
-    elif reg < DR_REG_RTCIO_BASE:
+
+    relative_import = 1 if '/' in __file__ else 0
+    soc = __import__(socmod, None, None, [], relative_import)
+
+    # Map SoC peripheral register to periph_sel field of RD_REG and WR_REG instructions.
+    if reg < soc.DR_REG_RTCCNTL_BASE:
+        raise ValueError("invalid register base")
+    elif reg < soc.DR_REG_RTCIO_BASE:
         ret = RD_REG_PERIPH_RTC_CNTL
-    elif reg < DR_REG_SENS_BASE:
+    elif reg < soc.DR_REG_SENS_BASE:
         ret = RD_REG_PERIPH_RTC_IO
-    elif reg < DR_REG_RTC_I2C_BASE:
+    elif reg < soc.DR_REG_RTC_I2C_BASE:
         ret = RD_REG_PERIPH_SENS
-    elif reg < DR_REG_IO_MUX_BASE:
+    elif reg < soc.DR_REG_IO_MUX_BASE:
         ret = RD_REG_PERIPH_RTC_I2C
     else:
         raise ValueError("invalid register base")
