@@ -95,6 +95,21 @@ are not needed on the device either.)
       micropython -m esp32_ulp.parse_to_db \
         esp-idf/components/soc/esp32/include/soc/{soc,soc_ulp,rtc_cntl_reg,rtc_io_reg,sens_reg}.h
 
+
+   .. warning::
+
+      `:warning:` Ensure that you include the header files for the correct
+      variant you are working with. In the example code above, simply switch
+      ``esp32`` to ``esp32s2`` or ``esp32s3`` in the path to the include files.
+
+      There are subtle differences across the ESP32 variants such as which
+      constants are available or the value of certain constants. For example,
+      peripheral register addresses differ between the 3 variants even though
+      many constants for peripheral registers are available on all 3 variants.
+      Other constants such as those relating to the HOLD functionality of touch
+      pads are only available on the original ESP32.
+
+
 2. Using the defines database during preprocessing
 
    The preprocessor will automatically use a defines database, when using the
@@ -107,6 +122,7 @@ are not needed on the device either.)
    the ``use_defines_db`` argument of the ``preprocess`` convenience function,
    or instantiate the ``Preprocessor`` class directly, without passing it a
    DefinesDB instance via ``use_db``.
+
 
 Design choices
 --------------

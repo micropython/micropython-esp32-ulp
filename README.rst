@@ -31,7 +31,7 @@ The following features are supported:
 
 * the entire `ESP32 ULP instruction set <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/ulp_instruction_set.html>`_
 * the entire `ESP32-S2 ULP instruction set <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/api-reference/system/ulp_instruction_set.html>`_
-  (this also covers the ESP32-S3) [#f1]_
+  (this also covers the ESP32-S3) [#f1]_ [#f2]_
 * constants defined with ``.set``
 * constants defined with ``#define``
 * expressions in assembly code and constant definitions
@@ -43,6 +43,17 @@ The following features are supported:
          but the binary format is different than that of the original ESP32 ULP. You need to
          select the ``esp32s2`` cpu (`see docs </docs/index.rst>`_) when assembling code for
          use on an ESP32-S2/S3.
+
+.. [#f2] Note: The ESP32-S2 and ESP32-S3 have the same ULP binary format, but the peripheral
+         register addresses (those accessed with REG_RD and REG_WR) are different. For best
+         results, use the correct peripheral register addresses for the specific variant you
+         are working with. The assembler (when used with ``cpu=esp32s2``) will accept
+         addresses for any of the 3 variants, because they are translated into relative
+         offsets anyway and many registers live at the same relative offset on all 3 variants.
+         This conveniently means that the same assembly code can assembled unmodified for each
+         variant and produce a correctly working binary - as long as only peripheral registers
+         are used, which have the same relative offset across the variants. Use with care!
+
 
 Quick start
 -----------
