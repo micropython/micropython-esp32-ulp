@@ -41,8 +41,8 @@ The following features are supported:
 
 .. [#f1] Note: the ESP32-S2 and ESP32-S3 have the same ULP binary format between each other
          but the binary format is different than that of the original ESP32 ULP. You need to
-         select the ``esp32s2`` cpu (`see docs </docs/disassembler.rst>`_) when assembling code
-         for use on an ESP32-S2/S3.
+         select the ``esp32s2`` cpu (`see docs </docs/index.rst>`_) when assembling code for
+         use on an ESP32-S2/S3.
 
 Quick start
 -----------
