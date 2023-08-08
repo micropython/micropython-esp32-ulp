@@ -1,5 +1,5 @@
 """
-Example for: ESP32
+Example for: ESP32-S2 and ESP32-S3
 
 Very basic example showing data exchange main CPU <--> ULP coprocessor.
 
@@ -27,7 +27,7 @@ entry:      move r3, data    # load address of data into r3
             halt             # halt ULP co-prozessor (until it gets waked up again)
 """
 
-binary = src_to_binary(source, cpu="esp32")  # cpu is esp32 or esp32s2
+binary = src_to_binary(source, cpu="esp32s2")  # cpu is esp32 or esp32s2
 
 load_addr, entry_addr = 0, 4
 
