@@ -174,6 +174,31 @@ def test_reg_address_translations_s2():
     assert ins.addr == 0x2a  # low 8 bits of 0x12a
 
 
+def test_reg_address_translations_s2_sens():
+    """
+    Test addressing of ESP32-S2 peripheral registers using full DPORT bus addresses
+    """
+
+    ins = make_ins("""
+    addr : 8        # Address within either RTC_CNTL, RTC_IO, or SARADC
+    periph_sel : 2  # Select peripheral: RTC_CNTL (0), RTC_IO(1), SARADC(2)
+    unused : 8      # Unused
+    low : 5         # Low bit
+    high : 5        # High bit
+    opcode : 4      # Opcode (OPCODE_RD_REG)
+    """)
+
+    # direct ULP address is derived from full address as follows:
+    # full:0x3f408904 == ulp:(0x3f408904-DR_REG_RTCCNTL_BASE) / 4
+    # full:0x3f408904 == ulp:(0x3f408904-0x3f408000) / 4
+    # full:0x3f408904 == ulp:0x904 / 4
+    # full:0x3f408904 == ulp:0x241
+    # see: https://github.com/espressif/binutils-esp32ulp/blob/249ec34/gas/config/tc-esp32ulp_esp32s2.c#L78
+    ins.all = opcodes.i_reg_rd("0x3f408904", "0", "0")
+    assert ins.periph_sel == 2  # high 2 bits of 0x241
+    assert ins.addr == 0x41  # low 8 bits of 0x241
+
+
 def test_reg_address_translations_s3():
     """
     Test addressing of ESP32-S3 peripheral registers using full DPORT bus addresses
@@ -199,6 +224,31 @@ def test_reg_address_translations_s3():
     assert ins.addr == 0x2a  # low 8 bits of 0x12a
 
 
+def test_reg_address_translations_s3_sens():
+    """
+    Test addressing of ESP32-S3 peripheral registers using full DPORT bus addresses
+    """
+
+    ins = make_ins("""
+    addr : 8        # Address within either RTC_CNTL, RTC_IO, or SARADC
+    periph_sel : 2  # Select peripheral: RTC_CNTL (0), RTC_IO(1), SARADC(2)
+    unused : 8      # Unused
+    low : 5         # Low bit
+    high : 5        # High bit
+    opcode : 4      # Opcode (OPCODE_RD_REG)
+    """)
+
+    # direct ULP address is derived from full address as follows:
+    # full:0x60008904 == ulp:(0x60008904-DR_REG_RTCCNTL_BASE) / 4
+    # full:0x60008904 == ulp:(0x60008904-0x60008000) / 4
+    # full:0x60008904 == ulp:0x904 / 4
+    # full:0x60008904 == ulp:0x241
+    # see: https://github.com/espressif/binutils-esp32ulp/blob/249ec34/gas/config/tc-esp32ulp_esp32s2.c#L78
+    ins.all = opcodes.i_reg_rd("0x60008904", "0", "0")
+    assert ins.periph_sel == 2  # high 2 bits of 0x241
+    assert ins.addr == 0x41  # low 8 bits of 0x241
+
+
 test_make_ins_struct_def()
 test_make_ins()
 test_arg_qualify()
@@ -209,3 +259,5 @@ test_eval_arg()
 test_reg_direct_ulp_addressing()
 test_reg_address_translations_s2()
 test_reg_address_translations_s3()
+test_reg_address_translations_s2_sens()
+test_reg_address_translations_s3_sens()

@@ -422,7 +422,7 @@ def i_reg_wr(reg, high_bit, low_bit, val):
         _wr_reg.addr = reg & 0xff
         _wr_reg.periph_sel = (reg & 0x300) >> 8
     else:
-        _wr_reg.addr = (reg & 0xff) >> 2
+        _wr_reg.addr = (reg >> 2) & 0xff
         _wr_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _wr_reg.data = get_imm(val)
     _wr_reg.low = get_imm(low_bit)
@@ -437,7 +437,7 @@ def i_reg_rd(reg, high_bit, low_bit):
         _rd_reg.addr = reg & 0xff
         _rd_reg.periph_sel = (reg & 0x300) >> 8
     else:
-        _rd_reg.addr = (reg & 0xff) >> 2
+        _rd_reg.addr = (reg >> 2) & 0xff
         _rd_reg.periph_sel = _soc_reg_to_ulp_periph_sel(reg)
     _rd_reg.unused = 0
     _rd_reg.low = get_imm(low_bit)

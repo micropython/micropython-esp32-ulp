@@ -10,6 +10,19 @@ calc_file_hash() {
     shasum < $1 | cut -d' ' -f1
 }
 
+make_log_dir() {
+   mkdir -p log
+}
+
+fetch_esp_idf() {
+    [ -d esp-idf ] && return
+
+    echo "Fetching esp-idf"
+    log_file=log/fetch-esp-idf.log
+    git clone --depth 1 \
+        https://github.com/espressif/esp-idf.git 1>$log_file 2>&1
+}
+
 run_tests_for_cpu() {
     local cpu=$1
     echo "Testing for CPU: $cpu"
@@ -33,7 +46,9 @@ run_tests_for_cpu() {
         bin_file="${src_name}.bin"
 
         echo -e "\tBuilding using binutils ($cpu)"
-        gcc -E -o ${pre_file} $src_file
+        gcc -I esp-idf/components/soc/$cpu/include -I esp-idf/components/esp_common/include \
+            -x assembler-with-cpp \
+            -E -o ${pre_file} $src_file
         esp32ulp-elf-as --mcpu=$cpu -o $obj_file ${pre_file}
         esp32ulp-elf-ld -T esp32.ulp.ld -o $elf_file $obj_file
         esp32ulp-elf-objcopy -O binary $elf_file $bin_file
@@ -56,5 +71,7 @@ run_tests_for_cpu() {
     echo ""
 }
 
+make_log_dir
+fetch_esp_idf
 run_tests_for_cpu esp32
 run_tests_for_cpu esp32s2
