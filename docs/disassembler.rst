@@ -25,6 +25,8 @@ You can also specify additional options to ``disassemble.py`` as follows:
 +--------------------------+----------------------------------------------------------------+
 | Option                   | Description                                                    |
 +==========================+================================================================+
+| ``-c`` or ``--mcpu``     | Choose ULP variant: either esp32 or esp32s2                    |
++--------------------------+----------------------------------------------------------------+
 | ``-h``                   | Show help text                                                 |
 +--------------------------+----------------------------------------------------------------+
 || ``-m <bytes sequence>`` || Disassemble a provided sequence of hex bytes                  |
@@ -43,18 +45,31 @@ specified file.
 Note that the ULP header is validates and files with unknown magic bytes will be
 rejected. The correct 4 magic bytes at the start of a ULP binary are ``ulp\x00``.
 
-Example:
+Example disassembling an ESP32 ULP binary:
 
 .. code-block:: shell
 
    $ micropython -m tools.disassemble path/to/binary.ulp
    .text
    0000  040000d0  LD r0, r1, 0
-   0004  0e0400d0  LD r2, r3, 1
-   0008  84010068  ST r0, r1, 0
-   000c  8b090068  ST r3, r2, 2
+   0004  0e0000d0  LD r2, r3, 0
+   0008  04000068  ST r0, r1, 0
+   000c  0b000068  ST r3, r2, 0
    .data
-   0000  00000000  <empty>
+   0010  00000000  <empty>
+
+Example disassembling an ESP32-S2 ULP binary:
+
+.. code-block:: shell
+
+   $ micropython -m tools.disassemble -c esp32s2 path/to/binary.ulp
+   .text
+   0000  040000d0  LD r0, r1, 0
+   0004  0e0000d0  LD r2, r3, 0
+   0008  84010068  ST r0, r1, 0
+   000c  8b010068  ST r3, r2, 0
+   .data
+   0010  00000000  <empty>
 
 
 Disassembling a byte sequence
@@ -129,18 +144,20 @@ For example:
 Disassembling on device
 -----------------------------
 
-The disassembler also works when used on an ESP32.
+The disassembler also works when used on an ESP32 device.
 
 To use the disassembler on a real device:
 
 * ensure ``micropython-esp32-ulp`` is installed on the device (see `docs/index.rst </docs/index.rst>`_).
-* upload ``tools/disassemble.py`` to the device (any directory will do)
-* run the following:
+* upload ``tools/disassemble.py`` ``tools/decode.py`` and ``tools/decode_s2.py`` to the device
+  (any directory will do, as long as those 3 files are in the same directory)
+* the following example code assumes you placed the 3 files into the device's "root" directory
+* run the following (note, we must specify which the cpu the binary is for):
 
   .. code-block:: python
 
      from disassemble import disassemble_file
      # then either:
-     disassemble_file('path/to/file.ulp')  # normal mode
+     disassemble_file('path/to/file.ulp', cpu='esp32s2')  # normal mode
      # or:
-     disassemble_file('path/to/file.ulp', True)  # verbose mode
+     disassemble_file('path/to/file.ulp', cpu='esp32s2', verbose=True)  # verbose mode

@@ -1,4 +1,4 @@
-from tools.disassemble import decode_instruction, get_instruction_fields
+from tools.decode import decode_instruction, get_instruction_fields
 import esp32_ulp.opcodes as opcodes
 import ubinascii
 

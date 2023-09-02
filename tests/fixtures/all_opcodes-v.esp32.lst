@@ -1,8 +1,8 @@
 header
 ULP magic    : b'ulp\x00' (0x00706c75)
 .text offset : 12 (0x0c)
-.text size   : 164 (0xa4)
-.data offset : 176 (0xb0)
+.text size   : 188 (0xbc)
+.data offset : 200 (0xc8)
 .data size   : 8 (0x08)
 .bss size    : 0 (0x00)
 ----------------------------------------
@@ -251,14 +251,28 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  opcode     =   8
                  sign       =   0
                  sub_opcode =   1
-0080  05000382  JUMPR 1, 5, GE
+0080  06000382  JUMPR 1, 6, GE
                  cmp        =   1 (GE)
-                 imm        =   5
+                 imm        =   6
                  offset     =   1
                  opcode     =   8
                  sign       =   0
                  sub_opcode =   1
-0084  01000084  JUMPS 0, 1, LT
+0084  08000582  JUMPR 2, 8, GE
+                 cmp        =   1 (GE)
+                 imm        =   8
+                 offset     =   2
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   1
+0088  07000582  JUMPR 2, 7, GE
+                 cmp        =   1 (GE)
+                 imm        =   7
+                 offset     =   2
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   1
+008c  01000084  JUMPS 0, 1, LT
                  cmp        =   0 (LT)
                  imm        =   1
                  offset     =   0
@@ -266,7 +280,15 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  sign       =   0
                  sub_opcode =   2
                  unused     =   0
-0088  05800284  JUMPS 1, 5, GE
+0090  05000584  JUMPS 2, 5, LE
+                 cmp        =   2 (LE)
+                 imm        =   5
+                 offset     =   2
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+0094  05800284  JUMPS 1, 5, GE
                  cmp        =   1 (GE)
                  imm        =   5
                  offset     =   1
@@ -274,33 +296,57 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  sign       =   0
                  sub_opcode =   2
                  unused     =   0
-008c  09000584  JUMPS 2, 9, LE
-                 cmp        =   2 (LE)
-                 imm        =   9
+0098  07000484  JUMPS 2, 7, LT
+                 cmp        =   0 (LT)
+                 imm        =   7
                  offset     =   2
                  opcode     =   8
                  sign       =   0
                  sub_opcode =   2
                  unused     =   0
-0090  01000090  WAKE
+009c  07000584  JUMPS 2, 7, LE
+                 cmp        =   2 (LE)
+                 imm        =   7
+                 offset     =   2
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+00a0  09000784  JUMPS 3, 9, LE
+                 cmp        =   2 (LE)
+                 imm        =   9
+                 offset     =   3
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+00a4  0b800884  JUMPS 4, 11, GE
+                 cmp        =   1 (GE)
+                 imm        =  11 (0x0b)
+                 offset     =   4
+                 opcode     =   8
+                 sign       =   0
+                 sub_opcode =   2
+                 unused     =   0
+00a8  01000090  WAKE
                  opcode     =   9
                  sub_opcode =   0
                  unused     =   0
                  wakeup     =   1
-0094  07000092  SLEEP 7
+00ac  07000092  SLEEP 7
                  cycle_sel  =   7
                  opcode     =   9
                  sub_opcode =   1
                  unused     =   0
-0098  090000a0  TSENS r1, 2
+00b0  090000a0  TSENS r1, 2
                  delay      =   2
                  dreg       =   1
                  opcode     =  10 (0x0a)
                  unused     =   0
-009c  000000b0  HALT
+00b4  000000b0  HALT
                  opcode     =  11 (0x0b)
                  unused     =   0
-00a0  060000d0  LD r2, r1, 0
+00b8  060000d0  LD r2, r1, 0
                  dreg       =   2
                  offset     =   0
                  opcode     =  13 (0x0d)
@@ -309,5 +355,5 @@ ULP magic    : b'ulp\x00' (0x00706c75)
                  unused2    =   0
 ----------------------------------------
 .data
-00a4  00000000  <empty>
-00a8  fecadec0  <non-empty>
+00bc  00000000  <empty>
+00c0  fecadec0  <non-empty>

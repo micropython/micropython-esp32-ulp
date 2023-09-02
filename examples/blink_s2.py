@@ -1,7 +1,5 @@
 """
-Example for: ESP32
-
-Simple example showing how to control a GPIO pin from the ULP coprocessor.
+Example for: ESP32-S2 and ESP32-S3
 
 The GPIO port is configured to be attached to the RTC module, and then set
 to OUTPUT mode. To avoid re-initializing the GPIO on every wakeup, a magic
@@ -24,21 +22,21 @@ from esp32_ulp import src_to_binary
 
 source = """\
 # constants from:
-# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32/include/soc/reg_base.h
-#define DR_REG_RTCIO_BASE            0x3ff48400
+# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32s2/include/soc/reg_base.h
+#define DR_REG_RTCIO_BASE            0x3f408400
 
 # constants from:
-# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32/include/soc/rtc_io_reg.h
-#define RTC_IO_TOUCH_PAD2_REG        (DR_REG_RTCIO_BASE + 0x9c)
+# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32s2/include/soc/rtc_io_reg.h
+#define RTC_IO_TOUCH_PAD2_REG        (DR_REG_RTCIO_BASE + 0x8c)
 #define RTC_IO_TOUCH_PAD2_MUX_SEL_M  (BIT(19))
 #define RTC_GPIO_OUT_REG             (DR_REG_RTCIO_BASE + 0x0)
 #define RTC_GPIO_ENABLE_REG          (DR_REG_RTCIO_BASE + 0xc)
-#define RTC_GPIO_ENABLE_S            14
-#define RTC_GPIO_OUT_DATA_S          14
+#define RTC_GPIO_ENABLE_S            10
+#define RTC_GPIO_OUT_DATA_S          10
 
 # constants from:
-# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32/include/soc/rtc_io_channel.h
-#define RTCIO_GPIO2_CHANNEL          12
+# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32s2/include/soc/rtc_io_channel.h
+#define RTCIO_GPIO2_CHANNEL          2
 
 # When accessed from the RTC module (ULP) GPIOs need to be addressed by their channel number
 .set gpio, RTCIO_GPIO2_CHANNEL
@@ -95,7 +93,7 @@ exit:
   halt  # go back to sleep until next wakeup period
 """
 
-binary = src_to_binary(source, cpu="esp32")  # cpu is esp32 or esp32s2
+binary = src_to_binary(source, cpu="esp32s2")  # cpu is esp32 or esp32s2
 
 load_addr, entry_addr = 0, 8
 

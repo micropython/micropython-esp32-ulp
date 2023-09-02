@@ -3,7 +3,6 @@ ESP32 ULP Co-Processor Assembler
 """
 
 import re
-from . import opcodes
 from .nocomment import remove_comments as do_remove_comments
 from .util import garbage_collect
 
@@ -88,9 +87,19 @@ class SymbolTable:
 
 class Assembler:
 
-    def __init__(self, symbols=None, bases=None, globals=None):
+    def __init__(self, cpu='esp32', symbols=None, bases=None, globals=None):
+        if cpu == 'esp32':
+            opcode_module = 'opcodes'
+        elif cpu == 'esp32s2':
+            opcode_module = 'opcodes_s2'
+        else:
+            raise ValueError('Invalid cpu')
+
+        relative_import = 1 if '/' in __file__ else 0
+        self.opcodes = __import__(opcode_module, None, None, [], relative_import)
+
         self.symbols = SymbolTable(symbols or {}, bases or {}, globals or {})
-        opcodes.symbols = self.symbols  # XXX dirty hack
+        self.opcodes.symbols = self.symbols  # XXX dirty hack
 
         # regex for parsing assembly lines
         # format: [[whitespace]label:][whitespace][opcode[whitespace arg[,arg...]]]
@@ -223,7 +232,7 @@ class Assembler:
             self.fill(self.section, amount, fill)
 
     def d_set(self, symbol, expr):
-        value = int(opcodes.eval_arg(expr))
+        value = int(self.opcodes.eval_arg(expr))
         self.symbols.set_sym(symbol, ABS, None, value)
 
     def d_global(self, symbol):
@@ -264,13 +273,13 @@ class Assembler:
                 else:
                     # machine instruction
                     opcode_lower = opcode.lower()
-                    func = getattr(opcodes, 'i_' + opcode_lower, None)
+                    func = getattr(self.opcodes, 'i_' + opcode_lower, None)
                     if func is not None:
                         if self.a_pass == 1:
                             # during the first pass, symbols are not all known yet.
                             # so we add empty instructions to the section, to determine
                             # section sizes and symbol offsets for pass 2.
-                            result = (0,) * opcodes.no_of_instr(opcode_lower, args)
+                            result = (0,) * self.opcodes.no_of_instr(opcode_lower, args)
                         else:
                             result = func(*args)
 

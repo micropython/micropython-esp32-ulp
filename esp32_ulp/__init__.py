@@ -6,8 +6,8 @@ from .link import make_binary
 garbage_collect('after import')
 
 
-def src_to_binary(src):
-    assembler = Assembler()
+def src_to_binary(src, cpu):
+    assembler = Assembler(cpu)
     src = preprocess(src)
     assembler.assemble(src, remove_comments=False)  # comments already removed by preprocessor
     garbage_collect('before symbols export')
@@ -19,11 +19,11 @@ def src_to_binary(src):
     return make_binary(text, data, bss_len)
 
 
-def assemble_file(filename):
+def assemble_file(filename, cpu):
     with open(filename) as f:
         src = f.read()
 
-    binary = src_to_binary(src)
+    binary = src_to_binary(src, cpu)
 
     if filename.endswith('.s') or filename.endswith('.S'):
         filename = filename[:-2]

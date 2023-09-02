@@ -58,6 +58,13 @@ follows:
    cd micropython-esp32-ulp
    micropython -m esp32_ulp path/to/code.S  # this results in path/to/code.ulp
 
+The assembler supports selecting a CPU to assemble for using the ``-c`` option
+(valid cpu's are ``esp32`` and ``esp32s2``):
+
+.. code-block:: shell
+
+   micropython -m esp32_ulp -c esp32s2 path/to/code.S  # assemble for an ESP32-S2
+
 
 More examples
 +++++++++++++
@@ -86,12 +93,13 @@ assembly source file into a machine code binary file with a ``.ulp`` extension.
 That file can then be loaded directly without assembling the source again.
 
 1. Create/upload an assembly source file and run the following to get a
-   loadable ULP binary as a ``.ulp`` file:
+   loadable ULP binary as a ``.ulp`` file (specify ``cpu='esp32s2'`` if you
+   have an ESP32-S2 or ESP32-S3 device):
 
    .. code-block:: python
 
       import esp32_ulp
-      esp32_ulp.assemble_file('code.S')  # this results in code.ulp
+      esp32_ulp.assemble_file('code.S', cpu='esp32')  # this results in code.ulp
 
 2. The above prints out the offsets of all global symbols/labels. For the next
    step, you will need to note down the offset of the label, which represents
@@ -153,7 +161,6 @@ Currently the following are not supported:
 * assembler macros using ``.macro``
 * preprocessor macros using ``#define A(x,y) ...``
 * including files using ``#include``
-* ESP32-S2 (not binary compatible with the ESP32)
 
 
 Testing
@@ -164,7 +171,8 @@ output is identical with what Espressif's esp32-elf-as (from their `binutils-gdb
 <https://github.com/espressif/binutils-gdb/tree/esp32ulp-elf-2.35>`_) produces.
 
 micropython-esp32-ulp has been tested on the Unix port of MicroPython and on real ESP32
-devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM.
+devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM as well as ESP32-S2
+(ESP32-S2FH4) and ESP32-S3 (ESP32-S3R8) devices.
 
 Consult the Github Actions `workflow definition file </.github/workflows/run_tests.yaml>`_
 for how to run the different tests.
