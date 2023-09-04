@@ -13,11 +13,17 @@ Overview
 Installation
 ------------
 
-On the ESP32, install using upip:
+On the ESP32, install using mip (or upip on older MicroPythons):
 
 .. code-block:: python
 
-   # ensure the ESP32 is connected to a network with internet connectivity
+   # step 1: ensure the ESP32 is connected to a network with internet connectivity
+
+   # step 2 (for MicroPython 1.20 or newer)
+   import mip
+   mip.install('github:micropython/micropython-esp32-ulp')
+
+   # step 2 (for MicroPython older than 1.20)
    import upip
    upip.install('micropython-esp32-ulp')
 
