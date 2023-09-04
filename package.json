@@ -1,0 +1,19 @@
+{
+  "v":1,
+  "urls":[
+    ["esp32_ulp/__init__.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/__init__.py"],
+    ["esp32_ulp/__main__.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/__main__.py"],
+    ["esp32_ulp/assemble.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/assemble.py"],
+    ["esp32_ulp/definesdb.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/definesdb.py"],
+    ["esp32_ulp/link.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/link.py"],
+    ["esp32_ulp/nocomment.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/nocomment.py"],
+    ["esp32_ulp/opcodes.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/opcodes.py"],
+    ["esp32_ulp/opcodes_s2.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/opcodes_s2.py"],
+    ["esp32_ulp/parse_to_db.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/parse_to_db.py"],
+    ["esp32_ulp/preprocess.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/preprocess.py"],
+    ["esp32_ulp/soc.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/soc.py"],
+    ["esp32_ulp/soc_s2.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/soc_s2.py"],
+    ["esp32_ulp/soc_s3.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/soc_s3.py"],
+    ["esp32_ulp/util.py", "github:micropython/micropython-esp32-ulp/esp32_ulp/util.py"]
+  ]
+}
