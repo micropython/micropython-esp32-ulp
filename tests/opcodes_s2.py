@@ -1,3 +1,10 @@
+#
+# This file is part of the micropython-esp32-ulp project,
+# https://github.com/micropython/micropython-esp32-ulp
+#
+# SPDX-FileCopyrightText: 2018-2023, the micropython-esp32-ulp authors, see AUTHORS file.
+# SPDX-License-Identifier: MIT
+
 from uctypes import UINT32, BFUINT32, BF_POS, BF_LEN
 from esp32_ulp.opcodes_s2 import make_ins, make_ins_struct_def
 from esp32_ulp.opcodes_s2 import get_reg, get_imm, get_cond, arg_qualify, eval_arg, ARG, REG, IMM, SYM, COND

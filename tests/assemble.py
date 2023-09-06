@@ -1,3 +1,10 @@
+#
+# This file is part of the micropython-esp32-ulp project,
+# https://github.com/micropython/micropython-esp32-ulp
+#
+# SPDX-FileCopyrightText: 2018-2023, the micropython-esp32-ulp authors, see AUTHORS file.
+# SPDX-License-Identifier: MIT
+
 from esp32_ulp.assemble import Assembler, TEXT, DATA, BSS, REL, ABS
 from esp32_ulp.assemble import SymbolTable
 from esp32_ulp.nocomment import remove_comments

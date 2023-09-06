@@ -1,3 +1,10 @@
+#
+# This file is part of the micropython-esp32-ulp project,
+# https://github.com/micropython/micropython-esp32-ulp
+#
+# SPDX-FileCopyrightText: 2018-2023, the micropython-esp32-ulp authors, see AUTHORS file.
+# SPDX-License-Identifier: MIT
+
 # This file tests various fixes to the assembler,
 # to ensure the binary output matches that of binutils.
 # a) support for left-aligned directives (e.g. .set without preceding whitespace)
