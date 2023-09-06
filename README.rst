@@ -62,8 +62,13 @@ To get going run the following directly on the ESP32:
 
 .. code-block:: python
 
-   # Step 1: Install micropython-esp32-ulp
    # IMPORTANT: Ensure the ESP32 is connected to a network with internet connectivity.
+
+   # Step 1: Install micropython-esp32-ulp (for MicroPython v1.20 or newer)
+   import mip
+   mip.install('github:micropython/micropython-esp32-ulp')
+
+   # Step 1: Install micropython-esp32-ulp (for MicroPython older than v1.20)
    import upip
    upip.install('micropython-esp32-ulp')
 
