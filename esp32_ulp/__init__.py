@@ -12,6 +12,7 @@ from .assemble import Assembler
 from .link import make_binary
 garbage_collect('after import')
 
+
 def src_to_binary_ext(src, cpu):
     assembler = Assembler(cpu)
     src = preprocess(src)
@@ -21,11 +22,13 @@ def src_to_binary_ext(src, cpu):
     text, data, bss_len = assembler.fetch()
     return make_binary(text, data, bss_len), addrs_syms
 
+
 def src_to_binary(src, cpu):
     binary, addrs_syms = src_to_binary_ext(src, cpu)
     for addr, sym in addrs_syms:
         print('%04d %s' % (addr, sym))
     return binary
+
 
 def assemble_file(filename, cpu):
     with open(filename) as f:
