@@ -118,7 +118,7 @@ That file can then be loaded directly without assembling the source again.
       from esp32 import ULP
 
       ulp = ULP()
-      with open('test.ulp', 'r') as f:
+      with open('test.ulp', 'rb') as f:
           # load the binary into RTC memory
           ulp.load_binary(0, f.read())
 
