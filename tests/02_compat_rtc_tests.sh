@@ -61,6 +61,7 @@ build_defines_db() {
     rm -f "${defines_db}"
     micropython -m esp32_ulp.parse_to_db \
         esp-idf/components/soc/$cpu/include/soc/*.h \
+        esp-idf/components/soc/$cpu/register/soc/*.h \
         esp-idf/components/esp_common/include/*.h 1>$log_file
 
     # cache defines.db
@@ -184,6 +185,7 @@ run_tests_for_cpu() {
 
         echo -e "\tBuilding using binutils ($cpu)"
         gcc -I esp-idf/components/soc/$cpu/include -I esp-idf/components/esp_common/include \
+            -I esp-idf/components/soc/$cpu/register \
             -x assembler-with-cpp \
             -E -o ${pre_file} $src_file
         esp32ulp-elf-as --mcpu=$cpu -o $obj_file ${pre_file}
