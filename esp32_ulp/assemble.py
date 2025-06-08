@@ -246,7 +246,7 @@ class Assembler:
         self.symbols.set_global(symbol)
 
     def append_data(self, wordlen, args):
-        data = [int(arg).to_bytes(wordlen, 'little') for arg in args]
+        data = [int(arg, 0).to_bytes(wordlen, 'little') for arg in args]
         self.append_section(b''.join(data))
 
     def d_byte(self, *args):
