@@ -77,6 +77,18 @@ def validate_expression(param):
     return True
 
 
+def parse_int(literal):
+    """
+    GNU as compatible parsing of string literals into integers
+    Specifically, GNU as treats literals starting with 0 as octal
+    All other literals are correctly parsed by Python
+    See: https://sourceware.org/binutils/docs/as/Integers.html
+    """
+    if len(literal) >= 2 and (literal.startswith("0") or literal.startswith("-0")) and literal.lstrip("-0").isdigit():
+        return int(literal, 8)
+    return int(literal, 0)
+
+
 def file_exists(filename):
     try:
         os.stat(filename)

@@ -219,13 +219,13 @@ class Assembler:
             raise ValueError('fill in bss section not allowed')
         if section is TEXT:  # TODO: text section should be filled with NOPs
             raise ValueError('fill/skip/align in text section not supported')
-        fill = int(fill_byte or 0).to_bytes(1, 'little') * amount
+        fill = int(self.opcodes.eval_arg(str(fill_byte or 0))).to_bytes(1, 'little') * amount
         self.offsets[section] += len(fill)
         if section is not BSS:
             self.sections[section].append(fill)
 
     def d_skip(self, amount, fill=None):
-        amount = int(amount)
+        amount = int(self.opcodes.eval_arg(amount))
         self.fill(self.section, amount, fill)
 
     d_space = d_skip
@@ -246,7 +246,7 @@ class Assembler:
         self.symbols.set_global(symbol)
 
     def append_data(self, wordlen, args):
-        data = [int(arg).to_bytes(wordlen, 'little') for arg in args]
+        data = [int(self.opcodes.eval_arg(arg)).to_bytes(wordlen, 'little') for arg in args]
         self.append_section(b''.join(data))
 
     def d_byte(self, *args):

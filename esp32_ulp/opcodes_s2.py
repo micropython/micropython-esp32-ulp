@@ -12,7 +12,7 @@ ESP32 ULP Co-Processor Instructions
 from ucollections import namedtuple
 from uctypes import struct, addressof, LITTLE_ENDIAN, UINT32, BFUINT32, BF_POS, BF_LEN
 
-from .util import split_tokens, validate_expression
+from .util import split_tokens, validate_expression, parse_int
 
 # XXX dirty hack: use a global for the symbol table
 symbols = None
@@ -301,7 +301,12 @@ def eval_arg(arg):
             _, _, sym_value = symbols.get_sym(token)
             parts.append(str(sym_value))
         else:
-            parts.append(token)
+            try:
+                # attempt to parse, to convert numbers with base prefix correctly
+                int_token = parse_int(token)
+                parts.append(str(int_token))
+            except ValueError:
+                parts.append(token)
     parts = "".join(parts)
     if not validate_expression(parts):
         raise ValueError('Unsupported expression: %s' % parts)
@@ -327,7 +332,7 @@ def arg_qualify(arg):
         if arg_lower in ['--', 'eq', 'ov', 'lt', 'gt', 'ge', 'le']:
             return ARG(COND, arg_lower, arg)
     try:
-        return ARG(IMM, int(arg), arg)
+        return ARG(IMM, parse_int(arg), arg)
     except ValueError:
         pass
     try:
