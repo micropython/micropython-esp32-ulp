@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-Example for: ESP32-S2 Wemos mini development board V1.0.0 with led on pin 15
+Example for: ESP32-S2
 
 This example creates a PWM-like dimming effect using self-modifying ULP code.
 The ULP program rewrites the `WAIT` instructions to control on/off LED durations,
@@ -23,32 +23,34 @@ from esp32_ulp import src_to_binary
 from time import sleep
 
 source = """\
+# Pin with LED: (0 to 21)
+.set led_pin,                        4
+
 # constants from:
 # https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32s2/include/soc/reg_base.h
 #define DR_REG_RTCIO_BASE            0x3f408400
 
 # constants from:
+# Espressif Technical Reference Manual (TRM) Chapter 5.15 Register 5.63:
+#define RTCIO_TOUCH_PADn_REG               (DR_REG_RTCIO_BASE + 0x84 + 4 * led_pin)
+#define RTCIO_TOUCH_PADn_MUX_SEL_M         (BIT(19))
+
+# constants from:
 # https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32s2/include/soc/rtc_io_reg.h
-#define RTC_IO_XTAL_32P_PAD_REG      (DR_REG_RTCIO_BASE + 0xC0)
-#define RTC_IO_X32P_MUX_SEL_M        (BIT(19))
 #define RTC_GPIO_OUT_REG             (DR_REG_RTCIO_BASE + 0x0)
 #define RTC_GPIO_ENABLE_REG          (DR_REG_RTCIO_BASE + 0xc)
 #define RTC_GPIO_ENABLE_S            10
 #define RTC_GPIO_OUT_DATA_S          10
 
-# constants from:
-# https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32s2/include/soc/rtc_io_channel.h
-#define RTCIO_GPIO15_CHANNEL         15
-
 .global entry
 program_init:
-            # connect GPIO to ULP (0: GPIO connected to digital GPIO module, 1: GPIO connected to analog RTC module)
-            WRITE_RTC_REG(RTC_IO_XTAL_32P_PAD_REG, RTC_IO_X32P_MUX_SEL_M, 1, 1);
+  # connect GPIO to ULP (0: GPIO connected to digital GPIO module, 1: GPIO connected to analog RTC module)
+  WRITE_RTC_REG(RTCIO_TOUCH_PADn_REG, RTCIO_TOUCH_PADn_MUX_SEL_M, 1, 1);
 
-            # enable GPIO as output, not input (this also enables a pull-down by default)
-            WRITE_RTC_REG(RTC_GPIO_ENABLE_REG, RTC_GPIO_ENABLE_S + RTCIO_GPIO15_CHANNEL, 1, 1)
+  # enable GPIO as output, not input (this also enables a pull-down by default)
+  WRITE_RTC_REG(RTC_GPIO_ENABLE_REG, RTC_GPIO_ENABLE_S + led_pin, 1, 1)
 
-set_waits:  add r0, r0, 0xFF # Increase r0 (delay time)
+set_waits:  add r0, r0, 200 # Increase r0 (delay time)
             move r3, wait_off
             st r0, r3, 0 # Overwrite wait_off with new delay value
             
@@ -57,9 +59,9 @@ set_waits:  add r0, r0, 0xFF # Increase r0 (delay time)
             move r3, wait_on
             st r1, r3, 0 # Overwrite wait_on with new value
 
-            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + RTCIO_GPIO15_CHANNEL, 1, 0) # turn off led
+            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + led_pin, 1, 0) # turn off led (clear GPIO)
 wait_off:   wait 0 # Placeholder; value overwritten dynamically
-            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + RTCIO_GPIO15_CHANNEL, 1, 1) # turn on led
+            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + led_pin, 1, 1) # turn on led (set GPIO)
 wait_on:    wait 0 # Placeholder; value overwritten dynamically
   
 jump set_waits # Loop program
