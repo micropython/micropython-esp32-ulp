@@ -7,7 +7,7 @@
 
 from uctypes import UINT32, BFUINT32, BF_POS, BF_LEN
 from esp32_ulp.opcodes import make_ins, make_ins_struct_def
-from esp32_ulp.opcodes import get_reg, get_imm, get_cond, arg_qualify, eval_arg, ARG, REG, IMM, SYM, COND
+from esp32_ulp.opcodes import get_reg, get_imm, get_cond, arg_qualify, parse_int, eval_arg, ARG, REG, IMM, SYM, COND
 from esp32_ulp.assemble import SymbolTable, ABS, REL, TEXT
 import esp32_ulp.opcodes as opcodes
 
@@ -46,6 +46,7 @@ def test_arg_qualify():
     assert arg_qualify('-1') == ARG(IMM, -1, '-1')
     assert arg_qualify('1') == ARG(IMM, 1, '1')
     assert arg_qualify('0x20') == ARG(IMM, 32, '0x20')
+    assert arg_qualify('0100') == ARG(IMM, 64, '0100')
     assert arg_qualify('0o100') == ARG(IMM, 64, '0o100')
     assert arg_qualify('0b1000') == ARG(IMM, 8, '0b1000')
     assert arg_qualify('eq') == ARG(COND, 'eq', 'eq')
@@ -96,6 +97,11 @@ def test_eval_arg():
     assert eval_arg('const >> 1') == 21
     assert eval_arg('(const|4)&0xf') == 0xe
 
+    assert eval_arg('0x7') == 7
+    assert eval_arg('010') == 8
+    assert eval_arg('-0x7') == -7  # negative
+    assert eval_arg('~0x7') == -8  # complement
+
     assert_raises(ValueError, eval_arg, 'evil()')
     assert_raises(ValueError, eval_arg, 'def cafe()')
     assert_raises(ValueError, eval_arg, '1 ^ 2')
@@ -105,14 +111,17 @@ def test_eval_arg():
     opcodes.symbols = None
 
 
-def assert_raises(exception, func, *args):
+def assert_raises(exception, func, *args, message=None):
     try:
         func(*args)
-    except exception:
+    except exception as e:
         raised = True
+        actual_message = e.args[0]
     else:
         raised = False
     assert raised
+    if message:
+        assert actual_message == message, '%s == %s' % (actual_message, message)
 
 
 def test_reg_direct_ulp_addressing():

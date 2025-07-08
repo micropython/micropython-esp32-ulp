@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MIT
 
 import os
-from esp32_ulp.util import split_tokens, validate_expression, file_exists
+from esp32_ulp.util import split_tokens, validate_expression, parse_int, file_exists
 
 tests = []
 
@@ -16,6 +16,19 @@ def test(param):
     the @test decorator
     """
     tests.append(param)
+
+
+def assert_raises(exception, func, *args, message=None):
+    try:
+        func(*args)
+    except exception as e:
+        raised = True
+        actual_message = e.args[0]
+    else:
+        raised = False
+    assert raised
+    if message:
+        assert actual_message == message, '%s == %s' % (actual_message, message)
 
 
 @test
@@ -67,6 +80,36 @@ def test_validate_expression():
     assert validate_expression('evil()') is False
     assert validate_expression('def cafe()') is False  # valid hex digits, but potentially dangerous code
     assert validate_expression('def CAFE()') is False
+
+
+@test
+def test_parse_int():
+    # decimal
+    assert parse_int("0") == 0, "0 == 0"
+    assert parse_int("5") == 5, "5 == 5"
+    assert parse_int("-0") == 0, "-0 == 0"
+    assert parse_int("-5") == -5, "-5 == -5"
+    # hex
+    assert parse_int("0x5") == 5, "0x5 == 5"
+    assert parse_int("0x5a") == 90, "0x5a == 90"
+    assert parse_int("-0x5a") == -90, "-0x5a == -90"
+    # binary
+    assert parse_int("0b1001") == 9, "0b1001 == 9"
+    assert parse_int("-0b1001") == -9, "-0b1001 == 9"
+    # octal
+    assert parse_int("07") == 7, "07 == 7"
+    assert parse_int("0100") == 64, "0100 == 64"
+    assert parse_int("0o210") == 136, "0o210 == 136"
+    assert parse_int("00000010") == 8, "00000010 == 8"
+    assert parse_int("-07") == -7, "-07 == -7"
+    assert parse_int("-0100") == -64, "-0100 == -64"
+    assert parse_int("-0o210") == -136, "-0o210 == -136"
+    assert parse_int("-00000010") == -8, "-00000010 == -8"
+    # negative cases
+    assert_raises(ValueError, parse_int, '0b123', message="invalid syntax for integer with base 2: '123'")
+    assert_raises(ValueError, parse_int, '0900', message="invalid syntax for integer with base 8: '0900'")
+    assert_raises(ValueError, parse_int, '0o900', message="invalid syntax for integer with base 8: '900'")
+    assert_raises(ValueError, parse_int, '0xg', message="invalid syntax for integer with base 16: 'g'")
 
 
 @test
