@@ -11,7 +11,7 @@ provided by the ESP-IDF framework, along with constants defined in the
 framework's include files (such as ``RTC_GPIO_IN_REG``), to make reading
 and writing from/to peripheral registers much easier.
 
-In order to do this the preprocessor has two capabilities:
+In order to do this, the preprocessor has two capabilities:
 
 1. Parse and replace identifiers defined with ``#define``
 2. Recognise the ``WRITE_RTC_*`` and ``READ_RTC_*`` macros and expand
@@ -21,7 +21,7 @@ In order to do this the preprocessor has two capabilities:
 Usage
 ------------------------
 
-Normally the assembler is called as follows
+Normally the assembler is called as follows:
 
 .. code-block:: python
 
@@ -49,8 +49,8 @@ Using a "Defines Database"
 Because the micropython-esp32-ulp assembler was built for running on the ESP32
 microcontroller with limited RAM, the preprocessor aims to work there too.
 
-To handle large number of defined constants (such as the ``RTC_*`` constants from
-the ESP-IDF) the preprocessor can use a database (based on BerkleyDB) stored on the
+To handle a large number of defined constants (such as the ``RTC_*`` constants from
+the ESP-IDF) the preprocessor can use a database (based on Berkeley DB) stored on the
 device's filesystem for looking up defines.
 
 The database needs to be populated before preprocessing. (Usually, when only using
@@ -67,7 +67,7 @@ are not needed on the device either.)
    database from include files. The resulting file will be called
    ``defines.db``.
 
-   (The following assume running on a PC. To do this on device, refer to the
+   (The following assumes running on a PC. To do this on device, refer to the
    `esp32_ulp/parse_to_db.py <../esp32_ulp/parse_to_db.py>`_ file.)
 
    .. code-block:: bash
@@ -83,7 +83,7 @@ are not needed on the device either.)
 
       # if file system space is not a concern, the following can be convenient
       # by including all relevant include files from the ESP-IDF framework.
-      # This results in an approximately 2MB large database.
+      # This results in an approximately 2 MB large database.
       micropython -m esp32_ulp.parse_to_db \
         esp-idf/components/soc/esp32/include/soc/*.h \
         esp-idf/components/esp_common/include/*.h
@@ -91,14 +91,14 @@ are not needed on the device either.)
       # most ULP code uses only 5 include files. Parsing only those into the
       # database should thus allow assembling virtually all ULP code one would
       # find or want to write.
-      # This results in an approximately 250kB large database.
+      # This results in an approximately 250 kB large database.
       micropython -m esp32_ulp.parse_to_db \
         esp-idf/components/soc/esp32/include/soc/{soc,soc_ulp,rtc_cntl_reg,rtc_io_reg,sens_reg}.h
 
 
    .. warning::
 
-      `:warning:` Ensure that you include the header files for the correct
+      Ensure that you include the header files for the correct
       variant you are working with. In the example code above, simply switch
       ``esp32`` to ``esp32s2`` or ``esp32s3`` in the path to the include files.
 
@@ -118,7 +118,7 @@ are not needed on the device either.)
    is taken not to create an empty database file, cluttering up the filesystem,
    when not needed).
 
-   If you do not want the preprocessor use use a DefinesDB, pass ``False`` to
+   If you do not want the preprocessor to use a DefinesDB, pass ``False`` to
    the ``use_defines_db`` argument of the ``preprocess`` convenience function,
    or instantiate the ``Preprocessor`` class directly, without passing it a
    DefinesDB instance via ``use_db``.
@@ -129,7 +129,7 @@ Design choices
 
 The preprocessor does not support:
 
-1. Function style macros such as :code:`#define f(a,b) (a+b)`
+1. Function-style macros such as :code:`#define f(a,b) (a+b)`
 
    This is not important, because there are only few RTC macros that need
    to be supported and they are simply implemented as Python functions.

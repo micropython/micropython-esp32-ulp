@@ -42,7 +42,7 @@ Disassembling a file
 The simplest and default mode of the disassembler is to disassemble the
 specified file.
 
-Note that the ULP header is validates and files with unknown magic bytes will be
+Note that the ULP header is validated and files with unknown magic bytes will be
 rejected. The correct 4 magic bytes at the start of a ULP binary are ``ulp\x00``.
 
 Example disassembling an ESP32 ULP binary:
@@ -75,13 +75,13 @@ Example disassembling an ESP32-S2 ULP binary:
 Disassembling a byte sequence
 -----------------------------
 
-The ``-m`` option allows disassembling a sequences hex letters representing
+The ``-m`` option allows disassembling a sequence of hex letters representing
 ULP instructions.
 
 This option expects the actual instructions directly, without any ULP header.
 
 The sequence must contain a number of hex letters exactly divisible by 8, i.e.
-8, 16, 24, etc, because each 32-bit word is made up of 8 hex letters. Spaces
+8, 16, 24, etc., because each 32-bit word is made up of 8 hex letters. Spaces
 can be included in the sequence and they are ignored.
 
 The typical use case for this feature is to copy/paste some instructions from
@@ -148,11 +148,11 @@ The disassembler also works when used on an ESP32 device.
 
 To use the disassembler on a real device:
 
-* ensure ``micropython-esp32-ulp`` is installed on the device (see `docs/index.rst </docs/index.rst>`_).
-* upload ``tools/disassemble.py`` ``tools/decode.py`` and ``tools/decode_s2.py`` to the device
+* Ensure ``micropython-esp32-ulp`` is installed on the device (see `docs/index.rst </docs/index.rst>`_).
+* Upload ``tools/disassemble.py``, ``tools/decode.py``, and ``tools/decode_s2.py`` to the device
   (any directory will do, as long as those 3 files are in the same directory)
-* the following example code assumes you placed the 3 files into the device's "root" directory
-* run the following (note, we must specify which the cpu the binary is for):
+* The following example code assumes you placed the 3 files into the device's "root" directory
+* Run the following (note, we must specify which CPU the binary is for):
 
   .. code-block:: python
 
