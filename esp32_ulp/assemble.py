@@ -100,7 +100,7 @@ class Assembler:
         elif cpu == 'esp32s2':
             opcode_module = 'opcodes_s2'
         else:
-            raise ValueError('Invalid cpu')
+            raise ValueError('Invalid CPU')
 
         relative_import = 1 if '/' in __file__ else 0
         self.opcodes = __import__(opcode_module, None, None, [], relative_import)
@@ -111,7 +111,7 @@ class Assembler:
         # regex for parsing assembly lines
         # format: [[whitespace]label:][whitespace][opcode[whitespace arg[,arg...]]]
         # where [] means optional
-        # initialised here once, instead of compiling once per line
+        # initialized here once, instead of compiling once per line
         self.line_regex = re.compile(r'^(\s*([a-zA-Z0-9_$.]+):)?\s*((\S*)\s*(.*))$')
 
     def init(self, a_pass):
