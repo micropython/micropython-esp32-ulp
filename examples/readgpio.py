@@ -69,10 +69,10 @@ ULP_MEM_BASE = 0x50000000
 ULP_DATA_MASK = 0xffff  # ULP data is only in lower 16 bits
 
 ulp = ULP()
-ulp.set_wakeup_period(0, 50000)  # use timer0, wakeup after 50.000 cycles
+ulp.set_wakeup_period(0, 50000)  # use timer0; wake up after 50,000 cycles
 ulp.load_binary(load_addr, binary)
 
-mem32[ULP_MEM_BASE + load_addr] = 0x0  # initialise state to 0
+mem32[ULP_MEM_BASE + load_addr] = 0x0  # initialize state to 0
 ulp.run(entry_addr)
 
 while True:

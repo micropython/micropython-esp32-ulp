@@ -8,11 +8,11 @@
 """
 Example for: ESP32-S2 and ESP32-S3
 
-Very basic example showing data exchange main CPU <--> ULP coprocessor.
+Very basic example showing data exchange between the main CPU and the ULP co-processor.
 
 To show that the ULP is doing something, it just increments the value <data>.
-It does that once per ulp timer wakeup (and then the ULP halts until it gets
-waked up via the timer again).
+It does that once per ULP timer wake-up (and then the ULP halts until it gets
+woken up via the timer again).
 
 The timer is set to a rather long period, so you can watch the data value
 incrementing (see loop at the end).
@@ -31,7 +31,7 @@ entry:      move r3, data    # load address of data into r3
             add r2, r2, 1    # increment r2
             st r2, r3, 0     # store r2 contents into data ([r3+0])
 
-            halt             # halt ULP co-prozessor (until it gets waked up again)
+            halt             # halt ULP co-processor (until it gets woken up again)
 """
 
 binary = src_to_binary(source, cpu="esp32s2")  # cpu is esp32 or esp32s2
@@ -42,7 +42,7 @@ ULP_MEM_BASE = 0x50000000
 ULP_DATA_MASK = 0xffff  # ULP data is only in lower 16 bits
 
 ulp = ULP()
-ulp.set_wakeup_period(0, 50000)  # use timer0, wakeup after 50.000 cycles
+ulp.set_wakeup_period(0, 50000)  # use timer0; wake up after 50,000 cycles
 ulp.load_binary(load_addr, binary)
 
 mem32[ULP_MEM_BASE + load_addr] = 0x1000
