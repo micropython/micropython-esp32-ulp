@@ -36,7 +36,7 @@ run_tests_for_cpu() {
     for src_file in $(ls -1 compat/*.S fixtures/*.S); do
         src_name="${src_file%.S}"
 
-        # files with a cpu encoded into their name are only run for that cpu
+        # Files with a CPU encoded into their name are only run for that CPU
         if [[ $src_file =~ \.esp32\. && $cpu != esp32 ]] || [[ $src_file =~ \.esp32s2?\. && $cpu != esp32s2 ]]; then
             continue
         fi

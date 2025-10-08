@@ -73,7 +73,7 @@ def test_empty_instruction():
 # instruction offset encoded in the binary instruction will be in
 # words (1 word = 4 bytes).
 # The disassembled instructions would therefore show as "JUMP 1"
-# for what was originally "JUMP 4" in the source code.@test
+# for what was originally "JUMP 4" in the source code.
 @test
 def test_all_instructions():
     # OPCODE_WR_REG = 1

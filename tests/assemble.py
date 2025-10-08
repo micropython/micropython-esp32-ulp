@@ -62,7 +62,7 @@ def test_parse_line():
 
 def test_parse_labels_correctly():
     """
-    description of what defines a label
+    Description of what defines a label
     https://sourceware.org/binutils/docs/as/Statements.html
     https://sourceware.org/binutils/docs/as/Labels.html
     """
@@ -168,7 +168,7 @@ def test_assemble_uppercase_opcode():
     assert not raised
 
 
-def test_assemble_evalulate_expressions():
+def test_assemble_evaluate_expressions():
     src_w_expr = """\
     .set shft, 2
     .set loops, (1 << shft)
@@ -300,7 +300,7 @@ test_assemble_bss()
 test_assemble_bss_with_value()
 test_assemble_global()
 test_assemble_uppercase_opcode()
-test_assemble_evalulate_expressions()
+test_assemble_evaluate_expressions()
 test_assemble_optional_comment_removal()
 test_assemble_test_regressions_from_evaluation()
 test_support_multiple_statements_per_line()

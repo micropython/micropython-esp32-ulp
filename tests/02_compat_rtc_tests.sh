@@ -130,12 +130,12 @@ run_tests_for_cpu() {
 
     LIST=$(echo binutils-gdb/gas/testsuite/gas/esp32ulp/$cpu/*.s)
     if [ $cpu = esp32 ]; then
-        # append extra tests to test preprocessor
-        # examples have constants specific to ESP32 (original)
-        # so we only run these tests with cpu = esp32
-        # these tests primarily test our preprocessor, which is
-        # cpu independent, so we do not need to run them
-        # per each cpu.
+        # Append extra tests to test the preprocessor
+        # Examples have constants specific to the original ESP32,
+        # so we only run these tests with CPU = esp32.
+        # These tests primarily exercise our preprocessor, which is
+        # CPU-independent, so we do not need to run them
+        # for each CPU.
         LIST=$(echo ulptool/src/ulp_examples/*/*.s $LIST)
     fi
 
