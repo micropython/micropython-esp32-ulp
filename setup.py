@@ -14,10 +14,10 @@ def long_desc_from_readme():
     with open('README.rst', 'r') as fd:
         long_description = fd.read()
 
-        # remove badges
+        # Remove badges.
         long_description = re.compile(r'^\.\. start-badges.*^\.\. end-badges', re.M | re.S).sub('', long_description)
 
-        # strip links. keep link name and use literal text formatting
+        # Strip links: keep the link text and use literal formatting.
         long_description = re.sub(r'`([^<`]+) </[^>]+>`_', '``\\1``', long_description)
 
         return long_description
