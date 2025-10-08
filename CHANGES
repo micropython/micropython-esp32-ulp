@@ -1,14 +1,13 @@
-ChangeLog
+Changelog
 =========
 
-1.2.0, release 2022-03-26
+1.2.0, released 2022-03-26
 
-- project moved to micropython organization
-- project renamed from py-esp32-ulp to micropython-esp32-ulp
-- (no functional changes)
+- Project moved to the MicroPython organization.
+- Project renamed from py-esp32-ulp to micropython-esp32-ulp.
+- (No functional changes.)
 
+1.1.0, released 2021-12-03
 
-1.1.0, release 2021-12-03
-
-- first pypi release
+- First PyPI release.
 
