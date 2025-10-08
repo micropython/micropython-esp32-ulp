@@ -8,11 +8,11 @@
 name: Publish Python Package
 
 on:
-  # trigger when publishing a release
+  # Trigger when publishing a release.
   release:
     types: [published]
 
-  # also allow triggering this workflow manually for testing
+  # Also allow triggering this workflow manually for testing.
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        # just fetching 1 commit is not enough for setuptools-scm, so we fetch all
+        # Fetching a single commit is not enough for setuptools-scm, so we fetch all commits.
         fetch-depth: 0
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -36,7 +36,7 @@ jobs:
     - name: Build package
       run: |
         python setup.py sdist
-        rm dist/*.orig  # clean sdist_upip noise
+        rm dist/*.orig  # Remove sdist_upip noise.
     - name: Publish to Test PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
