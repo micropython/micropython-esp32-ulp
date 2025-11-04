@@ -8,12 +8,12 @@
 """
 Tool for generating package.json for the MIP package manager
 
-Run this tool from the repo root, like:
+Run this tool from the repo root like this:
 
 python tools/genpkgjson.py > package.json
 
 Note:
-This tool works with both python3 and micropyton.
+This tool works with both Python 3 and MicroPython.
 """
 
 import os
@@ -38,9 +38,9 @@ def print_package_json(urls):
     """
     Custom-formatting JSON output for better readability
 
-    json.dumps in MicroPython cannot format the output and python3
-    puts each element of each urls' sub-arrays onto a new line.
-    Here we print each file and its source url onto the same line.
+    json.dumps in MicroPython cannot format the output, and Python 3
+    puts each element of each URLs subarray on a new line.
+    Here we print each file and its source URL on the same line.
     """
     print('{')
     print(f'  "v":{PACKAGE_JSON_VERSION},')

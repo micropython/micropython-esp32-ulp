@@ -10,8 +10,8 @@ import ubinascii
 import sys
 
 
-# placeholders:
-# these functions will be dynamically loaded later based on the chosen cpu
+# Placeholders:
+# These functions will be dynamically loaded later based on the chosen CPU
 decode_instruction, get_instruction_fields = None, None
 
 
@@ -21,7 +21,7 @@ def load_decoder(cpu):
     elif cpu == 'esp32s2':
         mod = 'decode_s2'
     else:
-        raise ValueError('Invalid cpu')
+        raise ValueError('Invalid CPU')
 
     relative_import = 1 if '/' in __file__ else 0
     decode = __import__(mod, globals(), locals(), [], relative_import)

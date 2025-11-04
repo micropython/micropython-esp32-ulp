@@ -59,9 +59,9 @@ set_waits:  add r0, r0, 200 # Increase r0 (delay time)
             move r3, wait_on
             st r1, r3, 0 # Overwrite wait_on with new value
 
-            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + led_pin, 1, 0) # turn off led (clear GPIO)
+            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + led_pin, 1, 0) # turn off LED (clear GPIO)
 wait_off:   wait 0 # Placeholder; value overwritten dynamically
-            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + led_pin, 1, 1) # turn on led (set GPIO)
+            WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + led_pin, 1, 1) # turn on LED (set GPIO)
 wait_on:    wait 0 # Placeholder; value overwritten dynamically
   
 jump set_waits # Loop program

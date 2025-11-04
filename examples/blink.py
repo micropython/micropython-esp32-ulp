@@ -8,20 +8,20 @@
 """
 Example for: ESP32
 
-Simple example showing how to control a GPIO pin from the ULP coprocessor.
+Simple example showing how to control a GPIO pin from the ULP co-processor.
 
 The GPIO port is configured to be attached to the RTC module, and then set
-to OUTPUT mode. To avoid re-initializing the GPIO on every wakeup, a magic
+to OUTPUT mode. To avoid re-initializing the GPIO on every wake-up, a magic
 token gets set in memory.
 
 After every change of state, the ULP is put back to sleep again until the
-next wakeup. The ULP wakes up every 500ms to change the state of the GPIO
-pin. An LED attached to the GPIO pin would toggle on and off every 500ms.
+next wake-up. The ULP wakes up every 500 ms to change the state of the GPIO
+pin. An LED attached to the GPIO pin would toggle on and off every 500 ms.
 
-The end of the python script has a loop to show the value of the magic token
+The end of the Python script has a loop to show the value of the magic token
 and the current state, so you can confirm the magic token gets set and watch
 the state value changing. If the loop is stopped (Ctrl-C), the LED attached
-to the GPIO pin continues to blink, because the ULP runs independently from
+to the GPIO pin continues to blink, because the ULP runs independently of
 the main processor.
 """
 
@@ -61,7 +61,7 @@ entry:
   move r0, magic
   ld r1, r0, 0
 
-  # test if we have initialised already
+  # test if we have initialized already
   sub r1, r1, token
   jump after_init, eq  # jump if magic == token (note: "eq" means the last instruction (sub) resulted in 0)
 
@@ -72,7 +72,7 @@ init:
   # GPIO shall be output, not input (this also enables a pull-down by default)
   WRITE_RTC_REG(RTC_GPIO_ENABLE_REG, RTC_GPIO_ENABLE_S + gpio, 1, 1)
 
-  # store that we're done with initialisation
+  # store that we're done with initialization
   move r0, magic
   move r1, token
   st r1, r0, 0
@@ -89,17 +89,17 @@ after_init:
   jump off  # else jump to 'off'
 
 on:
-  # turn on led (set GPIO)
+  # turn on LED (set GPIO)
   WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + gpio, 1, 1)
   jump exit
 
 off:
-  # turn off led (clear GPIO)
+  # turn off LED (clear GPIO)
   WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + gpio, 1, 0)
   jump exit
 
 exit:
-  halt  # go back to sleep until next wakeup period
+  halt  # go back to sleep until the next wake-up period
 """
 
 binary = src_to_binary(source, cpu="esp32")  # cpu is esp32 or esp32s2
@@ -110,7 +110,7 @@ ULP_MEM_BASE = 0x50000000
 ULP_DATA_MASK = 0xffff  # ULP data is only in lower 16 bits
 
 ulp = ULP()
-ulp.set_wakeup_period(0, 500000)  # use timer0, wakeup after 500000usec (0.5s)
+ulp.set_wakeup_period(0, 500000)  # use timer0; wake up after 500000 usec (0.5 s)
 ulp.load_binary(load_addr, binary)
 
 ulp.run(entry_addr)

@@ -83,7 +83,7 @@ def test_get_cond():
 def test_eval_arg():
     opcodes.symbols = SymbolTable({}, {}, {})
     opcodes.symbols.set_sym('const', ABS, None, 42)  # constant
-    opcodes.symbols.set_sym('raise', ABS, None, 99)  # constant using a python keyword as name (is allowed)
+    opcodes.symbols.set_sym('raise', ABS, None, 99)  # constant using a Python keyword as a name (allowed)
 
     assert eval_arg('1+1') == 2
     assert eval_arg('1+const') == 43

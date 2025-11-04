@@ -32,7 +32,7 @@ jobs:
     - name: Build MicroPython
       id: build_micropython
       run: |
-        echo "Building micropython"
+        echo "Building MicroPython"
         git clone --depth 1 https://github.com/micropython/micropython.git
         pushd micropython/mpy-cross
         make
@@ -50,8 +50,8 @@ jobs:
     - name: Fetch binutils-esp32ulp
       id: fetch_binutils
       run: |
-        echo "Fetching URL of pre-built esp32ulp-elf binaries"
-        ## URL to pre-built binaries is published in esp-idf
+        echo "Fetching URL of prebuilt esp32ulp-elf binaries"
+        ## The URL to prebuilt binaries is published in ESP-IDF
         IDFVER=v5.0.1
         curl -s \
           -o tools.json \

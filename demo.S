@@ -27,7 +27,7 @@ textstart:  ld r0, r1, 0    # a comment!
             rsh r0, r1, 42
             move r0, r1
             move r0, 42
-            move r0, textstart  # moves abs addr of textstart to r0
+            move r0, textstart  # Move the absolute address of textstart to r0
             move r0, constant42
             stage_rst
             stage_inc 42
@@ -70,10 +70,10 @@ data1:      .space 4, 0x42
 data2:      .skip 4
 dataw:      .word 1, 2, 3, 4
 datal:      .long 1, 2, 3, 4
-datab:      .byte 1, 2, 3  # test alignment / fill up of section
+datab:      .byte 1, 2, 3  # Test alignment and fill up the section
 dataend:
 
             .bss
 bss0:       .skip 4
-bss1:       .skip 2  # test alignment / fill up of section
+bss1:       .skip 2  # Test alignment and fill up the section
 bssend:

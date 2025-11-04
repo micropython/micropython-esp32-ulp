@@ -37,7 +37,7 @@ On the ESP32
 ++++++++++++
 
 The simplest example to try on the ESP32 is `counter.py </examples/counter.py>`_.
-It shows how to assemble code, load and run the resulting binary and exchange
+It shows how to assemble code, load and run the resulting binary, and exchange
 data between the ULP and the main CPU.
 
 Run the ``counter.py`` example:
@@ -65,7 +65,7 @@ follows:
    micropython -m esp32_ulp path/to/code.S  # this results in path/to/code.ulp
 
 The assembler supports selecting a CPU to assemble for using the ``-c`` option
-(valid cpu's are ``esp32`` and ``esp32s2``):
+(valid CPUs are ``esp32`` and ``esp32s2``):
 
 .. code-block:: shell
 
@@ -91,7 +91,7 @@ This can be useful in battery-powered applications where every second of sleep
 time matters.
 
 Splitting the assembly and load stage can be combined with other techniques,
-for example to implement a caching mechansim for the ULP binary that
+for example, to implement a caching mechanism for the ULP binary that
 automatically updates the binary every time the assembly source code changes.
 
 The ``esp32_ulp.assemble_file`` function can be used to assemble and link an
@@ -128,7 +128,7 @@ That file can then be loaded directly without assembling the source again.
           # start the ULP
           # assemble_file printed offsets in number of 32-bit words.
           # ulp.run() expects an offset in number of bytes.
-          # Thus, multiply the offset to our entry point by 4.
+          # Thus, multiply the offset of our entry point by 4.
           # e.g. for an offset of 2:
           #   2 words * 4 = 8 bytes
           ulp.run(2*4)  # specify the offset of the entry point label
@@ -173,14 +173,14 @@ Testing
 -------
 
 There are unit tests and also compatibility tests that check whether the binary
-output is identical with what Espressif's esp32-elf-as (from their `binutils-gdb fork
+output is identical to what Espressif's esp32-elf-as (from their `binutils-gdb fork
 <https://github.com/espressif/binutils-gdb/tree/esp32ulp-elf-2.35>`_) produces.
 
 micropython-esp32-ulp has been tested on the Unix port of MicroPython and on real ESP32
 devices with the chip type ESP32D0WDQ6 (revision 1) without SPIRAM as well as ESP32-S2
 (ESP32-S2FH4) and ESP32-S3 (ESP32-S3R8) devices.
 
-Consult the Github Actions `workflow definition file </.github/workflows/run_tests.yaml>`_
+Consult the GitHub Actions `workflow definition file </.github/workflows/run_tests.yaml>`_
 for how to run the different tests.
 
 

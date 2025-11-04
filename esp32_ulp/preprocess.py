@@ -55,7 +55,7 @@ class Preprocessor:
         identifier, value = parts
         tmp = identifier.split('(', 1)
         if len(tmp) == 2:
-            # skip parameterised defines (macros)
+            # skip parameterized defines (macros)
             return {}
         value = "".join(nocomment.remove_comments(value)).strip()
         return {identifier: value}
@@ -68,7 +68,7 @@ class Preprocessor:
 
     def expand_defines(self, line):
         found = True
-        while found:  # do as many passed as needed, until nothing was replaced anymore
+        while found:  # do as many passes as needed, until nothing is replaced anymore
             found = False
             tokens = split_tokens(line)
             line = ""
@@ -115,8 +115,8 @@ class Preprocessor:
         if macro_fn is None:
             return line
 
-        macro_args, _ = macro_args.rsplit(')', 1)  # trim away right bracket. safe as comments already stripped
-        macro_args = macro_args.split(',')  # not safe when args contain ',' but we should not have those
+        macro_args, _ = macro_args.rsplit(')', 1)  # trim away the right bracket; safe as comments are already stripped
+        macro_args = macro_args.split(',')  # not safe when args contain ','; we should not have those
         macro_args = [x.strip() for x in macro_args]
 
         return macro_fn(*macro_args)

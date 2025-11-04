@@ -41,7 +41,7 @@ temperature_data:  .long 0
 entry:
     move r3, magic
     ld r0, r3, 0
-    jumpr start, token, eq #check if we have already initialized
+    jumpr start, token, eq  # check if we have already initialized
     
 init:
     # Set SENS_TSENS_CLKGATE_EN to enable temperature sensor clock.
@@ -50,14 +50,14 @@ init:
     # Store temperature_data memory location in r2
     move r2, temperature_data
     
-    # store that we're done with initialisation
+    # store that we're done with initialization
     move r0, token
     st r0, r3, 0
     
 start:
-    tsens r0, 1000 # make measurement for 1000 clock cycles
-    st r0, r2, 0 # store the temperature in memory to be read by main CPU
-    halt # go back to sleep until next wakeup period
+    tsens r0, 1000 # make a measurement for 1000 clock cycles
+    st r0, r2, 0 # store the temperature in memory to be read by the main CPU
+    halt # go back to sleep until the next wake-up period
 """
 
 binary = src_to_binary(source, cpu="esp32s2")  # cpu is esp32 or esp32s2
