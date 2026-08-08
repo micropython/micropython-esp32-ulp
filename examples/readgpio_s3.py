@@ -11,7 +11,7 @@ Example for: ESP32-S3
 Very basic example showing how to read a GPIO pin from the ULP and access
 that data from the main CPU.
 
-In this case GPIO4 is being read. Note that the ULP needs to refer to GPIOs
+In this case GPIO2 is being read. Note that the ULP needs to refer to GPIOs
 via their RTC channel number. You can see the mapping in this file:
 https://github.com/espressif/esp-idf/blob/v5.0.2/components/soc/esp32s3/include/soc/rtc_io_channel.h#L33
 
